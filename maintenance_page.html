@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Maintenance Details - Toyota Corolla</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2563eb, #9333ea);
+            color: #fff;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+
+        .details-container {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .info-section h2 {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 30px;
+        }
+
+        .info-item {
+            margin-bottom: 6px;
+        }
+
+        .info-label {
+            font-weight: 600;
+        }
+
+        .info-value {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.25);
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .back-link {
+            margin-top: 40px;
+            text-decoration: none;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        footer {
+            margin-top: auto;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛠️ Maintenance Details</h1>
+    <div class="subtitle">Toyota Corolla (2018) – Maintenance on 2025-10-10</div>
+
+    <div class="details-container">
+        <div class="info-section">
+            <h2>Maintenance Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Car Name:</span>
+                    <span class="info-value">Toyota Corolla</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Model:</span>
+                    <span class="info-value">2018</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date:</span>
+                    <span class="info-value">2025-10-10</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Mileage:</span>
+                    <span class="info-value">82,350 km</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Service Center:</span>
+                    <span class="info-value">AutoFix Kaunas</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Cost:</span>
+                    <span class="info-value">€340.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Summary</h2>
+            <p>Performed a full oil change and replaced oil and air filters. Checked brake system and refilled windshield washer fluid. Routine inspection completed without additional issues.</p>
+        </div>
+
+        <div class="info-section">
+            <h2>Replaced Components</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Quantity</th>
+                        <th>Unit Price (€)</th>
+                        <th>Total (€)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Engine Oil (5W-30)</td>
+                        <td>1</td>
+                        <td>60.00</td>
+                        <td>60.00</td>
+                    </tr>
+                    <tr>
+                        <td>Oil Filter</td>
+                        <td>1</td>
+                        <td>20.00</td>
+                        <td>20.00</td>
+                    </tr>
+                    <tr>
+                        <td>Air Filter</td>
+                        <td>1</td>
+                        <td>25.00</td>
+                        <td>25.00</td>
+                    </tr>
+                    <tr>
+                        <td>Brake Fluid</td>
+                        <td>1</td>
+                        <td>15.00</td>
+                        <td>15.00</td>
+                    </tr>
+                    <tr>
+                        <th colspan="3" style="text-align: right;">Total Parts Cost:</th>
+                        <th>€120.00</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <a href="list.html" class="back-link">← Back to Maintenance Records</a>
+
+    <footer>© 2025 Auto Maintenance Dashboard</footer>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Maintenance Records</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2563eb, #9333ea);
+            color: #fff;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-size: 2.5em;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .filter-form {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-form label {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .filter-form input {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 180px;
+        }
+
+        .filter-form input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .filter-form button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-form button:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .car-list {
+            width: 100%;
+            max-width: 950px;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.25);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        td:first-child {
+            font-weight: 600;
+        }
+
+        .car-list a {
+            text-decoration: none;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .car-list a:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        footer {
+            margin-top: auto;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚗 Car Maintenance Records</h1>
+
+    <form class="filter-form" action="#" method="get">
+        <div>
+            <label for="carname">Car Name:</label>
+            <input type="text" id="carname" name="carname" placeholder="Enter car name">
+        </div>
+        <div>
+            <label for="model">Model:</label>
+            <input type="text" id="model" name="model" placeholder="Enter model">
+        </div>
+        <div>
+            <label for="maintenance">Maintenance Date:</label>
+            <input type="date" id="maintenance" name="maintenance">
+        </div>
+        <button type="submit">Filter</button>
+    </form>
+
+    <div class="car-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Car Name</th>
+                    <th>Model</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Toyota Corolla -->
+                <tr>
+                    <td>2025-10-10</td>
+                    <td>Toyota Corolla</td>
+                    <td>2018</td>
+                    <td><a href="car_toyota.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2025-06-20</td>
+                    <td>Toyota Corolla</td>
+                    <td>2018</td>
+                    <td><a href="car_toyota.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2024-12-05</td>
+                    <td>Toyota Corolla</td>
+                    <td>2018</td>
+                    <td><a href="car_toyota.html">View</a></td>
+                </tr>
+
+                <!-- BMW 320i -->
+                <tr>
+                    <td>2025-09-15</td>
+                    <td>BMW 320i</td>
+                    <td>2020</td>
+                    <td><a href="car_bmw.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2025-03-08</td>
+                    <td>BMW 320i</td>
+                    <td>2020</td>
+                    <td><a href="car_bmw.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2024-08-22</td>
+                    <td>BMW 320i</td>
+                    <td>2020</td>
+                    <td><a href="car_bmw.html">View</a></td>
+                </tr>
+
+                <!-- VW Golf -->
+                <tr>
+                    <td>2025-07-12</td>
+                    <td>Volkswagen Golf</td>
+                    <td>2017</td>
+                    <td><a href="car_vw.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2024-11-10</td>
+                    <td>Volkswagen Golf</td>
+                    <td>2017</td>
+                    <td><a href="car_vw.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2024-03-25</td>
+                    <td>Volkswagen Golf</td>
+                    <td>2017</td>
+                    <td><a href="car_vw.html">View</a></td>
+                </tr>
+
+                <!-- Audi A4 -->
+                <tr>
+                    <td>2025-08-05</td>
+                    <td>Audi A4</td>
+                    <td>2019</td>
+                    <td><a href="car_audi.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2025-02-14</td>
+                    <td>Audi A4</td>
+                    <td>2019</td>
+                    <td><a href="car_audi.html">View</a></td>
+                </tr>
+                <tr>
+                    <td>2024-06-01</td>
+                    <td>Audi A4</td>
+                    <td>2019</td>
+                    <td><a href="car_audi.html">View</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <footer>© 2025 Auto Maintenance Dashboard</footer>
+</body>
+</html>
