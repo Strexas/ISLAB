@@ -2,27 +2,181 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Insurance</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Insurance | Bolt Drive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --blue: #0d6efd;
+      --bg: #eef1f4;
+      --card-bg: #fff;
+      --text: #1f2933;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+    }
+    /* top bar */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #dbe2ea;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 48px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 20px;
+      color: #16396b;
+    }
+    .nav-links a {
+      margin-right: 20px;
+      text-decoration: none;
+      color: #16396b;
+      font-weight: 500;
+    }
+    .actions a {
+      text-decoration: none;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .btn-secondary { background: #fff; border: 1px solid #16396b; color: #16396b; }
+    .btn-primary { background: var(--blue); color: #fff; }
+
+    /* page container */
+    .container {
+      max-width: 900px;
+      margin: 35px auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+      padding: 28px 32px 32px 32px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #0d3f82;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 260px;
+      max-width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cbd2da;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .packages {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .pkg {
+      border: 1px solid #d6dfe8;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .pkg strong { display: block; }
+    button {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .links {
+      margin-top: 20px;
+      display: flex;
+      gap: 14px;
+    }
+    .links a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    @media (max-width: 640px) {
+      .topbar { padding: 12px 16px; }
+      .nav-links { display: none; }
+      .container { margin: 20px 12px; padding: 20px 16px; }
+    }
+  </style>
 </head>
 <body>
-  <h2>Insurance for selected car</h2>
+  <!-- top bar -->
+  <div class="topbar">
+    <div class="brand">
+      🚗 Bolt Drive
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="fleetlist.html">Fleet</a>
+      <a href="services.html">Services</a>
+    </div>
+    <div class="actions">
+      <a class="btn-secondary" href="login.html">Login</a>
+      <a class="btn-primary" href="register.html">Register</a>
+    </div>
+  </div>
 
-  <form>
-    <label>Reservation / Car ID</label><br>
-    <input type="text" placeholder="CAR-001"><br><br>
+  <!-- card -->
+  <div class="container">
+    <h2>Insurance for selected car</h2>
+    <p style="margin-top:-6px; color:#5a6a7b;">Choose a coverage package for the current reservation.</p>
 
-    <p>Select package:</p>
-    <label><input type="radio" name="pkg" value="basic" checked> Basic (10 €/day)</label><br>
-    <label><input type="radio" name="pkg" value="standard"> Standard (15 €/day)</label><br>
-    <label><input type="radio" name="pkg" value="full"> Full (20 €/day)</label><br><br>
+    <label>Reservation / Car ID</label>
+    <input type="text" placeholder="CAR-001">
 
-    <button type="submit">Confirm insurance</button>
-  </form>
+    <label style="margin-bottom:10px;">Select package</label>
+    <div class="packages">
+      <label class="pkg">
+        <input type="radio" name="pkg" value="basic" checked>
+        <div>
+          <strong>Basic</strong>
+          <span>Accident only</span>
+          <span>10 € / day</span>
+        </div>
+      </label>
+      <label class="pkg">
+        <input type="radio" name="pkg" value="standard">
+        <div>
+          <strong>Standard</strong>
+          <span>Accident + theft</span>
+          <span>15 € / day</span>
+        </div>
+      </label>
+      <label class="pkg">
+        <input type="radio" name="pkg" value="full">
+        <div>
+          <strong>Full coverage</strong>
+          <span>All risks</span>
+          <span>20 € / day</span>
+        </div>
+      </label>
+    </div>
 
-  <br>
-  <a href="payment.html">Proceed to payment</a> |
-  <a href="car_details.html">Back to car</a>
+    <button type="button">Confirm insurance</button>
+
+    <div class="links">
+      <a href="payment.html">Proceed to payment →</a>
+      <a href="car_details.html">← Back to car</a>
+    </div>
+  </div>
 </body>
 </html>
-
