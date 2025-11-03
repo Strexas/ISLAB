@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bolt Drive - Reserve Car</title>
+
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/car_reserve.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="resources/site_logo.png">
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-container">
+
+        <!-- Logo -->
+        <div class="navbar-logo">
+          <img src="resources/site_logo.png">
+          Bolt Drive
+        </div>
+
+        <!-- Navigation -->
+        <div class="navbar-links">
+          <a href="index.html">Home</a>
+          <a href="fleetlist.html">Fleet</a>
+          <a href="#">Services</a>
+          <a href="#">Contacts</a>
+        </div>
+
+        <!-- User ctrl buttons -->
+        <div class="navbar-links" style="display: flex; gap: 10px;">
+          <button>Login</button>
+          <button>Register</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Reserve car form -->
+    <section class="reservation-form-container">
+      <div class="rental-form-container">
+        <h1>Complete your reservation</h1>
+
+        <!-- Rental Details form -->
+        <h3 style="margin-top: 50px;">Rental Details</h3>
+        <form autocomplete="off">
+          
+          <div class="row">
+            <label class="reservation-field" style="width: 100%;">
+              <span>Pick-up Date</span>
+              <input type="date" required>
+            </label>
+
+            <label class="reservation-field" style="width: 100%;">
+              <span>Drop-off Date</span>
+              <input type="date" required>
+            </label>
+          </div>
+
+        </form>
+
+        <!-- Personal Info form -->
+        <h3 style="margin-top: 50px;">Personal Info</h3>
+        <form autocomplete="off">
+          
+          <!-- Name Surname-->
+          <div class="row">
+            <label class="reservation-field" style="width: 100%;">
+              <span>Name: </span>
+              <input type="text" required placeholder="Enter Name">
+            </label>
+
+            <label class="reservation-field" style="width: 100%;">
+              <span>Surname: </span>
+              <input type="text" required placeholder="Enter Surname">
+            </label>
+          </div>
+
+          <!-- Email Phone -->
+          <div class="row" style=" margin-top: 20px;">
+            <label class="reservation-field" style="width: 100%;">
+              <span>Email: </span>
+              <input type="email" required placeholder="Enter Email">
+            </label>
+
+            <label class="reservation-field" style="width: 100%;">
+              <span>Phone Number: </span>
+              <input type="tel" required placeholder="Enter Phone Number">
+            </label>
+          </div>
+        </form>
+
+        <!-- Insurance Options -->
+        <h3 style="margin-top: 50px;">Insurance Options</h3>
+        
+        <label class="insurance-option">
+          <input type="checkbox" name="insurance" value="premium" />
+          <div class="insurance-content">
+            <div class="insurance-title">Premium Coverage</div>
+            <div class="insurance-description">
+              Get full insurance protection including theft, collision, and roadside assistance, with zero deductible.
+            </div>
+          </div>
+        </label>
+
+        <button class="button-submit" style="width: 500px; margin-top: 20px; float: right; margin-bottom: 30px;">Continue</button>
+      </div>
+    </section>
+    
+    <section>
+
+    </section>
+  </body>
+</html>
