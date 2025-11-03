@@ -91,6 +91,20 @@
       <button class="btn" onclick="editPrice()">Update Pricing</button>
       <button class="btn" onclick="retireCar()">Retire Car</button>
       <button class="btn" onclick="showStatus()">Get Car Status</button>
+      <div id="statusBox" 
+     style="display:none; 
+            background-color:#f5f8ff;
+            border:1px solid #b9c9ff;
+            padding:15px;
+            margin-top:10px;
+            border-radius:8px;">
+  <h3 style="color:#004aad;">Car Status</h3>
+  <p><strong>Status:</strong> Available</p>
+  <p><strong>Last Maintenance:</strong> 2024-08-12</p>
+  <p><strong>Next Maintenance:</strong> 2025-01-05</p>
+  <p><strong>Condition:</strong> Good</p>
+  <p><strong>Mileage:</strong> 25,300 km</p>
+</div>
     </div>
 
     <div style="margin-top:20px;">
@@ -102,15 +116,15 @@
   </div>
 
   <script>
-    function showStatus() {
-      alert(
-        "Car Status: Available\n" +
-        "Last Maintenance: 2024-08-12\n" +
-        "Next Scheduled Maintenance: 2025-01-05\n" +
-        "Condition: Good\n" +
-        "Mileage: 25,300 km"
-      );
-    }
+   function showStatus() {
+  const box = document.getElementById("statusBox");
+  // Toggle visibility on click
+  if (box.style.display === "none") {
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
+  }
+} 
 
     function retireCar() {
       alert("This car has been marked as retired.\n(Employee notified — prototype only.)");
