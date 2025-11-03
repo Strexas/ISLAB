@@ -9,12 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="icon" type="image/png" href="resources/site_logo.png">
-
-    <script>
-      function DoHideShow(control, content, display_style = "block") { 
-        document.getElementById(content).style.display = control.checked ? display_style : "none"; 
-      }
-    </script>
   </head>
 
   <body>
@@ -79,33 +73,6 @@
                 <input type="date" name="dropoff_date" required>
               </label>
             </div>
-
-            <!-- Driver Age -->
-            <div class="row" style="height: 38px;">
-              <!-- Checkbox -->
-              <label class="reservation-field check_box">
-                <input type="checkbox" style="margin: 0px;" onclick="DoHideShow(this, 'age_field')">
-                <span>Driver below 30?</span>
-              </label>
-
-              <!-- Age field -->
-              <label class="reservation-field check_box" id="age_field" style="display: none;">
-                <span style="margin: 0px; width: 100%;">Age: </span>
-                <input type="number" style="margin: 0px;">
-              </label>
-            </div>
-
-            <!-- Different dropoff location checkbox -->
-            <label class="reservation-field check_box">
-              <input type="checkbox" style="margin: 0px;" onclick="DoHideShow(this, 'dropoff_location', 'flex')">
-              <span>Different drop-off location</span>
-            </label>
-
-            <!-- Dropoff location field -->
-            <label class="reservation-field" style="display: none;" id="dropoff_location">
-              <span>Drop-off Location</span>
-              <input type="text" placeholder="Enter drop-off location">
-            </label>
 
             <button class="button-submit">Search Available Cars</button>
           </form>
