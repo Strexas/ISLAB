@@ -67,6 +67,20 @@
       margin-top: 8px;
     }
 
+    .reservations button {
+      padding: 10px;
+      background-color: #003780;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .reservations button:hover {
+      background-color: #004aad;
+    }
+    
     .delete {
       background: #c0392b;
       color: white;
@@ -129,6 +143,10 @@
     <div class="license">
       <label><strong>Upload License Photo:</strong></label>
       <input type="file" accept="image/*">
+    </div>
+
+    <div class="reservations">
+      <button onclick="location.href='reservations.html'">View Reservations</button>
     </div>
 
     <button class="delete">Delete Account</button>

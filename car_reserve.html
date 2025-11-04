@@ -10,6 +10,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="icon" type="image/png" href="resources/site_logo.png">
+
+    <script>
+      function navigation() {
+        const insurance = document.getElementById("insurance");
+        if (insurance.checked) {
+          window.location.href = "insurance.html";
+        } else {
+          window.location.href = "payment.html";
+        }
+      }
+    </script>
   </head>
 
   <body>
@@ -27,14 +38,13 @@
         <div class="navbar-links">
           <a href="index.html">Home</a>
           <a href="fleetlist.html">Fleet</a>
-          <a href="#">Services</a>
-          <a href="#">Contacts</a>
         </div>
 
         <!-- User ctrl buttons -->
         <div class="navbar-links" style="display: flex; gap: 10px;">
-          <button>Login</button>
-          <button>Register</button>
+          <a style="color: white" href="login.html"><button>Login</button></a>
+          <a style="color: white" href="register.html"><button>Register</button></a>
+          <a style="color: white" href="profile.html"><button>Profile</button></a>
         </div>
       </div>
     </nav>
@@ -97,7 +107,7 @@
         <h3 style="margin-top: 50px;">Insurance Options</h3>
         
         <label class="insurance-option">
-          <input type="checkbox" name="insurance" value="premium" />
+          <input type="checkbox" name="insurance" value="premium" id="insurance" />
           <div class="insurance-content">
             <div class="insurance-title">Premium Coverage</div>
             <div class="insurance-description">
@@ -106,7 +116,7 @@
           </div>
         </label>
 
-        <button class="button-submit" style="width: 500px; margin-top: 20px; float: right; margin-bottom: 30px;">Continue</button>
+        <button class="button-submit" style="width: 500px; margin-top: 20px; float: right; margin-bottom: 30px;" onclick="navigation()">Continue</button>
       </div>
     </section>
     
