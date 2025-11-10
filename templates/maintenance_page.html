@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Maintenance Details - Toyota Corolla</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top left, #2563eb, #9333ea);
+      color: #fff;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.6em;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      opacity: 0.85;
+      margin-bottom: 30px;
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    .btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn:hover { background: rgba(255,255,255,0.4); transform: translateY(-2px); }
+    .btn.delete { background: rgba(255,50,50,0.3); }
+    .btn.delete:hover { background: rgba(255,50,50,0.6); }
+    .btn.parts { background: rgba(34,197,94,0.3); }
+    .btn.parts:hover { background: rgba(34,197,94,0.5); }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .details-container {
+      background: rgba(255,255,255,0.12);
+      padding: 35px 45px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 900px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      backdrop-filter: blur(6px);
+    }
+
+    .info-section {
+      margin-bottom: 30px;
+    }
+
+    .info-section h2 {
+      font-size: 1.4em;
+      margin-bottom: 14px;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+      padding-bottom: 6px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 30px;
+    }
+
+    .info-label { font-weight: 600; }
+    .info-value { opacity: 0.9; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      font-size: 0.9em;
+      letter-spacing: 0.5px;
+    }
+
+    tr:nth-child(even) {
+      background: rgba(255,255,255,0.08);
+    }
+
+    tr:last-child th {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .table-actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .order-status {
+      margin-top: 8px;
+      text-align: right;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .back-link {
+      margin-top: 40px;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .back-link:hover {
+      background: rgba(255,255,255,0.4);
+      transform: translateY(-2px);
+    }
+
+    footer {
+      margin-top: auto;
+      opacity: 0.8;
+      font-size: 0.9em;
+    }
+
+    .total-summary {
+      text-align: right;
+      font-weight: bold;
+      background: rgba(255,255,255,0.2);
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛠️ Car Details</h1>
+  <div class="subtitle">Toyota Corolla (2018) – Maintenance on 2025-10-10</div>
+
+  <div class="action-buttons">
+    <button class="btn edit">✏️ Edit</button>
+    <button class="btn delete">🗑️ Delete</button>
+  </div>
+
+  <div class="details-container">
+    <!-- Maintenance Info -->
+    <div class="info-section">
+      <h2>Maintenance Information</h2>
+      <div class="info-grid">
+        <div><span class="info-label">Maintenance ID:</span><span class="info-value"> EFHDW38JD</span></div>
+        <div><span class="info-label">Car Name:</span> <span class="info-value">Toyota Corolla</span></div>
+        <div><span class="info-label">Model:</span> <span class="info-value">2018</span></div>
+        <div><span class="info-label">Start Date:</span> <span class="info-value">2025-10-10</span></div>
+        <div><span class="info-label">End Date:</span> <span class="info-value">2025-10-15</span></div>
+      </div>
+    </div>
+
+    <!-- Maintenance Description -->
+    <div class="info-section">
+      <h2>Maintenance Description</h2>
+      <p>The driver reported vibrations at speeds over 100 km/h and squeaking when braking. Diagnostics found warped brake discs and worn suspension bushings.</p>
+      <p>Full oil change, replaced filters, and checked brakes. Ordered new bushings and discs for replacement.</p>
+    </div>
+
+    <!-- Orders -->
+    <div class="info-section">
+      <h2>Parts Orders</h2>
+
+      <!-- Order 1 -->
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th><th>Component</th><th>Cost (€)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ORD-2025-044</td><td>Brake Disc (Front)</td><td>140.00</td></tr>
+          <tr><th colspan="2" style="text-align:right;">Order Total:</th><th>€140.00</th></tr>
+        </tbody>
+      </table>
+      <div class="order-status">📦 Order Status: <strong>Shipped (Delivery: 2025-10-15)</strong></div>
+      <div class="table-actions">
+        <button class="btn edit">✏️ Edit</button>
+        <button class="btn delete">🗑️ Delete</button>
+      </div>
+
+      <!-- Order 2 -->
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th><th>Component</th><th>Cost (€)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ORD-2025-045</td><td>Suspension Bushings Set</td><td>80.00</td></tr>
+          <tr><th colspan="2" style="text-align:right;">Order Total:</th><th>€80.00</th></tr>
+        </tbody>
+      </table>
+      <div class="order-status">📦 Order Status: <strong>Pending (Expected Delivery: 2025-10-18)</strong></div>
+      <div class="table-actions">
+        <button class="btn edit">✏️ Edit</button>
+        <button class="btn delete">🗑️ Delete</button>
+      </div>
+
+      <!-- Grand Total -->
+      <div class="total-summary">💰 Total Cost for All Orders: €220.00</div>
+    </div>
+
+    <!-- Components Needing Order -->
+    <div class="info-section">
+      <h2>Components Needing Order</h2>
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Quantity</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Brake Pads (Front & Rear)</td><td>1</td></tr>
+          <tr><td>Engine Mount (Front Left)</td><td>1</td></tr>
+          <tr><td>Wheel Alignment Kit</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <div class="table-actions">
+        <button class="btn edit">✏️ Edit</button>
+      </div>
+      <button class="btn parts" style="margin-top:10px;">📦 Order New Parts</button>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    $(".btn.delete").onclick = () => {
+      if (confirm("Delete this maintenance record?")) {
+        alert("Record deleted.");
+        location.href = "list_maintenance.html";
+      }
+    };
+    $(".btn.edit").onclick = () => alert("Edit mode activated (feature under development).");
+    document.querySelectorAll(".btn.parts").forEach(btn =>
+      btn.addEventListener("click", () => alert("Opening list of required parts..."))
+    );
+
+    // Table-specific actions
+    document.querySelectorAll(".table-actions .btn.edit").forEach(btn =>
+      btn.addEventListener("click", () => alert("Editing table contents (feature under development)."))
+    );
+    document.querySelectorAll(".table-actions .btn.delete").forEach(btn =>
+      btn.addEventListener("click", () => {
+        if (confirm("Delete this order table?")) alert("Order deleted.");
+      })
+    );
+  </script>
+</body>
+</html>

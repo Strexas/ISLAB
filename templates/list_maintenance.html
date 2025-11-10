@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Car Maintenance Records</title>
+<style>
+    body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #2563eb, #9333ea);
+        color: #fff;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+    h1 { margin-bottom: 25px; font-size: 2.5em; text-align: center; }
+    form {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 20px 30px;
+        border-radius: 12px;
+        margin-bottom: 40px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    label { font-weight: 600; margin-right: 8px; }
+    input {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: none;
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+        width: 180px;
+    }
+    input::placeholder { color: rgba(255,255,255,0.7); }
+    button {
+        padding: 8px 18px;
+        border: none;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.3);
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    button:hover { background: rgba(255,255,255,0.5); transform: translateY(-2px); }
+    table {
+        width: 100%;
+        max-width: 950px;
+        border-collapse: collapse;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    th, td { padding: 14px 18px; text-align: left; }
+    th {
+        background: rgba(255,255,255,0.25);
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    tr:nth-child(even) { background: rgba(255,255,255,0.08); }
+    .btn-view, .btn-remove {
+        text-decoration: none;
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 6px;
+    }
+    .btn-view { background: rgba(255,255,255,0.2); }
+    .btn-view:hover { background: rgba(255,255,255,0.4); }
+    .btn-remove { background: rgba(255,50,50,0.3); border: none; cursor: pointer; }
+    .btn-remove:hover { background: rgba(255,50,50,0.6); }
+    footer { margin-top: auto; opacity: 0.8; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>🚗 Car Maintenance Records</h1>
+
+<!-- Combined Filter + Add Form -->
+<form id="mainForm">
+    <label>Car Name:</label><input type="text" id="carName" placeholder="Filter or add name">
+    <label>Model:</label><input type="text" id="carModel" placeholder="Filter or add model">
+    <label>Date:</label><input type="date" id="carDate">
+    <button type="button" id="filterBtn">Filter</button>
+    <button type="button" id="addBtn">Add</button>
+    <button type="button" id="resetBtn">Reset</button>
+</form>
+
+<table id="carTable">
+    <thead>
+        <tr>
+            <th>Date</th><th>Car Name</th><th>Model</th><th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>2025-10-10</td><td>Toyota Corolla</td><td>2018</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
+        <tr><td>2025-09-15</td><td>BMW 320i</td><td>2020</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
+        <tr><td>2025-07-12</td><td>Volkswagen Golf</td><td>2017</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
+        <tr><td>2025-08-05</td><td>Audi A4</td><td>2019</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
+    </tbody>
+</table>
+
+
+<script>
+const tableBody = document.querySelector("#carTable tbody");
+const carName = document.getElementById("carName");
+const carModel = document.getElementById("carModel");
+const carDate = document.getElementById("carDate");
+
+function addRow(date, name, model) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td>${date}</td>
+        <td>${name}</td>
+        <td>${model}</td>
+        <td><a class="btn-view" href="#">View</a></td>
+    `;
+    tableBody.appendChild(tr);
+}
+
+document.getElementById("addBtn").onclick = () => {
+    if (!carDate.value || !carName.value || !carModel.value) return alert("Fill all fields!");
+    addRow(carDate.value, carName.value, carModel.value);
+    carName.value = carModel.value = carDate.value = "";
+};
+
+document.getElementById("filterBtn").onclick = () => {
+    const nameFilter = carName.value.toLowerCase();
+    const modelFilter = carModel.value.toLowerCase();
+    const dateFilter = carDate.value;
+    for (const row of tableBody.rows) {
+        const [date, name, model] = [row.cells[0].textContent, row.cells[1].textContent.toLowerCase(), row.cells[2].textContent.toLowerCase()];
+        row.style.display =
+            (!nameFilter || name.includes(nameFilter)) &&
+            (!modelFilter || model.includes(modelFilter)) &&
+            (!dateFilter || date === dateFilter)
+            ? ""
+            : "none";
+    }
+};
+
+document.getElementById("resetBtn").onclick = () => {
+    carName.value = carModel.value = carDate.value = "";
+    for (const row of tableBody.rows) row.style.display = "";
+};
+
+document.querySelectorAll(".btn-remove").forEach(btn => btn.onclick = () => btn.closest("tr").remove());
+</script>
+</body>
+</html>
