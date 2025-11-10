@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - Car Renting Service</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #004aad;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fc;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+    }
+
+    .info span {
+      color: #333;
+      font-size: 14px;
+    }
+
+    .info button {
+      background: #004aad;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .info button:hover {
+      background: #003780;
+    }
+
+    .license {
+      margin-top: 15px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .reservations button {
+      padding: 10px;
+      background-color: #003780;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .reservations button:hover {
+      background-color: #004aad;
+    }
+    
+    .delete {
+      background: #c0392b;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .delete:hover {
+      background: #992d22;
+    }
+
+    a {
+      text-decoration: none;
+      color: #004aad;
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>User Profile</h2>
+
+    <div class="info">
+      <span><strong>Name:</strong> John</span>
+      <button>Edit</button>
+    </div>
+
+    <div class="info">
+      <span><strong>Surname:</strong> Doe</span>
+      <button>Edit</button>
+    </div>
+
+    <div class="info">
+      <span><strong>Email:</strong> john@example.com</span>
+      <button>Edit</button>
+    </div>
+
+    <div class="info">
+      <span><strong>Phone:</strong> +123456789</span>
+      <button>Edit</button>
+    </div>
+
+    <div class="info">
+      <span><strong>Transaccion history:</strong> </span>
+      <button onclick="window.location.href='Transaccion.html'">View</button>
+    </div>
+
+    <div class="info">
+      <span><strong>Driver's License:</strong> LT-1234567</span>
+      <button>Edit</button>
+    </div>
+
+    <div class="license">
+      <label><strong>Upload License Photo:</strong></label>
+      <input type="file" accept="image/*">
+    </div>
+
+    <div class="reservations">
+      <button onclick="location.href='reservations.html'">View Reservations</button>
+    </div>
+
+    <button class="delete">Delete Account</button>
+    <a href="login.html">Logout</a>
+  </div>
+</body>
+</html>
