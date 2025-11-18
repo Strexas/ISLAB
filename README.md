@@ -19,5 +19,5 @@ source .venv/bin/activate
 ```
 ## Run the project
 ```commandline
-
+python3 app.py
 ```
