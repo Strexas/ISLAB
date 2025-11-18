@@ -1,10 +1,12 @@
-from flask import render_template, request, redirect, url_for, flash, session
-from flask import Blueprint
-
-user_management_bp = Blueprint('user_management', __name__)
+from flask import (render_template, request,
+                   redirect, url_for, flash,
+                   session, Blueprint)
 
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+
+
+user_management_bp = Blueprint('user_management', __name__)
 
 db = SQLAlchemy()
 
