@@ -1,18 +1,22 @@
 from flask import Flask
-from config import Config
-from models import db
-from user_management import user_management_bp
+from user_management.routes import user_management_bp as user_management_blueprint
 
 app = Flask(__name__)
-app.config.from_object(Config)
-db.init_app(app)
+
+@app.route('/')
+def index():
+    return 'DEFAULT PAGE'
+
+# db.init_app(app)
 
 # connect the blueprint to the main app
-app.register_blueprint(user_management_bp)
+app.register_blueprint(user_management_blueprint)
+
+
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
     app.run(debug=True)
 
 

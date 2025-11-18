@@ -1,6 +1,30 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from models import db, User
-from . import user_management_bp  # import the blueprint defined in __init__.py
+from flask import Blueprint
+
+user_management_bp = Blueprint('user_management', __name__)
+
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+
+db = SQLAlchemy()
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    driver_license = db.Column(db.String(50))
+    role = db.Column(db.String(20), default='customer')  # customer, employee, accountant
+    is_banned = db.Column(db.Boolean, default=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 
 @user_management_bp.route('/register', methods=['GET', 'POST'])
 def register():
