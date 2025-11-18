@@ -17,6 +17,11 @@ For Windows
 ```commandline
 source .venv/bin/activate
 ```
+## Install libraries
+```commandline
+pip install -r requirements.txt
+```
+
 ## Run the project
 ```commandline
 python3 app.py
