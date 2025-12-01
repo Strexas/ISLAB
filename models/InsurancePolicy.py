@@ -1,5 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-from app import db
+from context import db
 
 class InsurancePolicy(db.Model):
     __tablename__ = 'insurance_policie'
