@@ -1,6 +1,6 @@
 from flask import Flask
-from user_management.routes import user_management_bp as user_management_blueprint
-from reservation_subsystem.routes import reservation_subsystem
+from subsystems.user_management.routes import user_management_bp as user_management_blueprint
+from subsystems.reservation_subsystem.routes import reservation_subsystem
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
