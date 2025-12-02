@@ -3,8 +3,8 @@
   <head>
     <title>Bolt Drive</title>
 
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -27,14 +27,14 @@
           <!-- Navigation -->
           <div class="navbar-links">
             <a href="#">Home</a>
-            <a href="fleetlist.html">Fleet</a>
+            <a href="fleetlist">Fleet</a>
           </div>
 
           <!-- User ctrl buttons -->
           <div class="navbar-links" style="display: flex; gap: 10px;">
-            <button><a style="color: white" href="login.html">Login</a></button>
-            <button><a style="color: white" href="register.html">Register</a></button>
-            <button><a style="color: white" href="profile.html">Profile</a></button>
+            <button><a style="color: white" href="login">Login</a></button>
+            <button><a style="color: white" href="register">Register</a></button>
+            <button><a style="color: white" href="profile">Profile</a></button>
 
           </div>
         </div>
@@ -47,7 +47,7 @@
         <div class="reservation-form-text">
           <h1>Reserve your<br>car here!</h1>
           <p>Great cars at great prices for your needs. <br>Experience luxury and comfort on every journey. </p>
-          <button class="button-promo" onclick="location.href = 'fleetlist.html';">Our Fleet</button>
+          <button class="button-promo" onclick="location.href = 'fleetlist';">Our Fleet</button>
         </div>
         
         <!-- The reservation form -->

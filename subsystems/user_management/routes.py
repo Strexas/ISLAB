@@ -1,13 +1,37 @@
-from flask import render_template, request, redirect, url_for, flash, session
-from Models import db, User
-from . import user_management_bp
-from .Forms import RegistrationForm, LoginForm, DeleteProfileForm
+from flask import (render_template, request,
+                   redirect, url_for, flash,
+                   session, Blueprint)
+
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+user_management_bp = Blueprint('user_management', __name__)
+
+db = SQLAlchemy()
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    driver_license = db.Column(db.String(50))
+    role = db.Column(db.String(20), default='customer')  # customer, employee, accountant
+    is_banned = db.Column(db.Boolean, default=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
 @user_management_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-    
+
     #Validate the data when submitted
     if form.validate_on_submit():
         user = User(email=form.email.data)
@@ -16,14 +40,14 @@ def register():
         db.session.commit()
         flash('Registration successful. Please log in!')
         return redirect(url_for('user_management.login'))
-        
+
     return render_template('register.html', form=form)
 
 
 @user_management_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    
+
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
@@ -33,14 +57,14 @@ def login():
             session['user_id'] = user.id
             session['role'] = user.role
             flash(f'Welcome, {user.email}!')
-            
+
             #Redirect depending on user role
             if user.role == 'employee' or user.role == 'accountant':
-                return redirect(url_for('main.admin_dashboard')) 
+                return redirect(url_for('main.admin_dashboard'))
             return redirect(url_for('user_management.index'))
-            
+
         flash('Invalid credentials or inactive/blocked account.', 'danger')
-        
+
     return render_template('login.html', form=form)
 
 @user_management_bp.route('/logout')
@@ -56,10 +80,10 @@ def profile():
     if not user_id:
         flash('You need to log in to view your profile.', 'warning')
         return redirect(url_for('user_management.login'))
-    
+
     user = User.query.get_or_404(user_id)
     delete_form = DeleteProfileForm()
-    
+
     return render_template('profile.html', user=user, delete_form=delete_form)
 
 @user_management_bp.route('/delete_profile', methods=['POST'])
