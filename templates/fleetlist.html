@@ -10,41 +10,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/carcard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fleetlist.css') }}">
 
-    <link rel="icon" type="image/png" href="resources/site_logo.png">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
 
   </head>
   <body style="margin: 0px; background-color: #1454d4;">
+
     <!-- Navbar -->
-    <nav class="navbar">
-      <div class="navbar-container">
-
-        <!-- Logo -->
-        <div class="navbar-logo">
-          <img src="resources/site_logo.png">
-          Bolt Drive
-        </div>
-
-        <!-- Navigation -->
-        <div class="navbar-links">
-          <a href="/">Home</a>
-          <a href="fleetlist">Fleet</a>
-        </div>
-
-        <!-- User ctrl buttons -->
-        <div class="navbar-links" style="display: flex; gap: 10px;">
-          <a style="color: white" href="login"><button>Login</button></a>
-          <a style="color: white" href="register"><button>Register</button></a>
-          <a style="color: white" href="profile"><button>Profile</button></a>
-        </div>
-      </div>
-    </nav>
+    {% from "components/navbar.html" import navbar %}
+    {{ navbar(logged_in=False) }}
 
     <main>
       <div class="controls" aria-label="Search and filters">
         <button onclick="location.href='add_car'" 
-          style="background-color:#2b6cb0;color:white;padding:10px 16px;border:none;border-radius:6px;cursor:pointer;">
-    + Add Car
-  </button>
+          style="background-color:#2b6cb0;color:white;padding:10px 16px;border:none;border-radius:6px;cursor:pointer;">+ Add Car</button>
         <input id="search" type="search" placeholder="Search by model, brand..." />
         <select id="typeFilter">
           <option value="">All types</option>

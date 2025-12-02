@@ -1,6 +1,5 @@
 import enum
-from flask_sqlalchemy import SQLAlchemy;
-from app import db
+from context import db
 
 class ReservationStatus(enum.Enum):
     PENDING = "pending"
