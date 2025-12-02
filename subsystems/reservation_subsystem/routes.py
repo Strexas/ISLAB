@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session
-from reservation_subsystem.reservation_subsystem import ReservationSubsystem;
+from subsystems.reservation_subsystem.reservation_subsystem import ReservationSubsystem
 
 reservation_blueprint = Blueprint("reservations", __name__)
 reservation_subsystem = ReservationSubsystem()

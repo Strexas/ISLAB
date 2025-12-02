@@ -1,7 +1,7 @@
 from context import db
 
 class InsurancePolicy(db.Model):
-    __tablename__ = 'insurance_policie'
+    __tablename__ = 'insurance_policies'
 
     insurance_id = db.Column(db.String(36), primary_key=True)
     reservation_id = db.Column(db.String(36), db.ForeignKey('reservations.reservation_id'), nullable=False)
