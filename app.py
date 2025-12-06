@@ -1,13 +1,13 @@
 import os
-
-
 from flask import Flask
-from subsystems.user_management.routes import user_management_bp as user_management_blueprint
-from subsystems.reservation_subsystem.routes import reservation_blueprint
 from flask_migrate import Migrate
 
 from context import db
 
+
+# IMPORT BLUEPRINTS
+from subsystems.user_management.routes import user_management_bp as user_management_blueprint
+from subsystems.reservation_subsystem.routes import reservation_blueprint
 
 app = Flask(__name__)
 
@@ -23,9 +23,10 @@ migrate = Migrate(app, db)
 app.register_blueprint(user_management_blueprint)
 app.register_blueprint(reservation_blueprint)
 
-if __name__ == '__main__':
-    app.run(debug=True)
 
 from models.Reservation import Reservation as Reservation
 from models.InsurancePolicy import InsurancePolicy as InsurancePolicy
 from models.User import User as User
+
+if __name__ == '__main__':
+    app.run(debug=True)

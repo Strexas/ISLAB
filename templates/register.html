@@ -1,57 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Register</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eef2f7;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 280px;
-      text-align: center;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    input, button {
-      width: 100%;
-      margin: 6px 0;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background: #0056d2;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #003e99;
-    }
-    a {
-      color: white;
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <style>
+            body {
+                  font-family: Arial, sans-serif;
+                  background: #eef2f7;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  height: 100vh;
+
+        }
+
+            .box {
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  width: 280px;
+                  text-align: center;
+                  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+
+        }
+
+            .form-control, .btn-submit {
+                  width: 100%;
+                  margin: 6px 0;
+                  padding: 8px;
+                  border: 1px solid #ccc;
+                  border-radius: 4px;
+                  box-sizing: border-box; /* Importante para el layout */
+
+        }
+
+            .btn-submit {
+                  background: #0056d2;
+                  color: white;
+                  border: none;
+                  cursor: pointer;
+                  font-size: 15px;
+
+        }
+
+                .btn-submit:hover {
+                      background: #003e99;
+
+            }
+
+            .link-register {
+                  color: #0056d2;
+                  text-decoration: none;
+                  font-size: 14px;
+
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.85em;
+            text-align: left;
+            margin-top: -5px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+
+    </style>
 </head>
 <body>
-  <div class="box">
-    <h2>Register</h2>
-    <input type="text" placeholder="Name">
-    <input type="email" placeholder="Email">
-    <input type="password" placeholder="Password">
-    <input type="password" placeholder="Confirm Password">
-   <button onclick="window.location.href='index.html'">Register</button>
+    <div class="box">
+        <h2>Register</h2>
 
-    <p><a style="color: #0056d2" href="login.html">Already have an account?</a></p>
-  </div>
+        <!-- Formulario POST que llama a la ruta de registro -->
+        <form method="POST" action="{{ url_for('user_management.register') }}">
+
+            <!-- Token de Seguridad CSRF -->
+            {{ form.hidden_tag() }}
+
+            <!-- Mostrar mensajes flash (ej. "Registration successful") -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <p style="color:red; font-size:14px;">{{ message }}</p>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- Nota: Has eliminado el campo 'Name' de tu modelo y formulario Python -->
+            <!-- Campo Email -->
+            <div>
+                {{ form.email(placeholder="Email", class="form-control") }}
+                {% for error in form.email.errors %}
+                <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Campo Contraseña -->
+            <div>
+                {{ form.password(placeholder="Password", class="form-control") }}
+                {% for error in form.password.errors %}
+                <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Campo Confirmar Contraseña (Validación EqualTo) -->
+            <div>
+                {{ form.confirm_password(placeholder="Confirm Password", class="form-control") }}
+                {% for error in form.confirm_password.errors %}
+                <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Botón de Envío (type="submit" por defecto) -->
+            {{ form.submit(class="btn-submit") }}
+
+        </form>
+
+        <p><a class="link-register" href="{{ url_for('user_management.login') }}">Already have an account?</a></p>
+    </div>
 </body>
 </html>
