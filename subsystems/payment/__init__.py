@@ -1,1 +1,2 @@
-from .routes import payment_blueprint
+from .routes import payment_bp
+
