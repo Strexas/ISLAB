@@ -12,7 +12,7 @@ class PaymentStatus(Enum):
 
 
 class Payment(db.Model):
-    __tablename__ = "payments"
+    __tablename__ = "payment"
 
 
     paymentid = db.Column(db.Integer, primary_key=True, autoincrement=True)
