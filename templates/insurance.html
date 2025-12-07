@@ -144,7 +144,10 @@
       </label>
     </div>
 
-    <a href="payment.html" class="btn btn-block">Confirm & Proceed to Payment</a>
+    <a href="{{ url_for('payment.payment_page') }}" class="btn btn-block">
+      Confirm & Proceed to Payment
+    </a>
+    
     <a href="fleet.html" class="btn-block btn-link">← Cancel and go back</a>
 
   </div>
