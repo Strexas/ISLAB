@@ -34,8 +34,8 @@ def add_money():
 
 @payment_blueprint.route("/add_bank_card", methods=["POST"])
 def add_bank_card():
-    data = request.json
-    user_id = data.get("user_id")
+    user_id = request.form.get("user_id")
+    amount = float(request.form.get("amount", 0))
     card_number = data.get("card_number")
     holder_name = data.get("holder_name")
     expire_date = data.get("expire_date")
