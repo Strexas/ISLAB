@@ -126,28 +126,62 @@
       <!-- card -->
       <div class="box">
         <h3 style="margin-top:0;">Card information</h3>
-        <label>Card number</label>
-        <input type="text" placeholder="XXXX XXXX XXXX XXXX">
-        <label>Expiry</label>
-        <input type="text" placeholder="MM/YY">
-        <label>CVV</label>
-        <input type="password" placeholder="123">
-        <button type="button">Save card</button>
+        <!-- ADD BANK CARD FORM -->
+        <form action="/payment/add_bank_card" method="post">
+          <!-- şimdilik user_id sabit; login entegre olunca dynamic olacak -->
+          <input type="hidden" name="user_id" value="1">
+
+          <label>Card number</label>
+          <input type="text" name="card_number" placeholder="XXXX XXXX XXXX XXXX" required>
+
+          <label>Expiry</label>
+          <input type="text" name="expire_date" placeholder="MM/YY" required>
+
+          <label>CVV</label>
+          <input type="password" name="cvv" placeholder="123">
+
+          <label>Card holder name</label>
+          <input type="text" name="holder_name" placeholder="Name Surname" required>
+
+          <label>Billing address</label>
+          <input type="text" name="billing_address" placeholder="Address" required>
+
+          <button type="submit">Save card</button>
+        </form>
       </div>
 
-      <!-- payment -->
+      <!-- payment from balance -->
       <div class="box">
-        <h3 style="margin-top:0;">Pay for insurance / reservation</h3>
-        <label>Reservation ID</label>
-        <input type="text" placeholder="RES-2025-001">
-        <label>Amount (€)</label>
-        <input type="number" value="50">
-        <button type="button">Pay</button>
+        <h3 style="margin-top:0;">Pay from balance</h3>
+        <form action="/payment/pay_from_balance" method="post">
+          <input type="hidden" name="user_id" value="1">
+
+          <label>Reservation ID</label>
+          <input type="text" name="reservation_id" placeholder="RES-2025-001">
+
+          <label>Amount (€)</label>
+          <input type="number" name="amount" value="50" min="1" required>
+
+          <button type="submit">Pay from balance</button>
+        </form>
+
+        <hr style="margin:16px 0; border:none; border-top:1px solid #d6dfe8;">
+
+        <h4 style="margin-top:0;">Add money to balance</h4>
+        <form action="/payment/add_money" method="post">
+          <input type="hidden" name="user_id" value="1">
+
+          <label>Amount (€)</label>
+          <input type="number" name="amount" min="1" required>
+
+          <button type="submit">Add money</button>
+        </form>
       </div>
 
       <!-- history -->
       <div class="box">
         <h3 style="margin-top:0;">Recent payments</h3>
+        <!-- Şimdilik statik; istersen sonra Flask ile dinamik yaparız -->
         <p>TX-1001 – 35 € – Success</p>
         <p>TX-1002 – 15 € – Success</p>
         <p>TX-1003 – 20 € – Pending</p>
