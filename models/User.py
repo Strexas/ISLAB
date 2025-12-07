@@ -11,6 +11,8 @@ class User(db.Model):
     role = db.Column(db.String(20), default='customer')  # customer, employee, accountant
     is_banned = db.Column(db.Boolean, default=False)
 
+    wallet_balance = db.Column(db.Float, nullable=False, default=0.0)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
