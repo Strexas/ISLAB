@@ -1,6 +1,7 @@
 from context import db
 from enum import Enum
 from sqlalchemy import Enum as PgEnum
+from datetime import datetime
 
 
 class PaymentStatus(Enum):
@@ -13,18 +14,14 @@ class PaymentStatus(Enum):
 class Payment(db.Model):
     __tablename__ = "payments"
 
-    paymentid = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
+    paymentid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey("user.userid"), nullable=False)
     reservationid = db.Column(db.Integer, db.ForeignKey("reservation.reservationid"), nullable=True)
 
-    date = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     amount = db.Column(db.Float, nullable=False)
 
     status = db.Column(PgEnum(PaymentStatus), nullable=False, default=PaymentStatus.PENDING)
-    paymentmethod = db.Column(db.String(20), nullable=False)
+    paymentmethod = db.Column(db.String(20), nullable=False)  # "Card" / "Balance"
     description = db.Column(db.String(255), nullable=True)
-
-    #-- relations
-    user = db.relationship("User", backref="payments")
-    reservation = db.relationship("Reservation", backref="payments")
