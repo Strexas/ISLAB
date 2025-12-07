@@ -20,8 +20,6 @@
       background: var(--bg);
       color: var(--text);
     }
-
-    /* Top Navigation */
     .topbar {
       background: #fff;
       border-bottom: 1px solid var(--border);
@@ -33,17 +31,14 @@
     .brand { font-size: 1.25rem; font-weight: 800; color: #16396b; text-decoration: none; }
     .nav-links a { margin-left: 20px; text-decoration: none; color: #16396b; font-weight: 500; }
 
-    /* Layout Grid */
     .main-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr; /* Main content vs Sidebar */
+      grid-template-columns: 2fr 1fr;
       gap: 24px;
       max-width: 1100px;
       margin: 30px auto;
       padding: 0 20px;
     }
-
-    /* Section Styling */
     .card-section {
       background: var(--card-bg);
       border-radius: 10px;
@@ -54,8 +49,7 @@
     }
     h2 { margin-top: 0; font-size: 1.5rem; color: #16396b; }
     h3 { margin-top: 0; font-size: 1.1rem; color: #323f4b; border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 15px;}
-    
-    /* Forms */
+
     label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; color: #4a5568; }
     input {
       width: 100%;
@@ -68,7 +62,6 @@
     }
     input:focus { border-color: var(--primary); outline: none; }
 
-    /* Buttons */
     .btn {
       padding: 10px 18px;
       border-radius: 6px;
@@ -82,7 +75,6 @@
     .btn-danger { background: var(--danger); color: white; padding: 6px 12px; font-size: 0.8rem;}
     .btn:hover { opacity: 0.9; }
 
-    /* Existing Cards List */
     .saved-card {
       display: flex;
       justify-content: space-between;
@@ -95,7 +87,6 @@
     }
     .card-info { font-family: monospace; font-size: 1.1rem; color: #333; }
 
-    /* History Table */
     .history-item {
       display: flex;
       justify-content: space-between;
@@ -106,7 +97,6 @@
     .status-success { color: var(--success); font-weight: bold; }
     .status-pending { color: #d69e2e; font-weight: bold; }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .main-grid { grid-template-columns: 1fr; }
     }
@@ -115,20 +105,21 @@
 <body>
 
   <div class="topbar">
-    <a href="index.html" class="brand">🚗 Bolt Drive</a>
+    <a href="/" class="brand">🚗 Bolt Drive</a>
     <div class="nav-links">
-      <a href="fleetlist.html">Fleet</a>
-      <a href="login.html">Logout</a>
+      <a href="/reservations">Reservations</a>
+      <a href="/login">Logout</a>
     </div>
   </div>
 
   <div class="main-grid">
 
     <div class="column-left">
-      
+
+      <!-- Add Card -->
       <div class="card-section">
         <h3>➕ Add New Bank Card</h3>
-        <form action="/payment/add_bank_card" method="post">
+        <form action="{{ url_for('payment.add_bank_card') }}" method="post">
           <input type="hidden" name="user_id" value="1">
 
           <label>Cardholder Name</label>
@@ -140,7 +131,7 @@
           <div style="display: flex; gap: 15px;">
             <div style="flex: 1;">
               <label>Expiry Date</label>
-              <input type="text" name="expire_date" placeholder="MM/YY" required>
+              <input type="text" name="expire_date" placeholder="YYYY-MM-DD" required>
             </div>
             <div style="flex: 1;">
               <label>CVV</label>
@@ -155,54 +146,60 @@
         </form>
       </div>
 
+      <!-- Saved cards -->
       <div class="card-section">
         <h3>💳 Your Saved Cards</h3>
-        
-        <div class="saved-card">
-          <div class="card-info">**** **** **** 4242</div>
-          <form action="/payment/delete_bank_card/101" method="post" style="margin:0;">
-             <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-        </div>
 
-        <div class="saved-card">
-          <div class="card-info">**** **** **** 8899</div>
-          <form action="/payment/delete_bank_card/102" method="post" style="margin:0;">
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-        </div>
+        {% if cards %}
+          {% for card in cards %}
+            <div class="saved-card">
+              <div class="card-info">
+                **** **** **** {{ card.cardnumber[-4:] }}
+              </div>
+              <form action="{{ url_for('payment.delete_bank_card', card_id=card.cardid) }}" method="post" style="margin:0;">
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="font-size:0.9rem; color:#6b7280;">No saved cards yet.</p>
+        {% endif %}
       </div>
     </div>
 
     <div class="column-right">
 
+      <!-- Wallet -->
       <div class="card-section" style="background-color: #eef4ff; border-color: #dbeafe;">
         <h3>💰 Wallet Balance</h3>
-        <h2 style="color:var(--primary); margin-bottom: 20px;">€ 120.00</h2>
-        
+        <h2 style="color:var(--primary); margin-bottom: 20px;">
+          € {{ (wallet_balance or 0) | round(2) }}
+        </h2>
+
         <label>Add Money to Balance</label>
-        <form action="/payment/add_money" method="post" style="display: flex; gap: 10px;">
+        <form action="{{ url_for('payment.add_money') }}" method="post" style="display: flex; gap: 10px;">
           <input type="hidden" name="user_id" value="1">
-          <input type="number" name="amount" placeholder="Amount €" min="5" required style="margin-bottom:0;">
+          <input type="number" name="amount" placeholder="Amount €" min="5" step="0.01" required style="margin-bottom:0;">
           <button type="submit" class="btn btn-primary" style="width: auto;">Top Up</button>
         </form>
       </div>
 
+      <!-- Pay reservation -->
       <div class="card-section">
         <h3>✅ Pay for Reservation</h3>
         <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
           Paying for Reservation <strong>#RES-2025-001</strong>
         </p>
-        
-        <form action="/payment/pay_from_balance" method="post">
+
+        <form action="{{ url_for('payment.pay_from_balance') }}" method="post">
           <input type="hidden" name="user_id" value="1">
-          
+
           <label>Reservation ID</label>
           <input type="text" name="reservation_id" value="RES-2025-001" readonly style="background-color:#eee;">
 
           <label>Total Amount (€)</label>
           <input type="number" name="amount" value="50.00" readonly style="background-color:#eee;">
-          
+
           <label>Description</label>
           <input type="text" name="description" value="Payment for Insurance + Rental">
 
@@ -210,24 +207,28 @@
         </form>
       </div>
 
+      <!-- History -->
       <div class="card-section">
         <h3>📜 History</h3>
-        
-        <div class="history-item">
-          <span>Rental #990</span>
-          <span class="status-success">-€35.00 Success</span>
-        </div>
-        <div class="history-item">
-          <span>Top Up</span>
-          <span class="status-success">+€100.00 Success</span>
-        </div>
-        <div class="history-item">
-          <span>Rental #850</span>
-          <span class="status-pending">-€20.00 Pending</span>
-        </div>
-        
+
+        {% if payments %}
+          {% for p in payments[:3] %}
+            <div class="history-item">
+              <span>{{ p.date.strftime("%Y-%m-%d") }} – {{ p.description or "Payment" }}</span>
+              <span class="{% if p.status.value == 'Success' %}status-success{% else %}status-pending{% endif %}">
+                €{{ p.amount }} {{ p.status.value }}
+              </span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="font-size:0.9rem; color:#6b7280;">No payments yet.</p>
+        {% endif %}
+
         <div style="margin-top: 15px; text-align: center;">
-            <a href="/payment/history/1" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem;">View All Transactions →</a>
+          <a href="{{ url_for('payment.payment_history', user_id=1) }}"
+             style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+            View All Transactions →
+          </a>
         </div>
       </div>
 
