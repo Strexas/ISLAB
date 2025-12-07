@@ -1,4 +1,5 @@
 from context import db
+from datetime import date
 
 
 class CreditCard(db.Model):
@@ -11,6 +12,4 @@ class CreditCard(db.Model):
     cardnumber = db.Column(db.String(20), nullable=False)
     expiredate = db.Column(db.Date, nullable=False)
     billingaddress = db.Column(db.String(255), nullable=False)
-    added = db.Column(db.Date, nullable=False)
-
-    user = db.relationship("User", backref="creditcards")
+    added = db.Column(db.Date, nullable=False, default=date.today)
