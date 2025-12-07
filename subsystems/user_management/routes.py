@@ -460,3 +460,21 @@ def change_password():
 
     flash("Invalid input.", "danger")
     return redirect(url_for("user_management.profile"))
+
+@user_management_bp.route("/profile/<int:user_id>")
+def view_user_profile(user_id):
+    role = session.get("role")
+
+    if role not in ["employee", "accountant"]:
+        flash("Access denied.", "danger")
+        return redirect(url_for("user_management.profile"))
+
+    user = User.get_by_id(user_id)
+
+    return render_template(
+        "profile.html",
+        user=user,
+        license_form=None,   
+        delete_form=None,   
+        password_form=None   
+    )

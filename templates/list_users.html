@@ -108,6 +108,9 @@
 
 <body>
 
+    {% from "_navbar.html" import navbar %}
+    {{ navbar() }}
+
     <h1>👥 List of Users</h1>
 
     <!-- FLASH MESSAGES -->
@@ -179,7 +182,7 @@
             </div>
 
             <!-- VIEW PROFILE -->
-            <a class="btn btn-profile" href="{{ url_for('user_management.profile') }}">
+            <a class="btn btn-profile" href="{{ url_for('user_management.view_user_profile', user_id=user.id) }}">
                 View Profile
             </a>
 
