@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 
 from context import db, mail
 # Blueprints
+from subsystems.fleet_management.routes import fleet_management_bp
 from subsystems.user_management.routes import user_management_bp
 from subsystems.reservation_subsystem.routes import reservation_blueprint
 from subsystems.user_management.dot_service import dot_bp
@@ -23,7 +24,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
 # DATABASE
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:Mariaajo8!@localhost:5432/islab_berku"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:possw0rd@localhost:5432/localhost"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # INITIALIZE EXTENSIONS
@@ -33,12 +34,16 @@ migrate = Migrate(app, db)
 
 # REGISTER BLUEPRINTS
 app.register_blueprint(dot_bp)
-app.register_blueprint(user_management_bp)
+app.register_blueprint(fleet_management_bp)
 app.register_blueprint(reservation_blueprint)
+app.register_blueprint(user_management_bp)
+
+app.template_folder = "templates"
 
 from models.Reservation import Reservation
 from models.InsurancePolicy import InsurancePolicy
 from models.User import User
+from models.Vehicle import Vehicle
 
 if __name__ == '__main__':
     app.run(debug=True)
