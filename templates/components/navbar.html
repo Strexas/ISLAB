@@ -1,0 +1,32 @@
+{% macro navbar(logged_in) %}
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-container">
+
+    <!-- Logo -->
+    <div class="navbar-logo">
+      <img src="{{ url_for('static', filename='resources/site_logo.png') }}">
+      Bolt Drive
+    </div>
+
+    <!-- Navigation -->
+    <div class="navbar-links">
+      <a href="/">Home</a>
+      <a href="fleetlist">Fleet</a>
+    </div>
+
+    <!-- User ctrl buttons -->
+    <div class="navbar-links" style="display: flex; gap: 10px;">
+      {% if not logged_in %}
+        <button><a style="color: white" href="login">Login</a></button>
+        <button><a style="color: white" href="register">Register</a></button>
+      {% endif %}
+
+      {% if logged_in %}
+        <button><a style="color: white" href="profile">Profile</a></button>
+      {% endif %}
+
+    </div>
+  </div>
+</nav>
+{% endmacro %}

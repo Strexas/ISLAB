@@ -9,7 +9,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/png" href="resources/site_logo.png">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
 
     <script>
       function navigation() {
@@ -25,29 +25,8 @@
 
   <body>
     <!-- Navbar -->
-    <nav class="navbar">
-      <div class="navbar-container">
-
-        <!-- Logo -->
-        <div class="navbar-logo">
-          <img src="resources/site_logo.png">
-          Bolt Drive
-        </div>
-
-        <!-- Navigation -->
-        <div class="navbar-links">
-          <a href="index.html">Home</a>
-          <a href="fleetlist.html">Fleet</a>
-        </div>
-
-        <!-- User ctrl buttons -->
-        <div class="navbar-links" style="display: flex; gap: 10px;">
-          <a style="color: white" href="login.html"><button>Login</button></a>
-          <a style="color: white" href="register.html"><button>Register</button></a>
-          <a style="color: white" href="profile.html"><button>Profile</button></a>
-        </div>
-      </div>
-    </nav>
+    {% from "components/navbar.html" import navbar %}
+    {{ navbar(logged_in=logged_in) }}
 
     <!-- Reserve car form -->
     <section class="reservation-form-container">
