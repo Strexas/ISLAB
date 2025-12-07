@@ -30,7 +30,7 @@
                   padding: 8px;
                   border: 1px solid #ccc;
                   border-radius: 4px;
-                  box-sizing: border-box; /* Importante para el layout */
+                  box-sizing: border-box; 
 
         }
 
@@ -71,13 +71,12 @@
     <div class="box">
         <h2>Register</h2>
 
-        <!-- Formulario POST que llama a la ruta de registro -->
         <form method="POST" action="{{ url_for('user_management.register') }}">
 
             <!-- Token de Seguridad CSRF -->
             {{ form.hidden_tag() }}
 
-            <!-- Mostrar mensajes flash (ej. "Registration successful") -->
+            <!-- Mostrar mensajes flash -->
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
@@ -85,8 +84,6 @@
             {% endfor %}
             {% endif %}
             {% endwith %}
-
-            <!-- Nota: Has eliminado el campo 'Name' de tu modelo y formulario Python -->
             <!-- Campo Email -->
             <div>
                 {{ form.email(placeholder="Email", class="form-control") }}
@@ -103,7 +100,6 @@
                 {% endfor %}
             </div>
 
-            <!-- Campo Confirmar Contraseña (Validación EqualTo) -->
             <div>
                 {{ form.confirm_password(placeholder="Confirm Password", class="form-control") }}
                 {% for error in form.confirm_password.errors %}
@@ -111,7 +107,6 @@
                 {% endfor %}
             </div>
 
-            <!-- Botón de Envío (type="submit" por defecto) -->
             {{ form.submit(class="btn-submit") }}
 
         </form>

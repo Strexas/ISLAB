@@ -109,22 +109,114 @@
     <div class="card">
         <h2>User Profile</h2>
 
-        <div class="info">
-            <span><strong>Email:</strong> {{ user.email }}</span>
-            <button>Edit</button>
+        <div class="info" id="email-section">
+            <span id="email-display"><strong>Email:</strong> {{ user.email }}</span>
+
+            <!-- Botón Edit -->
+            <button id="edit-email-btn" onclick="enableEmailEdit()">Edit</button>
+
+            <!-- FORM oculto hasta pulsar Edit -->
+            <form id="email-form" action="{{ url_for('user_management.update_email') }}"
+                  method="POST" style="display:none; width:100%; margin-top:10px;">
+
+                <input type="text"
+                       name="new_email"
+                       value="{{ user.email }}"
+                       style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
+
+                <button type="submit"
+                        style="background:#004aad; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
+                    Save
+                </button>
+
+                <button type="button" onclick="cancelEmailEdit()"
+                        style="background:#999; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
+                    Cancel
+                </button>
+            </form>
         </div>
 
-        <div class="info">
-            <span>
+        <script>
+            function enableEmailEdit() {
+                document.getElementById("email-display").style.display = "none";
+                document.getElementById("edit-email-btn").style.display = "none";
+                document.getElementById("email-form").style.display = "block";
+            }
+
+            function cancelEmailEdit() {
+                document.getElementById("email-display").style.display = "block";
+                document.getElementById("edit-email-btn").style.display = "inline-block";
+                document.getElementById("email-form").style.display = "none";
+            }
+        </script>
+
+
+        <div class="info" id="license-section">
+            <span id="license-display">
                 <strong>Driver License:</strong>
                 {% if user.driver_license %}
                 {{ user.driver_license }}
                 {% else %}
                 Not added
                 {% endif %}
+                {% if user.license_verified %}
+                <span style="color:green; font-weight:bold;">(Verified)</span>
+                {% else %}
+                <span style="color:red; font-weight:bold;">(Not Verified)</span>
+                {% endif %}
             </span>
-            <button>Edit</button>
+
+            <button id="edit-license-btn" onclick="enableLicenseEdit()">Edit</button>
         </div>
+
+        <!-- FORM EDIT LICENSE -->
+        <form id="license-form" action="{{ url_for('user_management.edit_license') }}"
+              method="POST" style="display:none; margin-top:10px;">
+
+            {{ license_form.hidden_tag() }}
+
+            {{
+ license_form.driver_license(
+        value=user.driver_license,
+        placeholder="Driver license number",
+        style="width:100%; padding:8px; margin-top:8px;"
+    )
+            }}
+
+            {{
+ license_form.license_expiration(
+        value=user.license_expiration,
+        placeholder="YYYY-MM-DD",
+        style="width:100%; padding:8px; margin-top:8px;"
+    )
+            }}
+
+            <button type="submit"
+                    style="background:#004aad; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
+                Save
+            </button>
+
+            <button type="button"
+                    onclick="cancelLicenseEdit()"
+                    style="background:#999; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
+                Cancel
+            </button>
+        </form>
+
+        <script>
+            function enableLicenseEdit() {
+                document.getElementById("license-display").style.display = "none";
+                document.getElementById("edit-license-btn").style.display = "none";
+                document.getElementById("license-form").style.display = "block";
+            }
+
+            function cancelLicenseEdit() {
+                document.getElementById("license-display").style.display = "block";
+                document.getElementById("edit-license-btn").style.display = "inline-block";
+                document.getElementById("license-form").style.display = "none";
+            }
+        </script>
+
 
         <div class="info">
             <span><strong>Role:</strong> {{ user.role }}</span>
@@ -136,8 +228,30 @@
         </div>
 
         <div class="license">
-            <label><strong>Upload License Photo:</strong></label>
-            <input type="file" accept="image/*">
+            <div class="license">
+                <label><strong>Upload License Photo:</strong></label>
+
+                {% if user.license_photo_path %}
+                <div style="margin-top:10px; text-align:center;">
+                    <img src="{{ user.license_photo_path }}"
+                         alt="License Photo"
+                         style="width:180px; border-radius:10px; border:1px solid #ccc;">
+                </div>
+                {% endif %}
+
+                <form action="{{ url_for('user_management.upload_license_photo') }}"
+                      method="POST"
+                      enctype="multipart/form-data">
+
+                    <input type="file" name="license_photo" accept="image/*" required>
+
+                    <button type="submit"
+                            style="background:#004aad; color:white; padding:8px 12px; border:none; border-radius:5px; margin-top:8px;">
+                        Upload
+                    </button>
+                </form>
+            </div>
+
         </div>
 
         <div class="reservations">
@@ -146,10 +260,22 @@
 
         <form action="{{ url_for('user_management.delete_profile') }}" method="POST">
             {{ delete_form.hidden_tag() }}
+
+            <label for="current_password"><strong>Confirm password to delete account:</strong></label>
+            <input type="password"
+                   name="current_password"
+                   placeholder="Enter your password"
+                   required
+                   style="width: 100%; padding: 8px; margin-top: 8px; border-radius: 5px; border: 1px solid #ccc;">
+
+            {% for error in delete_form.current_password.errors %}
+            <p style="color:red; font-size: 13px;">{{ error }}</p>
+            {% endfor %}
+
             <button type="submit" class="delete">Delete Account</button>
         </form>
 
-        <a href="{{ url_for('user_management.login') }}">Logout</a>
+        <a href="{{ url_for('user_management.logout') }}">Logout</a>
     </div>
 </body>
 </html>

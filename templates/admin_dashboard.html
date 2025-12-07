@@ -38,10 +38,10 @@
             font-weight: 500;
         }
 
-        a:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-        }
+            a:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: translateY(-3px);
+            }
 
         footer {
             position: absolute;
@@ -54,9 +54,9 @@
 <body>
     <h1>Admin Dashboard</h1>
     <div class="link-container">
-        <a href="./list_users.html">👤 List Users</a>
-        <a href="./fleetlist.html">🚗 List Cars</a>
-        <a href="list_maintenance.html">List Maintenance</a>
+        <a href="{{ url_for('user_management.list_users') }}">👤 List Users</a>
+        <a href="{{ url_for('reservations.fleet_list') }}">🚗 List Cars</a>
+        <a href="{{ url_for('reservations.fleet_list') }}">🔧 List Maintenance</a>
     </div>
     <footer>© 2025 Admin Panel</footer>
 </body>
