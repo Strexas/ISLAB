@@ -3,7 +3,7 @@ import os
 
 from flask import Flask
 from subsystems.user_management.routes import user_management_bp as user_management_blueprint
-from subsystems.payment import payment_blueprint
+from subsystems.payment.routes import payment_bp
 from subsystems.reservation_subsystem.routes import reservation_blueprint
 from flask_migrate import Migrate
 
@@ -25,7 +25,8 @@ migrate = Migrate(app, db)
 
 app.register_blueprint(user_management_blueprint)
 app.register_blueprint(reservation_blueprint)
-app.register_blueprint(payment_blueprint)
+app.register_blueprint(payment_bp)
+
 
 
 if __name__ == '__main__':
