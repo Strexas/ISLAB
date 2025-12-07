@@ -2,280 +2,246 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Profile - Car Renting Service</title>
+    <title>User Profile</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f5f7fa;
+            background: #eef2f7;
             display: flex;
-            align-items: center;
             justify-content: center;
-            height: 100vh;
+            align-items: flex-start;
+            padding-top: 40px;
             margin: 0;
         }
 
         .card {
+            width: 480px;
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 10px;
-            width: 400px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         h2 {
-            color: #004aad;
             text-align: center;
+            color: #004aad;
             margin-bottom: 20px;
         }
 
-        .info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .section-title {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #004aad;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        .info-box {
             background: #f8f9fc;
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
         }
 
-            .info span {
-                color: #333;
-                font-size: 14px;
-            }
-
-            .info button {
-                background: #004aad;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-
-                .info button:hover {
-                    background: #003780;
-                }
-
-        .license {
-            margin-top: 15px;
+        .info-line {
+            margin-bottom: 6px;
         }
 
-        input[type="file"] {
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .reservations button {
-            padding: 10px;
-            background-color: #003780;
+        .edit-btn {
+            background: #004aad;
             color: white;
             border: none;
-            border-radius: 10px;
-            margin-top: 10px;
+            padding: 6px 10px;
+            border-radius: 5px;
             cursor: pointer;
+            float: right;
         }
 
-            .reservations button:hover {
-                background-color: #004aad;
+            .edit-btn:hover {
+                background: #003780;
             }
 
-        .delete {
+        .delete-btn {
             background: #c0392b;
             color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
             width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
-            .delete:hover {
+            .delete-btn:hover {
                 background: #992d22;
             }
 
-        a {
-            text-decoration: none;
-            color: #004aad;
-            display: block;
-            text-align: center;
-            margin-top: 15px;
+        input, button {
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
+
     <div class="card">
+
         <h2>User Profile</h2>
 
-        <div class="info" id="email-section">
-            <span id="email-display"><strong>Email:</strong> {{ user.email }}</span>
+        <!-- ========== USER INFORMATION ========== -->
+        <div class="section-title">User Information</div>
+        <div class="info-box">
+            <div class="info-line"><strong>Name:</strong> {{ user.name or "—" }}</div>
+            <div class="info-line"><strong>Surname:</strong> {{ user.surname or "—" }}</div>
+            <div class="info-line"><strong>Birthdate:</strong> {{ user.birthdate or "—" }}</div>
+            <div class="info-line"><strong>Role:</strong> {{ user.role }}</div>
+            <div class="info-line">
+                <strong>Account Status:</strong>
+                {% if user.account_status %}
+                <span style="color:green;">Active</span>
+                {% else %}
+                <span style="color:red;">Banned</span>
+                {% endif %}
+            </div>
+            <div class="info-line">
+                <strong>Email Verified:</strong>
+                {% if user.is_verified %}
+                <span style="color:green;">Yes</span>
+                {% else %}
+                <span style="color:red;">No</span>
+                {% endif %}
+            </div>
+        </div>
 
-            <!-- Botón Edit -->
-            <button id="edit-email-btn" onclick="enableEmailEdit()">Edit</button>
+        <!-- ========== EMAIL SECTION ========== -->
+        <div class="section-title">Email</div>
+        <div class="info-box">
+            <div class="info-line">
+                <strong>Email:</strong> {{ user.email }}
+                <button class="edit-btn" onclick="enableEmailEdit()">Edit</button>
+            </div>
 
-            <!-- FORM oculto hasta pulsar Edit -->
             <form id="email-form" action="{{ url_for('user_management.update_email') }}"
-                  method="POST" style="display:none; width:100%; margin-top:10px;">
-
-                <input type="text"
-                       name="new_email"
-                       value="{{ user.email }}"
-                       style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
-
-                <button type="submit"
-                        style="background:#004aad; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
-                    Save
-                </button>
-
-                <button type="button" onclick="cancelEmailEdit()"
-                        style="background:#999; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
-                    Cancel
-                </button>
+                  method="POST" style="display:none; margin-top:10px;">
+                <input type="email" name="new_email" value="{{ user.email }}"
+                       style="width:100%; padding:8px; margin-bottom:8px;">
+                <button type="submit" class="edit-btn" style="float:none; width:100%;">Save Email</button>
             </form>
         </div>
 
-        <script>
-            function enableEmailEdit() {
-                document.getElementById("email-display").style.display = "none";
-                document.getElementById("edit-email-btn").style.display = "none";
-                document.getElementById("email-form").style.display = "block";
-            }
+        <!-- ========== PASSWORD SECTION ========== -->
+        <div class="section-title">Change Password</div>
+        <div class="info-box">
 
-            function cancelEmailEdit() {
-                document.getElementById("email-display").style.display = "block";
-                document.getElementById("edit-email-btn").style.display = "inline-block";
-                document.getElementById("email-form").style.display = "none";
-            }
-        </script>
+            <form action="{{ url_for('user_management.change_password') }}" method="POST">
 
+                {{ password_form.hidden_tag() }}
 
-        <div class="info" id="license-section">
-            <span id="license-display">
-                <strong>Driver License:</strong>
-                {% if user.driver_license %}
-                {{ user.driver_license }}
-                {% else %}
-                Not added
-                {% endif %}
-                {% if user.license_verified %}
-                <span style="color:green; font-weight:bold;">(Verified)</span>
-                {% else %}
-                <span style="color:red; font-weight:bold;">(Not Verified)</span>
-                {% endif %}
-            </span>
+                <input type="password" name="old_password" placeholder="Current password"
+                       required style="width:100%; padding:8px; margin-bottom:10px;">
+                <input type="password" name="new_password" placeholder="New password"
+                       required style="width:100%; padding:8px; margin-bottom:10px;">
+                <input type="password" name="confirm_new_password" placeholder="Confirm new password"
+                       required style="width:100%; padding:8px; margin-bottom:10px;">
 
-            <button id="edit-license-btn" onclick="enableLicenseEdit()">Edit</button>
+                <button type="submit" class="edit-btn" style="float:none; width:100%;">Update Password</button>
+            </form>
+
         </div>
 
-        <!-- FORM EDIT LICENSE -->
-        <form id="license-form" action="{{ url_for('user_management.edit_license') }}"
-              method="POST" style="display:none; margin-top:10px;">
+        <!-- ========== DRIVER LICENSE SECTION ========== -->
+        <div class="section-title">Driver License</div>
 
-            {{ license_form.hidden_tag() }}
-
-            {{
- license_form.driver_license(
-        value=user.driver_license,
-        placeholder="Driver license number",
-        style="width:100%; padding:8px; margin-top:8px;"
-    )
-            }}
-
-            {{
- license_form.license_expiration(
-        value=user.license_expiration,
-        placeholder="YYYY-MM-DD",
-        style="width:100%; padding:8px; margin-top:8px;"
-    )
-            }}
-
-            <button type="submit"
-                    style="background:#004aad; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
-                Save
-            </button>
-
-            <button type="button"
-                    onclick="cancelLicenseEdit()"
-                    style="background:#999; color:white; padding:5px 10px; border:none; border-radius:5px; margin-top:8px;">
-                Cancel
-            </button>
-        </form>
-
-        <script>
-            function enableLicenseEdit() {
-                document.getElementById("license-display").style.display = "none";
-                document.getElementById("edit-license-btn").style.display = "none";
-                document.getElementById("license-form").style.display = "block";
-            }
-
-            function cancelLicenseEdit() {
-                document.getElementById("license-display").style.display = "block";
-                document.getElementById("edit-license-btn").style.display = "inline-block";
-                document.getElementById("license-form").style.display = "none";
-            }
-        </script>
-
-
-        <div class="info">
-            <span><strong>Role:</strong> {{ user.role }}</span>
-        </div>
-
-        <div class="info">
-            <span><strong>Transaction history:</strong></span>
-            <button onclick="window.location.href='/transactions'">View</button>
-        </div>
-
-        <div class="license">
-            <div class="license">
-                <label><strong>Upload License Photo:</strong></label>
-
-                {% if user.license_photo_path %}
-                <div style="margin-top:10px; text-align:center;">
-                    <img src="{{ user.license_photo_path }}"
-                         alt="License Photo"
-                         style="width:180px; border-radius:10px; border:1px solid #ccc;">
-                </div>
-                {% endif %}
-
-                <form action="{{ url_for('user_management.upload_license_photo') }}"
-                      method="POST"
-                      enctype="multipart/form-data">
-
-                    <input type="file" name="license_photo" accept="image/*" required>
-
-                    <button type="submit"
-                            style="background:#004aad; color:white; padding:8px 12px; border:none; border-radius:5px; margin-top:8px;">
-                        Upload
-                    </button>
-                </form>
+        <div class="info-box">
+            <div class="info-line">
+                <strong>License:</strong>
+                {% if user.driver_license %} {{ user.driver_license }} {% else %} Not added {% endif %}
             </div>
 
+            <div class="info-line">
+                <strong>Expiration:</strong>
+                {% if user.license_expiration %} {{ user.license_expiration }} {% else %} — {% endif %}
+            </div>
+
+            <div class="info-line">
+                <strong>Status:</strong>
+                {% if user.license_verified %}
+                <span style="color:green;">Verified</span>
+                {% else %}
+                <span style="color:red;">Not verified</span>
+                {% endif %}
+            </div>
+
+            <button class="edit-btn" onclick="enableLicenseEdit()">Edit License</button>
+
+            <form id="license-form" action="{{ url_for('user_management.edit_license') }}"
+                  method="POST" style="display:none; margin-top:10px;">
+
+                {{ license_form.hidden_tag() }}
+
+                {{
+ license_form.driver_license(
+                value=user.driver_license,
+                placeholder="License number",
+                style="width:100%; padding:8px; margin-bottom:8px;"
+            )
+                }}
+
+                {{
+ license_form.license_expiration(
+                value=user.license_expiration,
+                style="width:100%; padding:8px; margin-bottom:8px;"
+            )
+                }}
+
+                <button type="submit" class="edit-btn" style="float:none; width:100%;">Save License</button>
+            </form>
         </div>
 
-        <div class="reservations">
-            <button onclick="location.href='/reservations'">View Reservations</button>
+        <!-- LICENSE PHOTO -->
+        <div class="section-title">License Photo</div>
+        <div class="info-box">
+
+            {% if user.license_photo_path %}
+            <img src="{{ user.license_photo_path }}"
+                 style="width:200px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px;">
+            {% endif %}
+
+            <form action="{{ url_for('user_management.upload_license_photo') }}"
+                  method="POST" enctype="multipart/form-data">
+                <input type="file" name="license_photo" accept="image/*" required style="width:100%;">
+                <button type="submit" class="edit-btn" style="float:none; width:100%; margin-top:10px;">Upload Photo</button>
+            </form>
+
         </div>
+
+
+        <!-- ========== DELETE PROFILE ========== -->
+        <div class="section-title">Delete Account</div>
 
         <form action="{{ url_for('user_management.delete_profile') }}" method="POST">
+
             {{ delete_form.hidden_tag() }}
 
-            <label for="current_password"><strong>Confirm password to delete account:</strong></label>
-            <input type="password"
-                   name="current_password"
-                   placeholder="Enter your password"
-                   required
-                   style="width: 100%; padding: 8px; margin-top: 8px; border-radius: 5px; border: 1px solid #ccc;">
+            <input type="password" name="current_password"
+                   placeholder="Confirm password to delete"
+                   required style="width:100%; padding:8px; margin-bottom:10px;">
 
-            {% for error in delete_form.current_password.errors %}
-            <p style="color:red; font-size: 13px;">{{ error }}</p>
-            {% endfor %}
-
-            <button type="submit" class="delete">Delete Account</button>
+            <button type="submit" class="delete-btn">DELETE ACCOUNT</button>
         </form>
 
-        <a href="{{ url_for('user_management.logout') }}">Logout</a>
     </div>
+
+    <script>
+        function enableEmailEdit() {
+            document.getElementById('email-form').style.display = 'block';
+        }
+
+        function enableLicenseEdit() {
+            document.getElementById('license-form').style.display = 'block';
+        }
+    </script>
+
 </body>
 </html>

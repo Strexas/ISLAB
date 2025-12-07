@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>List Users</title>
+
     <style>
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #4f46e5, #9333ea);
-            color: #fff;
+            color: white;
             margin: 0;
-            padding: 40px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -17,163 +18,210 @@
         }
 
         h1 {
-            margin-bottom: 25px;
-            font-size: 2.5em;
-            letter-spacing: 1px;
             text-align: center;
-        }
-
-        .filter-form {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 20px 30px;
-            border-radius: 12px;
-            margin-bottom: 40px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        }
-
-        .filter-form label {
-            font-weight: 600;
-            margin-right: 8px;
-        }
-
-        .filter-form input {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            outline: none;
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-            width: 180px;
-        }
-
-        .filter-form input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .filter-form button {
-            padding: 8px 18px;
-            border: none;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.3);
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-form button:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
+            margin-bottom: 25px;
+            font-size: 2.4em;
         }
 
         .user-list {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
             gap: 20px;
-            max-width: 1000px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
         }
 
         .user-card {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255,255,255,0.18);
+            padding: 20px;
             border-radius: 12px;
-            padding: 20px 25px;
             width: 260px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
         }
 
-        .user-card:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-5px);
-        }
+            .user-card:hover {
+                transform: translateY(-6px);
+            }
 
         .user-name {
-            font-size: 1.2em;
-            font-weight: 600;
+            font-size: 1.3em;
+            font-weight: bold;
             margin-bottom: 8px;
         }
 
-        .user-email, .user-birthday {
-            font-size: 0.95em;
+        .user-info {
+            margin-bottom: 10px;
             opacity: 0.9;
-            margin-bottom: 8px;
         }
 
-        .user-card a {
+        .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
             text-decoration: none;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px 15px;
-            border-radius: 6px;
-            transition: background 0.3s;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
         }
 
-        .user-card a:hover {
-            background: rgba(255, 255, 255, 0.4);
+        .btn-profile {
+            background: rgba(255,255,255,0.3);
+            color: white;
         }
+
+            .btn-profile:hover {
+                background: rgba(255,255,255,0.5);
+            }
+
+        .btn-ban {
+            background: #c0392b;
+            color: white;
+            border: none;
+        }
+
+            .btn-ban:hover {
+                background: #992d22;
+            }
+
+        .btn-unban {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+
+            .btn-unban:hover {
+                background: #1e7e34;
+            }
 
         footer {
             margin-top: auto;
-            opacity: 0.8;
+            opacity: 0.7;
             font-size: 0.9em;
         }
     </style>
 </head>
+
 <body>
+
     <h1>👥 List of Users</h1>
 
-    <!-- HTML-Only Filter Section -->
-    <form class="filter-form" action="#" method="get">
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" placeholder="Enter name">
-        </div>
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Enter email">
-        </div>
-        <div>
-            <label for="birthday">Birthday:</label>
-            <input type="date" id="birthday" name="birthday">
-        </div>
-        <button type="submit">Filter</button>
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <p style="color:yellow; font-size: 1.1em; text-align:center;">{{ message }}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="GET" action="{{ url_for('user_management.list_users') }}"
+          style="margin-bottom: 25px; text-align:center; width:100%; max-width:420px;">
+
+        <input type="text" name="search"
+               placeholder="Search by name, surname or email..."
+               value="{{ search }}"
+               style="
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                border: none;
+                outline: none;
+                font-size: 15px;
+                box-shadow: 0 0 8px rgba(0,0,0,0.15);
+           ">
+
+        <button type="submit"
+                style="
+                margin-top: 10px;
+                padding: 10px 20px;
+                background: rgba(255,255,255,0.3);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: 0.3s;
+            ">
+            🔍 Search
+        </button>
     </form>
 
+
     <div class="user-list">
-        <div class="user-card">
-            <div class="user-name">Dainius Kirsnauskas</div>
-            <div class="user-email">daikir@ktu.lt</div>
-            <div class="user-birthday">🎂 1995-04-12</div>
-            <a href="profile.html">Go to Profile</a>
-        </div>
 
+        {% for user in users %}
         <div class="user-card">
-            <div class="user-name">Laura Jankauskaitė</div>
-            <div class="user-email">laura.j@ktu.lt</div>
-            <div class="user-birthday">🎂 1998-09-20</div>
-            <a href="profile.html">Go to Profile</a>
-        </div>
 
-        <div class="user-card">
-            <div class="user-name">Mantas Petrauskas</div>
-            <div class="user-email">mantas.p@ktu.lt</div>
-            <div class="user-birthday">🎂 1992-12-05</div>
-            <a href="profile.html">Go to Profile</a>
-        </div>
+            <div class="user-name">
+                {{ user.name or "No name" }} {{ user.surname or "" }}
+            </div>
 
-        <div class="user-card">
-            <div class="user-name">Agnė Vaitkutė</div>
-            <div class="user-email">agne.v@ktu.lt</div>
-            <div class="user-birthday">🎂 2000-03-18</div>
-            <a href="profile.html">Go to Profile</a>
+            <div class="user-info">
+                ✉️ <strong>Email:</strong> {{ user.email }}
+            </div>
+
+            <div class="user-info">
+                🪪 <strong>Role:</strong> {{ user.role }}
+            </div>
+
+            <div class="user-info">
+                <strong>Status:</strong>
+                {% if user.account_status %}
+                <span style="color:greenyellow;">Active</span>
+                {% else %}
+                <span style="color:#ffb3b3;">Banned</span>
+                {% endif %}
+            </div>
+
+            <!-- VIEW PROFILE -->
+            <a class="btn btn-profile" href="{{ url_for('user_management.profile') }}">
+                View Profile
+            </a>
+
+            <!-- ONLY ACCOUNTANT CAN BAN/UNBAN USERS -->
+            {% if session.get('role') == 'accountant' %}
+
+            {% if user.id != session.get('user_id') %}
+
+            {% if user.account_status %}
+            <!-- BAN BUTTON -->
+            <form method="POST" action="{{ url_for('user_management.ban_user', user_id=user.id) }}">
+                <button class="btn btn-ban" type="submit">BAN USER</button>
+            </form>
+            {% else %}
+            <!-- UNBAN BUTTON -->
+            <form method="POST" action="{{ url_for('user_management.unban_user', user_id=user.id) }}">
+                <button class="btn btn-unban" type="submit">UNBAN USER</button>
+            </form>
+            {% endif %}
+
+            {% endif %}
+            {% endif %}
+
+            {% if session.get('role') == 'accountant' and user.id != session.get('user_id') %}
+            <form method="POST" action="{{ url_for('user_management.delete_user', user_id=user.id) }}">
+                <button type="submit"
+                        style="background:#e74c3c; color:white; padding:10px; width:100%;
+                   border:none; border-radius:8px; margin-top:8px; cursor:pointer;">
+                    DELETE USER
+                </button>
+            </form>
+            {% endif %}
+
+
         </div>
+        {% endfor %}
+
     </div>
 
-    <footer>© 2025 Admin Panel</footer>
+    <footer>
+        © 2025 Admin Panel
+    </footer>
+
 </body>
 </html>

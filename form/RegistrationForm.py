@@ -1,7 +1,7 @@
+from wtforms import SelectField
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, DateField
+from wtforms import StringField, PasswordField, SubmitField, DateField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
-
 
 class RegistrationForm(FlaskForm):
     name = StringField('Name', validators=[Optional(), Length(max=120)])
@@ -13,6 +13,13 @@ class RegistrationForm(FlaskForm):
     confirm_password = PasswordField(
         'Confirm Password',
         validators=[DataRequired(), EqualTo('password', message='Passwords must match.')]
+    )
+
+    # SOLO visible para empleados/accountants (el HTML ya lo controla)
+    role = SelectField(
+        'Role',
+        choices=[('customer', 'Customer'), ('employee', 'Employee'), ('accountant', 'Accountant')],
+        default='customer'
     )
 
     submit = SubmitField('Register')

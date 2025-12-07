@@ -2,6 +2,8 @@
     render_template, request, redirect, url_for,
     flash, session, Blueprint, current_app
 )
+from form.PasswordChangeForm import PasswordChangeForm
+from form.EditLicenseForm import EditLicenseForm as LicenseForm
 from werkzeug.utils import secure_filename
 import os
 import requests
@@ -40,19 +42,26 @@ def simulate_dot_check(license_number: str):
 
 
 # ---------- REGISTER + EMAIL VERIFICATION ----------
-
 @user_management_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
+
+        # Si un employee/accountant está loggeado → puede elegir rol
+        if session.get("role") in ["employee", "accountant"]:
+            selected_role = form.role.data
+        else:
+            selected_role = "customer"
+
         # Crear usuario
         user = User.create_user(
             email=form.email.data,
             password=form.password.data,
             name=form.name.data,
             surname=form.surname.data,
-            birthdate=form.birthdate.data
+            birthdate=form.birthdate.data,
+            role=selected_role
         )
 
         # Generar token de verificación
@@ -74,6 +83,7 @@ def register():
     return render_template('register.html', form=form)
 
 
+
 @user_management_bp.route('/verify/<token>')
 def verify_email(token):
     t = Token.query.filter_by(token=token, type="verify_email").first()
@@ -91,42 +101,41 @@ def verify_email(token):
 
 
 # ---------- LOGIN / LOGOUT ----------
-
 @user_management_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
 
-        user = User.authenticate(email, password)
+        result = User.authenticate(form.email.data, form.password.data)
 
-        if not user:
+        if result == "banned":
+            flash("Your account has been banned. Contact support.", "danger")
+            return render_template("login.html", form=form)
+
+        if result == "disabled":
+            flash("Your account has been deactivated.", "danger")
+            return render_template("login.html", form=form)
+
+        if not result:
             flash("Invalid email or password.", "danger")
             return render_template("login.html", form=form)
 
+        user = result
+
         if not user.is_verified:
-            flash("Please verify your email before logging in.", "warning")
+            flash("Please verify your email before logging in.", "info")
             return render_template("login.html", form=form)
 
-        if not user.account_status:
-            flash("This account is banned or inactive.", "danger")
-            return render_template("login.html", form=form)
+        session["user_id"] = user.id
+        session["role"] = user.role
 
-        # Login OK
-        session['user_id'] = user.id
-        session['role'] = user.role
+        if user.role == "accountant":
+            return redirect(url_for("user_management.list_users"))  # ADMIN PANEL
 
-        flash(f"Welcome, {user.email}!", "success")
-
-        if user.role in ['employee', 'accountant']:
-            return redirect(url_for('user_management.admin_dashboard'))
-        else:
-            return redirect(url_for('user_management.index'))
+        return redirect(url_for("user_management.profile"))  # CUSTOMER AREA
 
     return render_template("login.html", form=form)
-
 
 @user_management_bp.route('/logout')
 def logout():
@@ -136,22 +145,24 @@ def logout():
 
 
 # ---------- PROFILE & DELETE PROFILE ----------
-
-@user_management_bp.route('/profile')
+@user_management_bp.route("/profile")
 def profile():
-    if not login_required():
-        return redirect(url_for('user_management.login'))
-
     user = User.get_current()
+    if not user:
+        return redirect(url_for("user_management.login"))
+
+    license_form = LicenseForm()
     delete_form = DeleteProfileForm()
-    license_form = EditLicenseForm()
+    password_form = PasswordChangeForm()  
 
     return render_template(
-        'profile.html',
+        "profile.html",
         user=user,
+        license_form=license_form,
         delete_form=delete_form,
-        license_form=license_form
+        password_form=password_form
     )
+
 
 
 @user_management_bp.route('/delete_profile', methods=['POST'])
@@ -173,7 +184,6 @@ def delete_profile():
 
 
 # ---------- LIST USERS (Office Employee + Accountant) ----------
-
 @user_management_bp.route('/list_users')
 def list_users():
     role = session.get('role')
@@ -182,16 +192,23 @@ def list_users():
         flash("You don't have permission to access this page.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    # Log access (diagrama: Log access)
-    log = AccessLog(
-        employee_id=session['user_id'],
-        action="Viewed users list"
-    )
-    db.session.add(log)
-    db.session.commit()
+    search = request.args.get("search", "").strip()
 
-    users = User.get_all()
-    return render_template('list_users.html', users=users)
+    query = User.query
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            db.or_(
+                User.name.ilike(search_term),
+                User.surname.ilike(search_term),
+                User.email.ilike(search_term)
+            )
+        )
+
+    users = query.order_by(User.id).all()
+
+    return render_template('list_users.html', users=users, search=search)
 
 
 # ---------- BAN USER (solo Accountant) ----------
@@ -207,7 +224,6 @@ def ban_user(user_id):
     user_to_ban = User.get_by_id(user_id)
     user_to_ban.ban()
 
-    # Revocar sesión si es el usuario actual
     if session.get('user_id') == user_to_ban.id:
         session.clear()
 
@@ -223,6 +239,21 @@ def admin_dashboard():
         return redirect(url_for('user_management.login'))
 
     return render_template("admin_dashboard.html")
+
+@user_management_bp.route('/unban_user/<int:user_id>', methods=['POST'])
+def unban_user(user_id):
+    role = session.get('role')
+
+    if role != 'accountant':
+        flash("Access denied. Only accountants can unban users.", "danger")
+        return redirect(url_for('user_management.list_users'))
+
+    user_to_unban = User.get_by_id(user_id)
+    user_to_unban.unban()
+
+    flash(f"User {user_to_unban.email} has been unbanned.", "success")
+    return redirect(url_for('user_management.list_users'))
+
 
 # ---------- UPDATE EMAIL ----------
 @user_management_bp.route('/update_email', methods=['POST'])
@@ -331,7 +362,6 @@ def upload_license_photo():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
 
-        # GENERAR UN NOMBRE ÚNICO PARA EVITAR COLISIONES
         unique_filename = f"user_{user.id}_{filename}"
 
         upload_path = os.path.join(
@@ -340,7 +370,6 @@ def upload_license_photo():
 
         file.save(upload_path)
 
-        # GUARDAR LA RUTA RELATIVA EN LA BD
         user.license_photo_path = f"/static/uploads/licenses/{unique_filename}"
         db.session.commit()
 
@@ -349,3 +378,85 @@ def upload_license_photo():
         flash("Invalid file type. Allowed: png, jpg, jpeg", "danger")
 
     return redirect(url_for('user_management.profile'))
+
+@user_management_bp.route("/create_admin", methods=["POST"])
+def create_admin():
+    from flask import current_app
+
+    # Seguridad básica: solo permitir cuando el servidor está en modo debug
+    if not current_app.debug:
+        return {"error": "Not allowed in production"}, 403
+
+    data = request.json or {}
+
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return {"error": "Email and password required"}, 400
+
+    # Comprobar si ya existe
+    existing = User.query.filter_by(email=email).first()
+    if existing:
+        return {"error": "User already exists"}, 400
+
+    # Crear usuario admin
+    admin = User(
+        email=email,
+        name="System",
+        surname="Admin",
+        role="accountant",        # <<< Admin
+        account_status=True,
+        is_verified=True           # Saltamos verificación email
+    )
+    admin.set_password(password)
+
+    db.session.add(admin)
+    db.session.commit()
+
+    return {"message": "Admin created successfully"}
+
+@user_management_bp.route('/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    # Solo accountant puede borrar
+    if session.get("role") != "accountant":
+        flash("Access denied. Only accountants can delete users.", "danger")
+        return redirect(url_for('user_management.list_users'))
+
+    user = User.get_by_id(user_id)
+
+    # Evita que un admin se elimine a sí mismo
+    if user.id == session.get("user_id"):
+        flash("You cannot delete your own account.", "warning")
+        return redirect(url_for('user_management.list_users'))
+
+    # Eliminar usuario
+    db.session.delete(user)
+    db.session.commit()
+
+    flash(f"User {user.email} has been permanently deleted.", "success")
+    return redirect(url_for('user_management.list_users'))
+
+@user_management_bp.route("/change_password", methods=["POST"])
+def change_password():
+    password_form = PasswordChangeForm()
+
+    if password_form.validate_on_submit():
+        user = User.get_current()
+
+        if not user.verify_password(password_form.old_password.data):
+            flash("Incorrect current password.", "danger")
+            return redirect(url_for("user_management.profile"))
+
+        if password_form.new_password.data != password_form.confirm_new_password.data:
+            flash("New passwords do not match.", "danger")
+            return redirect(url_for("user_management.profile"))
+
+        user.set_password(password_form.new_password.data)
+        db.session.commit()
+
+        flash("Password updated successfully!", "success")
+        return redirect(url_for("user_management.profile"))
+
+    flash("Invalid input.", "danger")
+    return redirect(url_for("user_management.profile"))

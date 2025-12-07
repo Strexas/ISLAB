@@ -6,7 +6,13 @@ class Token(db.Model):
     __tablename__ = 'tokens'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete="CASCADE"),
+        nullable=False
+    )
+
     token = db.Column(db.String(128), unique=True, nullable=False)
     type = db.Column(db.String(50), default="verify_email")  # verify_email, reset_password, etc.
     expires_at = db.Column(db.DateTime, nullable=False)
