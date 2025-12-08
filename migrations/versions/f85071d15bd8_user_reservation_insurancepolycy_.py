@@ -1,8 +1,8 @@
-"""Add fleet management tables
+"""user-reservation-insurancepolycy-vehicle tables
 
-Revision ID: 291949ca511c
+Revision ID: f85071d15bd8
 Revises: 
-Create Date: 2025-12-07 19:02:14.430809
+Create Date: 2025-12-08 14:44:01.279437
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '291949ca511c'
+revision = 'f85071d15bd8'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,6 +37,7 @@ def upgrade():
     sa.Column('password_hash', sa.String(length=512), nullable=False),
     sa.Column('role', sa.String(length=20), nullable=True),
     sa.Column('account_status', sa.Boolean(), nullable=True),
+    sa.Column('is_banned', sa.Boolean(), nullable=True),
     sa.Column('is_verified', sa.Boolean(), nullable=True),
     sa.Column('driver_license', sa.String(length=50), nullable=True),
     sa.Column('license_expiration', sa.Date(), nullable=True),
@@ -46,27 +47,37 @@ def upgrade():
     sa.UniqueConstraint('email')
     )
     op.create_table('vehicles',
-    sa.Column('vehicle_id', sa.String(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('license_plate', sa.String(length=20), nullable=False),
-    sa.Column('manufacturer', sa.String(length=50), nullable=False),
-    sa.Column('model', sa.String(length=50), nullable=False),
+    sa.Column('manufacturer', sa.String(length=80), nullable=False),
+    sa.Column('model', sa.String(length=80), nullable=False),
     sa.Column('year', sa.Integer(), nullable=False),
     sa.Column('status', sa.String(length=20), nullable=False),
-    sa.Column('transmission', sa.String(length=20), nullable=False),
-    sa.Column('seat', sa.Integer(), nullable=False),
-    sa.Column('fuel_type', sa.String(length=20), nullable=False),
-    sa.Column('type', sa.String(length=20), nullable=False),
-    sa.Column('price_per_day', sa.Float(), nullable=False),
-    sa.PrimaryKeyConstraint('vehicle_id'),
+    sa.Column('transmission', sa.String(length=40), nullable=True),
+    sa.Column('seats', sa.Integer(), nullable=True),
+    sa.Column('fuel_type', sa.String(length=40), nullable=True),
+    sa.Column('image_path', sa.String(length=255), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('license_plate')
     )
     op.create_table('access_logs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('employee_id', sa.Integer(), nullable=False),
-    sa.Column('action', sa.String(length=200), nullable=False),
+    sa.Column('action', sa.String(length=255), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['employee_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['employee_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('creditcard',
+    sa.Column('cardid', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('userid', sa.Integer(), nullable=False),
+    sa.Column('cardholdername', sa.String(length=100), nullable=False),
+    sa.Column('cardnumber', sa.String(length=20), nullable=False),
+    sa.Column('expiredate', sa.Date(), nullable=False),
+    sa.Column('billingaddress', sa.String(length=255), nullable=False),
+    sa.Column('added', sa.Date(), nullable=False),
+    sa.ForeignKeyConstraint(['userid'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('cardid')
     )
     op.create_table('insurance_policies',
     sa.Column('insurance_id', sa.String(length=36), nullable=False),
@@ -80,23 +91,37 @@ def upgrade():
     sa.PrimaryKeyConstraint('insurance_id'),
     sa.UniqueConstraint('policy_number')
     )
-    op.create_table('rent_prices',
-    sa.Column('rent_price_id', sa.String(), nullable=False),
-    sa.Column('price', sa.Float(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=False),
-    sa.Column('vehicle_id', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.vehicle_id'], ),
-    sa.PrimaryKeyConstraint('rent_price_id')
+    op.create_table('payment',
+    sa.Column('paymentid', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('userid', sa.Integer(), nullable=False),
+    sa.Column('reservationid', sa.String(length=36), nullable=True),
+    sa.Column('date', sa.DateTime(), nullable=False),
+    sa.Column('amount', sa.Float(), nullable=False),
+    sa.Column('status', sa.Enum('PENDING', 'AUTHORIZED', 'SUCCESS', 'FAILED', name='paymentstatus'), nullable=False),
+    sa.Column('paymentmethod', sa.String(length=20), nullable=False),
+    sa.Column('description', sa.String(length=255), nullable=True),
+    sa.ForeignKeyConstraint(['reservationid'], ['reservations.reservation_id'], ),
+    sa.ForeignKeyConstraint(['userid'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('paymentid')
     )
-    op.create_table('review_caches',
-    sa.Column('review_id', sa.String(), nullable=False),
-    sa.Column('average_rating', sa.Float(), nullable=True),
-    sa.Column('review_count', sa.Integer(), nullable=True),
+    op.create_table('rent_prices',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('vehicle_id', sa.Integer(), nullable=False),
+    sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('date', sa.Date(), nullable=False),
+    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('review_cache',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('vehicle_id', sa.Integer(), nullable=True),
+    sa.Column('average_rating', sa.Float(), nullable=False),
+    sa.Column('review_count', sa.Integer(), nullable=False),
     sa.Column('last_updated', sa.Date(), nullable=False),
-    sa.Column('source', sa.String(length=100), nullable=True),
-    sa.Column('vehicle_id', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.vehicle_id'], ),
-    sa.PrimaryKeyConstraint('review_id')
+    sa.Column('source', sa.String(length=80), nullable=True),
+    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('vehicle_id')
     )
     op.create_table('tokens',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -104,7 +129,7 @@ def upgrade():
     sa.Column('token', sa.String(length=128), nullable=False),
     sa.Column('type', sa.String(length=50), nullable=True),
     sa.Column('expires_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('token')
     )
@@ -114,9 +139,11 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('tokens')
-    op.drop_table('review_caches')
+    op.drop_table('review_cache')
     op.drop_table('rent_prices')
+    op.drop_table('payment')
     op.drop_table('insurance_policies')
+    op.drop_table('creditcard')
     op.drop_table('access_logs')
     op.drop_table('vehicles')
     op.drop_table('users')

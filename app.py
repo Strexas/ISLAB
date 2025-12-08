@@ -27,7 +27,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
 # DATABASE
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:possw0rd@localhost:5432/localhost"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:1223334444@localhost:5432/car_rental_lab"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # INITIALIZE EXTENSIONS
@@ -40,14 +40,9 @@ app.register_blueprint(dot_bp)
 app.register_blueprint(fleet_bp)
 app.register_blueprint(reservation_blueprint)
 app.register_blueprint(user_management_bp)
+app.register_blueprint(payment_bp)
 
 app.template_folder = "templates"
-
-from models.Reservation import Reservation
-from models.InsurancePolicy import InsurancePolicy
-from models.User import User
-from models.Vehicle import Vehicle
-app.register_blueprint(payment_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
