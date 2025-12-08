@@ -3,9 +3,9 @@
   <head>
     <title>Bolt Drive - Reserve Car</title>
 
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/car_reserve.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/car_reserve.css') }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -40,12 +40,12 @@
           <div class="row">
             <label class="reservation-field" style="width: 100%;">
               <span>Pick-up Date</span>
-              <input type="date" required>
+              <input  type="date" name="pickup_date" required>
             </label>
 
             <label class="reservation-field" style="width: 100%;">
               <span>Drop-off Date</span>
-              <input type="date" required>
+              <input type="date" name="return_date" required>
             </label>
           </div>
 
@@ -59,12 +59,12 @@
           <div class="row">
             <label class="reservation-field" style="width: 100%;">
               <span>Name: </span>
-              <input type="text" required placeholder="Enter Name">
+              <input type="text" name="name" required placeholder="Enter Name">
             </label>
 
             <label class="reservation-field" style="width: 100%;">
               <span>Surname: </span>
-              <input type="text" required placeholder="Enter Surname">
+              <input type="text" name="surname" required placeholder="Enter Surname">
             </label>
           </div>
 
@@ -72,12 +72,12 @@
           <div class="row" style=" margin-top: 20px;">
             <label class="reservation-field" style="width: 100%;">
               <span>Email: </span>
-              <input type="email" required placeholder="Enter Email">
+              <input type="email" name="email" required placeholder="Enter Email">
             </label>
 
             <label class="reservation-field" style="width: 100%;">
               <span>Phone Number: </span>
-              <input type="tel" required placeholder="Enter Phone Number">
+              <input type="tel" name="phone" required placeholder="Enter Phone Number">
             </label>
           </div>
         </form>
@@ -86,7 +86,7 @@
         <h3 style="margin-top: 50px;">Insurance Options</h3>
         
         <label class="insurance-option">
-          <input type="checkbox" name="insurance" value="premium" id="insurance" />
+          <input type="checkbox" name="wants_insurance" value="premium" id="insurance" />
           <div class="insurance-content">
             <div class="insurance-title">Premium Coverage</div>
             <div class="insurance-description">

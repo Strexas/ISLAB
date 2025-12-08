@@ -1,0 +1,27 @@
+{% macro car_card(car) %}
+<!-- Car Card -->
+<div 
+  class="media" 
+  role="img" 
+  style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0potgg_ZzLEfXTMob4IMtshtja_kUfPmHow&s')">
+</div>
+<div class="body">
+  <div class="title-row">
+    <h3></h3>
+    <div class="badge"></div>
+  </div>
+  <div class="muted"></div>
+  <div class="features" aria-hidden="false">
+    
+  </div>
+  <div class="price-row">
+    <div>
+      <div class="price"></div>
+      <div class="muted">per day</div>
+    </div>
+    <div>
+      <button class="btn"><a style="color: white; text-decoration: none" href="car_details">Details</a></button>
+    </div>
+  </div>
+</div>
+{% endmacro %}
