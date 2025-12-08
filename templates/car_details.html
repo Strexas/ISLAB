@@ -1,160 +1,81 @@
+{% from "_navbar.html" import navbar %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Toyota Corolla - Details</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #eef1f4;
-      margin: 0;
-      padding: 0;
-      color: #222;
-    }
-    header {
-      background-color: #004aad;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      font-size: 24px;
-    }
-    .car-details {
-      max-width: 800px;
-      margin: 40px auto;
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .car-details img {
-      width: 100%;
-      height: 300px;
-      border-radius: 10px;
-      object-fit: cover;
-    }
-    .car-details h2 {
-      margin-top: 20px;
-      color: #004aad;
-    }
-    .car-details p {
-      margin: 10px 0;
-      color: #333;
-    }
-    .button-bar {
-      margin-top: 15px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .btn {
-      background-color: #004aad;
-      color: white;
-      padding: 10px 16px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    .btn:hover {
-      background-color: #003b8a;
-    }
-    #priceField[contenteditable="true"] {
-      background-color: #e6f0ff;
-      border-radius: 4px;
-      padding: 2px 4px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>{{ vehicle.manufacturer }} {{ vehicle.model }}</title>
+    <style>
+        body {
+            background: #eef2f7;
+            padding-top: 80px;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background: #004aad;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-right: 8px;
+        }
+
+        .delete-btn {
+            background: #c0392b;
+        }
+
+    </style>
 </head>
+
 <body>
-  <header>Car Details</header>
+    {{ navbar() }}
 
-  <div class="car-details">
-    <img src="https://imgs.search.brave.com/ar5oBNoMLYzlXuIcwqkMUUrYoCcm2fD29jLY6Nc9cGM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9oaXBz/LmhlYXJzdGFwcHMu/Y29tL2htZy1wcm9k/L2ltYWdlcy8yMDI0/LXRveW90YS1nci1j/b3JvbGxhLXByZW1p/dW0tZXh0ZXJpb3It/MTA3LTY2MjAzNWVj/Y2U3NmMuanBnP2Ny/b3A9MC43NTh4dzow/LjY0MHhoOzAuMTE1/eHcsMC4yNDd4aCZy/ZXNpemU9NzAwOio" alt="Toyota Corolla">
-    <h2>Toyota Corolla 2020</h2>
-    <p><strong>Price:</strong> <span id="priceField">€45/day</span></p>
-    <p><strong>Fuel Type:</strong> Petrol</p>
-    <p><strong>Transmission:</strong> Automatic</p>
-    <p><strong>Seats:</strong> 5</p>
-    <p><strong>Description:</strong> Reliable, fuel-efficient sedan suitable for city driving and long trips.</p>
-    
-    <div style="margin-top:15px; border:1px solid #ccc; padding:10px; border-radius:8px; background-color:#f9f9f9;">
-  <h3>Availability Calendar (Demo)</h3>
-  <p><span style="color:green;">●</span> Available &nbsp;&nbsp; 
-     <span style="color:red;">●</span> Reserved</p>
-  <p>📅 March 2025:</p>
-  <p>
-    <span style="color:red;">1–3</span>, 
-    <span style="color:green;">4–10</span>, 
-    <span style="color:red;">11–14</span>, 
-    <span style="color:green;">15–31</span>
-  </p>
-</div>
-    <p>
-      <strong>External Review:</strong> 
-      <a class="btn" href="https://www.caranddriver.com/toyota/corolla" target="_blank">
-        View Car Review
-      </a>
-    </p>
-     <div class="button-bar">
-      <a class="btn" href="fleetlist.html">← Back to List</a>
-      <a class="btn" href="car_reserve.html">Reserve Car</a>
-      <button class="btn" onclick="editPrice()">Update Pricing</button>
-      <button class="btn" onclick="retireCar()">Retire Car</button>
-      <button class="btn" onclick="showStatus()">Get Car Status</button>
-      <div id="statusBox" 
-     style="display:none; 
-            background-color:#f5f8ff;
-            border:1px solid #b9c9ff;
-            padding:15px;
-            margin-top:10px;
-            border-radius:8px;">
-  <h3 style="color:#004aad;">Car Status</h3>
-  <p><strong>Status:</strong> Available</p>
-  <p><strong>Last Maintenance:</strong> 2024-08-12</p>
-  <p><strong>Next Maintenance:</strong> 2025-01-05</p>
-  <p><strong>Condition:</strong> Good</p>
-  <p><strong>Reservation status:</strong> Active</p>
-  <p><strong>Mileage:</strong> 25,300 km</p>
-</div>
+    <div class="container">
+        <h2>{{ vehicle.manufacturer }} {{ vehicle.model }}</h2>
+
+        <img src="{{ vehicle.image_path or '/static/default_car.png' }}">
+
+        <p><strong>Plate:</strong> {{ vehicle.license_plate }}</p>
+        <p><strong>Year:</strong> {{ vehicle.year }}</p>
+        <p><strong>Transmission:</strong> {{ vehicle.transmission }}</p>
+        <p><strong>Seats:</strong> {{ vehicle.seats }}</p>
+        <p><strong>Fuel:</strong> {{ vehicle.fuel_type }}</p>
+        <p><strong>Status:</strong> {{ vehicle.status }}</p>
+
+        <p><strong>Current price:</strong> {{ vehicle.current_price() }} €</p>
+
+        {% if session.get("role") in ["employee", "accountant"] %}
+        <a href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.id) }}" class="btn">Edit</a>
+
+        {% if session.get("role") == "accountant" %}
+        <form method="POST"
+              action="{{ url_for('fleet.fleet_delete', vehicle_id=vehicle.id) }}"
+              style="display:inline;">
+            <button class="btn delete-btn" onclick="return confirm('Delete this vehicle?');">
+                Delete
+            </button>
+        </form>
+        {% endif %}
+        {% endif %}
     </div>
 
-    <div style="margin-top:20px;">
-      <h3>Maintenance Records (Demo)</h3>
-      <a class="btn" href="maintenance_page.html">Maintenance 1</a>
-      <a class="btn" href="maintenance_page.html">Maintenance 2</a>
-      <a class="btn" href="maintenance_page.html">Maintenance 3</a>
-    </div>
-  </div>
-
-  <script>
-   function showStatus() {
-  const box = document.getElementById("statusBox");
-  // Toggle visibility on click
-  if (box.style.display === "none") {
-    box.style.display = "block";
-  } else {
-    box.style.display = "none";
-  }
-} 
-
-    function retireCar() {
-      alert("This car has been marked as retired.\n(Employee notified — prototype only.)");
-    }
-
-    function editPrice() {
-      const priceEl = document.getElementById("priceField");
-      if (priceEl.isContentEditable) {
-        priceEl.contentEditable = "false";
-        alert("New price saved! (Prototype only)");
-      } else {
-        priceEl.contentEditable = "true";
-        priceEl.focus();
-        alert("You can now edit the price field.");
-      }
-    }
-  </script>
 </body>
 </html>
