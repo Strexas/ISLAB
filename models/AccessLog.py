@@ -5,6 +5,12 @@ class AccessLog(db.Model):
     __tablename__ = 'access_logs'
 
     id = db.Column(db.Integer, primary_key=True)
-    employee_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    action = db.Column(db.String(200), nullable=False)
+    
+    employee_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete="CASCADE"),
+        nullable=False
+    )
+
+    action = db.Column(db.String(255))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

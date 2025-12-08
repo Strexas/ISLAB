@@ -52,6 +52,8 @@
     </style>
 </head>
 <body>
+    {% from "_navbar.html" import navbar %}
+    {{ navbar() }}
     <h1>Admin Dashboard</h1>
     <div class="link-container">
         <a href="{{ url_for('user_management.list_users') }}">👤 List Users</a>

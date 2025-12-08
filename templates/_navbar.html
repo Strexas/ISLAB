@@ -1,0 +1,37 @@
+{% macro navbar() %}
+<nav class="navbar" style="
+    width:100%;
+    background:#222;
+    padding:12px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:white;
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+">
+
+    <div style="display:flex; align-items:center; gap:10px;">
+        <img src="{{ url_for('static', filename='resources/site_logo.png') }}"
+             style="height:32px; width:auto; object-fit:contain;">
+
+        <span style="font-size:20px; font-weight:bold;">Bolt Drive</span>
+    </div>
+
+    <div style="display:flex; gap:15px; align-items:center;">
+        <a href="/" style="color:white; text-decoration:none;">Home</a>
+        <a href="/fleetlist" style="color:white; text-decoration:none;">Fleet</a>
+
+        {% if not session.get('user_id') %}
+        <a href="/login" style="color:white; text-decoration:none;">Login</a>
+        <a href="/register" style="color:white; text-decoration:none;">Register</a>
+        {% else %}
+        <a href="/profile" style="color:white; text-decoration:none;">Profile</a>
+        <a href="/logout" style="color:white; text-decoration:none;">Logout</a>
+        {% endif %}
+    </div>
+
+</nav>
+{% endmacro %}
