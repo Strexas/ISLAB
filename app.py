@@ -4,6 +4,9 @@ from flask import Flask
 from subsystems.user_management.routes import user_management_bp as user_management_blueprint
 from subsystems.payment.routes import payment_bp
 from subsystems.reservation_subsystem.routes import reservation_blueprint
+
+from subsystems.maintenance_subsystem.routes import maintenance_subsystem_blueprint
+
 from flask_migrate import Migrate
 
 from context import db
@@ -24,6 +27,7 @@ app.register_blueprint(reservation_blueprint)
 app.register_blueprint(payment_bp)
 
 if __name__ == '__main__':
+    app.register_blueprint(maintenance_subsystem_blueprint)
     app.run(debug=True)
 
 from models.Reservation import Reservation as Reservation
