@@ -1,221 +1,188 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import (
+    Blueprint, render_template, request,
+    redirect, url_for, flash, session, current_app
+)
+from werkzeug.utils import secure_filename
+import os
+from datetime import date
+
 from context import db
+from models.Vehicle import Vehicle
+from models.RentPrice import RentPrice
+from models.ReviewCache import ReviewCache
+from form.VehicleForm import VehicleForm
 
-# Models
-from models.Vehicle import Vehicle, RentPrice, ReviewCache
 
-# Forms
-from form.VehicleForm import (
-    VehicleForm,
-    RentPriceForm,
-    ReviewCacheForm,
-    VehicleFilterForm,
-    RetireVehicleForm
-)
+fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
 
-from datetime import datetime, date
-import uuid
+# Allowed file extensions for vehicle image upload
+ALLOWED_IMG = {"png", "jpg", "jpeg"}
 
-fleet_management_bp = Blueprint(
-    "fleet_management",
-    __name__,
-    url_prefix="/fleet"
-)
 
-# Fleet List with Filtering
-@fleet_management_bp.route('/', methods=['GET'])
+# -------------------- UTILS --------------------
+
+def allowed(filename):
+    """Check if uploaded file has a valid image extension."""
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG
+
+
+def can_manage():
+    """Employees + accountants can modify fleet."""
+    return session.get("role") in ["employee", "accountant"]
+
+
+# -------------------- LIST VEHICLES --------------------
+
+@fleet_bp.route("/")
 def fleet_list():
-    form = VehicleFilterForm()
-    
-    type_filter = request.args.get('type', '')
-    min_seats = request.args.get('min_seats', type=int)
-    max_price = request.args.get('max_price', type=float)
-    fuel_type_filter = request.args.get('fuel_type', '')
-    status_filter = request.args.get('status', '')
+    vehicles = Vehicle.query.order_by(Vehicle.id).all()
+    return render_template("fleet_list.html", vehicles=vehicles)
 
-    query = Vehicle.query
 
-    if type_filter:
-        query = query.filter(Vehicle.type == type_filter)
-    if min_seats:
-        query = query.filter(Vehicle.seat >= min_seats)
-    if max_price:
-        query = query.filter(Vehicle.price_per_day <= max_price)
-    if fuel_type_filter:
-        query = query.filter(Vehicle.fuel_type == fuel_type_filter)
-    if status_filter:
-        query = query.filter(Vehicle.status == status_filter)
-    
-    vehicles = query.order_by(Vehicle.manufacturer, Vehicle.model).all()
+# -------------------- VEHICLE DETAILS --------------------
 
-    return render_template('fleetlist.html',
-                           vehicles=vehicles,
-                           form=form,
-                           current_filters=request.args)
-
-# Vehicle Details
-@fleet_management_bp.route('/<string:vehicle_id>', methods=['GET'])
-def vehicle_details(vehicle_id):
+@fleet_bp.route("/<int:vehicle_id>")
+def fleet_details(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
+    return render_template("fleet_detail.html", vehicle=vehicle)
 
-    current_rent_price = RentPrice.query.filter_by(vehicle_id=vehicle_id)\
-        .order_by(RentPrice.date.desc()).first()
 
-    review_cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
+# -------------------- ADD VEHICLE --------------------
 
-    price_history = RentPrice.query.filter_by(vehicle_id=vehicle_id)\
-        .order_by(RentPrice.date.desc()).limit(10).all()
+@fleet_bp.route("/add", methods=["GET", "POST"])
+def fleet_add():
+    if not can_manage():
+        flash("Access denied.", "danger")
+        return redirect(url_for("fleet.fleet_list"))
 
-    return render_template('car_details.html',
-                           vehicle=vehicle,
-                           current_rent_price=current_rent_price,
-                           review_cache=review_cache,
-                           price_history=price_history)
-
-# Add New Vehicle
-@fleet_management_bp.route('/add', methods=['GET', 'POST'])
-def add_vehicle():
     form = VehicleForm()
 
     if form.validate_on_submit():
-        try:
-            new_vehicle = Vehicle(
-                vehicle_id=form.vehicle_id.data,
-                license_plate=form.license_plate.data,
-                manufacturer=form.manufacturer.data,
-                model=form.model.data,
-                year=form.year.data,
-                status=form.status.data,
-                transmission=form.transmission.data,
-                seat=form.seat.data,
-                fuel_type=form.fuel_type.data,
-                type=form.type.data,
-                price_per_day=form.price_per_day.data,
-                image_url=form.image_url.data,
-                description=form.description.data
+
+        # Create vehicle
+        vehicle = Vehicle(
+            license_plate=form.license_plate.data,
+            manufacturer=form.manufacturer.data,
+            model=form.model.data,
+            year=form.year.data,
+            transmission=form.transmission.data,
+            seats=form.seats.data,
+            fuel_type=form.fuel_type.data,
+            status=form.status.data
+        )
+
+        # ---------- IMAGE UPLOAD ----------
+        file = request.files.get("image")
+
+        if file and file.filename and allowed(file.filename):
+            filename = secure_filename(file.filename)
+            unique = f"{vehicle.license_plate}_{filename}"
+            upload_path = os.path.join(
+                current_app.root_path, "static", "vehicles", unique
             )
+            os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+            file.save(upload_path)
 
-            db.session.add(new_vehicle)
+            vehicle.image_path = f"/static/vehicles/{unique}"
 
-            initial_rent_price = RentPrice(
-                rent_price_id=f"RP_{form.vehicle_id.data}_{datetime.utcnow().strftime('%Y%m%d')}",
-                price=form.price_per_day.data,
-                date=date.today(),
-                vehicle_id=form.vehicle_id.data
+        # Save vehicle so ID exists
+        db.session.add(vehicle)
+        db.session.flush()
+
+        # ---------- INITIAL PRICE ----------
+        price_entry = RentPrice(
+            vehicle_id=vehicle.id,
+            price=form.current_price.data,
+            date=date.today()
+        )
+        db.session.add(price_entry)
+
+        db.session.commit()
+
+        flash("Vehicle added successfully.", "success")
+        return redirect(url_for("fleet.fleet_list"))
+
+    return render_template("vehicle_form.html", form=form, mode="add")
+    
+
+# -------------------- EDIT VEHICLE --------------------
+
+@fleet_bp.route("/<int:vehicle_id>/edit", methods=["GET", "POST"])
+def fleet_edit(vehicle_id):
+    if not can_manage():
+        flash("Access denied.", "danger")
+        return redirect(url_for("fleet.fleet_list"))
+
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    form = VehicleForm()
+
+    # ------------- LOAD EXISTING DATA -------------
+    if request.method == "GET":
+        form.license_plate.data = vehicle.license_plate
+        form.manufacturer.data = vehicle.manufacturer
+        form.model.data = vehicle.model
+        form.year.data = vehicle.year
+        form.transmission.data = vehicle.transmission
+        form.seats.data = vehicle.seats
+        form.fuel_type.data = vehicle.fuel_type
+        form.status.data = vehicle.status
+        form.current_price.data = vehicle.current_price() or 0
+
+    # ------------- SUBMIT CHANGES -------------
+    if form.validate_on_submit():
+
+        vehicle.license_plate = form.license_plate.data
+        vehicle.manufacturer = form.manufacturer.data
+        vehicle.model = form.model.data
+        vehicle.year = form.year.data
+        vehicle.transmission = form.transmission.data
+        vehicle.seats = form.seats.data
+        vehicle.fuel_type = form.fuel_type.data
+        vehicle.status = form.status.data
+
+        # PRICE CHANGE? Create new RentPrice
+        new_price = form.current_price.data
+        if vehicle.current_price() != new_price:
+            new_price_entry = RentPrice(
+                vehicle_id=vehicle.id,
+                price=new_price,
+                date=date.today()
             )
+            db.session.add(new_price_entry)
 
-            db.session.add(initial_rent_price)
-            db.session.commit()
+        # IMAGE UPDATE
+        file = request.files.get("image")
+        if file and file.filename and allowed(file.filename):
+            filename = secure_filename(file.filename)
+            unique = f"{vehicle.license_plate}_{filename}"
+            upload_path = os.path.join(
+                current_app.root_path, "static", "vehicles", unique
+            )
+            os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+            file.save(upload_path)
 
-            flash("Vehicle added successfully!", "success")
-            return redirect(url_for('fleet_management.vehicle_details',
-                                    vehicle_id=form.vehicle_id.data))
-        
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error adding vehicle: {e}", "error")
+            vehicle.image_path = f"/static/vehicles/{unique}"
 
-    return render_template('add_vehicle.html', form=form)
+        db.session.commit()
 
-# Edit Vehicle
-@fleet_management_bp.route('/<string:vehicle_id>/edit', methods=['GET', 'POST'])
-def edit_vehicle(vehicle_id):
+        flash("Vehicle updated successfully.", "success")
+        return redirect(url_for("fleet.fleet_details", vehicle_id=vehicle.id))
+
+    return render_template("vehicle_form.html", form=form, mode="edit", vehicle=vehicle)
+
+
+# -------------------- DELETE VEHICLE --------------------
+
+@fleet_bp.route("/<int:vehicle_id>/delete", methods=["POST"])
+def fleet_delete(vehicle_id):
+    if session.get("role") != "accountant":
+        flash("Only accountants can delete vehicles.", "danger")
+        return redirect(url_for("fleet.fleet_list"))
+
     vehicle = Vehicle.query.get_or_404(vehicle_id)
-    form = VehicleForm(obj=vehicle)
 
-    if form.validate_on_submit():
-        try:
-            vehicle.manufacturer = form.manufacturer.data
-            vehicle.model = form.model.data
-            vehicle.year = form.year.data
-            vehicle.status = form.status.data
-            vehicle.transmission = form.transmission.data
-            vehicle.seat = form.seat.data
-            vehicle.fuel_type = form.fuel_type.data
-            vehicle.type = form.type.data
-            vehicle.image_url = form.image_url.data
-            vehicle.description = form.description.data
+    db.session.delete(vehicle)
+    db.session.commit()
 
-            if vehicle.price_per_day != form.price_per_day.data:
-                vehicle.price_per_day = form.price_per_day.data
-
-                new_record = RentPrice(
-                    rent_price_id=f"RP_{vehicle.vehicle_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
-                    price=form.price_per_day.data,
-                    date=date.today(),
-                    vehicle_id=vehicle.vehicle_id
-                )
-                db.session.add(new_record)
-
-            db.session.commit()
-            flash("Vehicle updated!", "success")
-            return redirect(url_for('fleet_management.vehicle_details', vehicle_id=vehicle.vehicle_id))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error updating vehicle: {e}", "error")
-
-    return render_template('edit_vehicle.html', form=form, vehicle=vehicle)
-
-# Retire Vehicle
-@fleet_management_bp.route('/<string:vehicle_id>/retire', methods=['GET', 'POST'])
-def retire_vehicle(vehicle_id):
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
-    form = RetireVehicleForm()
-
-    if form.validate_on_submit():
-        try:
-            vehicle.status = "Inactive"
-            vehicle.updated_at = datetime.utcnow()
-
-            db.session.commit()
-            flash("Vehicle retired!", "success")
-            return redirect(url_for('fleet_management.fleet_list'))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error retiring vehicle: {e}", "error")
-
-    return render_template('retire_vehicle.html', form=form, vehicle=vehicle)
-
-# Update Reviews
-@fleet_management_bp.route('/<string:vehicle_id>/update_reviews', methods=['GET', 'POST'])
-def update_reviews(vehicle_id):
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
-    form = ReviewCacheForm()
-
-    review = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
-
-    if form.validate_on_submit():
-        try:
-            if review:
-                review.average_rating = form.average_rating.data
-                review.review_count = form.review_count.data
-                review.last_updated = form.last_updated.data
-                review.source = form.source.data
-            else:
-                new_review = ReviewCache(
-                    review_id=f"REV_{vehicle_id}_{datetime.utcnow().strftime('%Y%m%d')}",
-                    average_rating=form.average_rating.data,
-                    review_count=form.review_count.data,
-                    last_updated=form.last_updated.data,
-                    source=form.source.data,
-                    vehicle_id=vehicle_id
-                )
-                db.session.add(new_review)
-
-            db.session.commit()
-            flash("Review cache updated!", "success")
-            return redirect(url_for('fleet_management.vehicle_details', vehicle_id=vehicle_id))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error updating reviews: {e}", "error")
-
-    if review and request.method == 'GET':
-        form.average_rating.data = review.average_rating
-        form.review_count.data = review.review_count
-        form.last_updated.data = review.last_updated
-        form.source.data = review.source
-
-    return render_template('update_reviews.html', form=form, vehicle=vehicle)
+    flash("Vehicle deleted.", "success")
+    return redirect(url_for("fleet.fleet_list"))
