@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, DecimalField, SelectField, SubmitField
+from wtforms import StringField, IntegerField, SelectField, TextAreaField, BooleanField,DecimalField,SubmitField    
 from wtforms.validators import DataRequired, Length, NumberRange
 
 class VehicleForm(FlaskForm):
@@ -26,3 +26,7 @@ class VehicleForm(FlaskForm):
     current_price = DecimalField("Daily Price", places=2, validators=[DataRequired()])
 
     submit = SubmitField("Save")
+
+class RetireVehicleForm(FlaskForm):
+    reason = TextAreaField('Reason for Retirement', validators=[DataRequired(), Length(min=5, max=500)])
+    confirm = BooleanField('Confirm retirement', validators=[DataRequired()])

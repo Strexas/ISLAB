@@ -5,12 +5,14 @@ from flask import (
 from werkzeug.utils import secure_filename
 import os
 from datetime import date
+import requests
+from datetime import datetime, timedelta
 
 from context import db
 from models.Vehicle import Vehicle
 from models.RentPrice import RentPrice
 from models.ReviewCache import ReviewCache
-from form.VehicleForm import VehicleForm
+from form.VehicleForm import VehicleForm, RetireVehicleForm
 
 
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
@@ -36,7 +38,7 @@ def can_manage():
 @fleet_bp.route("/")
 def fleet_list():
     vehicles = Vehicle.query.order_by(Vehicle.id).all()
-    return render_template("fleet_list.html", vehicles=vehicles)
+    return render_template("fleetlist.html", vehicles=vehicles)
 
 
 # -------------------- VEHICLE DETAILS --------------------
@@ -44,7 +46,14 @@ def fleet_list():
 @fleet_bp.route("/<int:vehicle_id>")
 def fleet_details(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
-    return render_template("fleet_detail.html", vehicle=vehicle)
+
+    reviews = get_vehicle_reviews(vehicle_id)
+
+    return render_template(
+        "fleet_detail.html",
+        vehicle=vehicle,
+        reviews=reviews.get("reviews", [])
+    )
 
 
 # -------------------- ADD VEHICLE --------------------
@@ -186,3 +195,70 @@ def fleet_delete(vehicle_id):
 
     flash("Vehicle deleted.", "success")
     return redirect(url_for("fleet.fleet_list"))
+
+def get_vehicle_reviews(vehicle_id):
+    """Returns reviews via cache or external API."""
+    
+    # ---- 1. Check cache ----
+    cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
+
+    if cache:
+        age = datetime.utcnow() - cache.fetched_at
+        if age < timedelta(hours=24):  # Cache still valid
+            return cache.data
+
+    # ---- 2. Fetch from external API ----
+    try:
+        api_url = f"https://dummyjson.com/products/{vehicle_id}/reviews"
+        response = requests.get(api_url, timeout=5)
+        response.raise_for_status()
+
+        data = response.json()
+
+        # ---- 3. Save new cache ----
+        if cache:
+            cache.data = data
+            cache.fetched_at = datetime.utcnow()
+        else:
+            cache = ReviewCache(
+                vehicle_id=vehicle_id,
+                data=data,
+                fetched_at=date.utcnow()
+            )
+            db.session.add(cache)
+
+        db.session.commit()
+
+        return data
+
+    except Exception as e:
+        print("Review API error:", e)
+        return {"reviews": []}  # fallback
+
+# Retire Vehicle
+@fleet_bp.route('/<string:vehicle_id>/retire', methods=['GET', 'POST'])
+def retire_vehicle(vehicle_id):
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    form = RetireVehicleForm()
+    
+    if form.validate_on_submit():
+        try:
+            if not form.confirm.data:
+                flash('Please confirm the retirement', 'error')
+                return render_template('fleet_management/retire_vehicle.html', form=form, vehicle=vehicle)
+            
+            # Update vehicle status
+            vehicle.status = 'Inactive'
+            vehicle.updated_at = datetime.utcnow()
+            
+            # In a real system, you might want to store retirement details in a separate table
+            db.session.commit()
+            
+            flash(f'Vehicle {vehicle.manufacturer} {vehicle.model} has been retired.', 'success')
+            return redirect(url_for('fleet_management.fleet_list'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error retiring vehicle: {str(e)}', 'error')
+    
+    return render_template('fleet_management/retire_vehicle.html', form=form, vehicle=vehicle)
