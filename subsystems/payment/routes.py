@@ -114,6 +114,7 @@ def add_money():
         flash("User not found.", "danger")
         return redirect(url_for("payment.payment_page"))
 
+    
     # Cüzdanı güncelle
     current = user.wallet_balance or 0.0
     user.wallet_balance = current + amount

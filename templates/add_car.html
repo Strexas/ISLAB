@@ -1,118 +1,76 @@
+{% from "_navbar.html" import navbar %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Car - Fleet Management</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #eef1f4;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #004aad;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      font-size: 24px;
-    }
-    form {
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    form label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    form input, form select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .buttons {
-      margin-top: 20px;
-      display: flex;
-      justify-content: space-between;
-    }
-    button {
-      background-color: #004aad;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #003a86;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>{{ 'Edit Vehicle' if mode=='edit' else 'Add Vehicle' }}</title>
+    <style>
+        body {
+            background: #eef2f7;
+            padding-top: 80px;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .card {
+            width: 450px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .btn {
+            padding: 10px;
+            width: 100%;
+            background: #004aad;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            margin-top: 15px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
-  <header>Add a New Car</header>
-  <form>
-    <label for="brand">Brand</label>
-    <input id="brand" name="brand" type="text" placeholder="e.g. Toyota" required>
+    {{ navbar() }}
 
-    <label for="model">Model</label>
-    <input id="model" name="model" type="text" placeholder="e.g. Corolla 2022" required>
+    <div class="card">
+        <h2>{{ 'Edit Vehicle' if mode=='edit' else 'Add Vehicle' }}</h2>
 
-    <label for="year">Year</label>
-    <input id="year" name="year" type="number" min="1990" max="2025" required>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
 
-    <label for="type">Type</label>
-    <select id="type" name="type" required>
-      <option value="">Select type</option>
-      <option>Economy</option>
-      <option>Sedan</option>
-      <option>SUV</option>
-      <option>Van</option>
-      <option>Luxury</option>
-    </select>
+            {{ form.license_plate(label="License Plate") }}
+            {{ form.manufacturer(label="Manufacturer") }}
+            {{ form.model(label="Model") }}
+            {{ form.year(label="Year") }}
+            {{ form.transmission(label="Transmission") }}
+            {{ form.seats(label="Seats") }}
+            {{ form.fuel_type(label="Fuel Type") }}
+            {{ form.status(label="Status") }}
+            {{ form.current_price(label="Price (€)") }}
 
-    <label for="price">Price per day (€)</label>
-    <input id="price" name="price" type="number" placeholder="e.g. 55" required>
+            <label>Image</label>
+            <input type="file" name="image">
 
-    <label for="fueltype">Fuel Type</label>
-    <select id="fueltype" name="fueltype" required>
-      <option value="">Select fuel type</option>
-      <option>Gas</option>
-      <option>Petrol</option>
-      <option>Diesel</option>
-      <option>Electric</option>
-    </select>
-
-    <label for="transmission">Transmission</label>
-    <select id="transmission" name="transmission" required>
-      <option value="">Select transmission type</option>
-      <option>Manual</option>
-      <option>Automatic</option>
-      <option>Hybrid</option>
-    </select>
-
-    <label for="seat">Number of seats</label>
-    <input id="seats" name="seats" type="number" placeholder="e.g. 4" required>
-
-    <label for="status">Status</label>
-    <select id="status" name="status">
-      <option>Available</option>
-      <option>Rented</option>
-      <option>Under Maintenance</option>
-      <option>Retired</option>
-    </select>
-
-    <div class="buttons">
-      <button type="button" onclick="alert('Car added successfully! (Prototype only)')">Add Car</button>
-      <button type="button" onclick="window.location.href='fleetlist.html'">Back to Fleet</button>
+            <button class="btn" type="submit">
+                {{ 'Save Changes' if mode=='edit' else 'Add Vehicle' }}
+            </button>
+        </form>
     </div>
-  </form>
+
 </body>
 </html>
