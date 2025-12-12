@@ -4,6 +4,7 @@
   <title>Bolt Drive</title>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +17,7 @@
 
       <!-- Navbar -->
       {% from "components/navbar.html" import navbar %}
-      {{ navbar(logged_in=False) }}
+      {{ navbar() }}
       
       <!-- Reserve car form -->
       <section class="reservation-form-container">

@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <title>Login</title>
 
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #eef2f7;
             margin: 0;
-            padding-top: 80px; /* espacio para la navbar */
             display: flex;
             justify-content: center;
+            flex-direction: column;
             align-items: flex-start;
         }
 
@@ -19,12 +24,13 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
+            margin: 40px auto;
             width: 300px;
             text-align: center;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
         }
 
-        .form-control, .btn-submit {
+        .box .form-control, .btn-submit {
             width: 100%;
             margin: 8px 0;
             padding: 8px;
@@ -33,7 +39,7 @@
             box-sizing: border-box;
         }
 
-        .btn-submit {
+        .box .btn-submit {
             background: #0056d2;
             color: white;
             border: none;
@@ -41,11 +47,11 @@
             font-size: 15px;
         }
 
-            .btn-submit:hover {
-                background: #003e99;
-            }
+        .box .btn-submit:hover {
+            background: #003e99;
+        }
 
-        a {
+        .box a {
             text-decoration: none;
             color: #0056d2;
             font-size: 14px;
@@ -64,7 +70,7 @@
 
 <body>
 
-    {% from "_navbar.html" import navbar %}
+    {% from "components/navbar.html" import navbar %}
     {{ navbar() }}
 
     <div class="box">

@@ -36,35 +36,9 @@ main {
   min-width:160px
 }
 
-.grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:18px
-}
-
 footer {
   text-align:center;
-  color:#6b7280;
+  color:var(--primary-text-color);
+  font-style: italic;
   padding:22px 10px
-}
-
-.button-promo {
-  background-color: transparent;
-  color: white;
-  width: 80px;
-  border-radius: 10px;
-  border: solid 1px white;
-  padding: 10px 20px;
-  font-size: 15px;
-  margin-top: auto;
-  font-weight: 420;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  transition: color 0.2s;
-  margin-left: 5px;
-}
-
-.button-promo:hover {
-  background-color: white;
-  color: black;
 }

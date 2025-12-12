@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>User Profile</title>
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #eef2f7;
-            padding-top: 80px;
             margin: 0;
         }
 
@@ -68,7 +73,7 @@
             cursor: pointer;
         }
 
-        img {
+        .info-box img {
             width: 200px;
             border-radius: 8px;
             border: 1px solid #ccc;
@@ -78,9 +83,8 @@
 </head>
 <body>
 
-    {% from "_navbar.html" import navbar %}
+    {% from "components/navbar.html" import navbar %}
     {{ navbar() }}
-
 
     <div class="card">
 
