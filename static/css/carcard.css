@@ -1,4 +1,4 @@
-.card {
+.car_card {
     background:#fff;
     border-radius:10px;
     box-shadow:0 6px 18px rgba(15,23,42,0.06);
@@ -8,14 +8,14 @@
     flex-direction:column
 }
 
-.card .media {
+.car_card .media {
     height:140px;
     background:#e6eef8;
     background-size:cover;
     background-position:center
 }
 
-.card .body {
+.car_card .body {
     padding:14px;
     display:flex;
     flex-direction:column;
@@ -23,19 +23,19 @@
     flex:1
 }
 
-.title-row {
+.car_card .title {
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:8px
 }
 
-.title-row h3 {
+.car_card .title h3 {
     margin:0;
     font-size:16px
 }
 
-.features { 
+.car_card .features { 
     display:flex;
     flex-wrap:wrap;
     gap:8px;
@@ -43,7 +43,7 @@
     color:#6b7280
 }
 
-.price-row {
+.car_card .price-row {
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -53,13 +53,4 @@
 .price {
     font-weight:700;
     color:#446bc1;
-}
-
-.btn {
-    background: #446bc1;
-    color:white;
-    padding:9px 12px;
-    border-radius:8px;
-    border:0;
-    cursor:pointer
 }

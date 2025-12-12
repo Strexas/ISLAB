@@ -1,26 +1,41 @@
 {% macro car_card(car) %}
-<!-- Car Card -->
-<div 
-  class="media" 
-  role="img" 
-  style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0potgg_ZzLEfXTMob4IMtshtja_kUfPmHow&s')">
-</div>
-<div class="body">
-  <div class="title-row">
-    <h3></h3>
-    <div class="badge"></div>
-  </div>
-  <div class="muted"></div>
-  <div class="features" aria-hidden="false">
-    
-  </div>
-  <div class="price-row">
-    <div>
-      <div class="price"></div>
-      <div class="muted">per day</div>
+<div class="car_card">
+  {% if car.image_path %}
+    <div class="media" role="img"
+         style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0potgg_ZzLEfXTMob4IMtshtja_kUfPmHow&s')">
     </div>
-    <div>
-      <button class="btn"><a style="color: white; text-decoration: none" href="car_details">Details</a></button>
+  {% endif %}
+
+  <div class="body">
+    <div class="title">
+      <h3>{{ car.manufacturer }} {{ car.model }}</h3>
+      <div class="badge">{{ car.status }}</div>
+    </div>
+
+    <div class="muted">
+      Plate: {{ car.license_plate }} • Year: {{ car.year }}
+    </div>
+
+    <div class="features">
+      {% if car.transmission %}<span>{{ car.transmission }}</span>{% endif %}
+      {% if car.seats %}<span>{{ car.seats }} seats</span>{% endif %}
+      {% if car.fuel_type %}<span>{{ car.fuel_type }}</span>{% endif %}
+    </div>
+
+    <div class="price-row">
+      <div>
+        <div class="price">
+          {% set p = car.current_price() %}
+          {% if p is not none %}€{{ '%.2f'|format(p) }}{% else %}—{% endif %}
+        </div>
+        <div class="muted">per day</div>
+      </div>
+
+      <div>
+        <a class="primary_button" href="/fleet/{{ car.id }}">
+          Details
+        </a>
+      </div>
     </div>
   </div>
 </div>

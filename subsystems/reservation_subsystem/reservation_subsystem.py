@@ -24,7 +24,7 @@ class ReservationSubsystem:
             raise ValueError("Return date must be after pickup date.")
 
         return pickup, dropoff
-    
+
     #Check car availability (Use Case: Make a Reservation)
     def is_car_available(self, car_id, pickup, dropoff) -> bool:
         overlapping = (

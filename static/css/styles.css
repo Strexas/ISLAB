@@ -1,0 +1,56 @@
+:root {
+  /* Primary Button Colors */
+  --primary-button-color: #446bc1;
+  --primary-button-hover-color: #0a2455;
+  --primary-button-text-color: white;
+
+  /* Secondary Button Colors */
+  --secondary-button-color: transparent;
+  --secondary-button-text-color: white;
+  --secondary-button-border-color: white;
+  --secondary-button-hover-color: white;
+  --secondary-button-hover-text-color: black;
+
+  --primary-text-color: #ffffff;
+  --secondary-text-color: rgb(86, 86, 86);
+}
+
+.primary_button {
+  background-color: var(--primary-button-color);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: var(--primary-button-text-color);
+  font-size: 15px;
+  transition: background-color 0.3s;
+  text-decoration: none;
+}
+
+.primary_button:hover {
+  background-color: var(--primary-button-hover-color);
+  cursor: pointer;
+}
+
+.secondary_button {
+  background-color: var(--secondary-button-color);
+  color: var(--secondary-button-text-color);
+  border-radius: 10px;
+  border: solid 1px var(--secondary-button-border-color);
+  padding: 10px 20px;
+  font-size: 15px;
+  margin-top: auto;
+  font-weight: 420;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  transition: color 0.2s;
+}
+
+.secondary_button:hover {
+  background-color: var(--secondary-button-hover-color);
+  color: var(--secondary-button-hover-text-color);
+}
+
+.no-results {
+  font-style: italic;
+  color: var(--primary-text-color);
+}

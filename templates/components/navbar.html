@@ -12,18 +12,18 @@
     <!-- Navigation -->
     <div class="navbar-links">
       <a href="/">Home</a>
-      <a href="fleetlist">Fleet</a>
+      <a href="/fleet">Fleet</a>
     </div>
 
     <!-- User ctrl buttons -->
     <div class="navbar-links" style="display: flex; gap: 10px;">
-      {% if not logged_in %}
-        <button><a style="color: white" href="login">Login</a></button>
-        <button><a style="color: white" href="register">Register</a></button>
+      {% if not session.get('user_id') %}
+        <button><a style="color: white" href="/login">Login</a></button>
+        <button><a style="color: white" href="/register">Register</a></button>
       {% endif %}
 
-      {% if logged_in %}
-        <button><a style="color: white" href="profile">Profile</a></button>
+      {% if session.get('user_id') %}
+        <button><a style="color: white" href="/profile">Profile</a></button>
       {% endif %}
 
     </div>
