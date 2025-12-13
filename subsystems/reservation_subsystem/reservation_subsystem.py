@@ -1,11 +1,11 @@
 from datetime import datetime
-import uuid
-from sqlalchemy import or_, and_
 from models.User import User
 from models.Vehicle import Vehicle
-from models.Reservation import Reservation
+from models.Reservation import Reservation, ReservationStatus
 from models.InsurancePolicy import InsurancePolicy
+from models.RentPrice import RentPrice
 from context import db
+import uuid
 
 class ReservationSubsystem:
     def __init__(self):
@@ -19,44 +19,46 @@ class ReservationSubsystem:
         if not self.is_car_available(vehicle.id, pickup_date, return_date):
             raise ValueError("The selected vehicle is not available for the chosen dates.")
 
+        price_row = RentPrice.query.filter(RentPrice.vehicle_id == vehicle.id).first()
+        daily_rate = daily_rate = price_row.price if price_row else 0
+
         #Calculate total amount
         days = (return_date - pickup_date).days
-        total_amount = vehicle.daily_rate * days
+        total_amount = daily_rate * days
 
         #Create reservation record
         reservation = Reservation(
-            reservation_id=str(uuid.uuid4()),
-            user_id=user.user_id,
-            vehicle_id=vehicle.vehicle_id,
+            user_id=user.id,
+            vehicle_id=vehicle.id,
             total_amount=total_amount,
             pickup_date=pickup_date,
             return_date=return_date,
-            status=Reservation.ReservationStatus.PENDING
+            status=ReservationStatus.PENDING
         )
-        db.session.add(reservation)
-        db.session.commit()
 
+        db.session.add(reservation)
+        db.session.flush()
+        
         return reservation
 
     def add_insurance_to_reservation(self, reservation: Reservation, provider: str, amount: float) -> InsurancePolicy:
-        #Create insurance policy
-        policy = self.create_insurance_policy(
-            insurance_id=str(uuid.uuid4()),
+        # Create insurance policy
+        policy = InsurancePolicy(
             reservation_id=reservation.reservation_id,
             provider=provider,
             payment_amount=amount,
             start_date=reservation.pickup_date,
             end_date=reservation.return_date,
-            policy_number=f"POL-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{reservation.reservation_id[:6]}"
+            policy_number=f"POL-{str(uuid.uuid4())}"
         )
 
         db.session.add(policy)
-        db.session.commit()
+        db.session.flush()
 
         return policy
 
     def finalize_reservation(self, reservation: Reservation):
-        reservation.status = Reservation.ReservationStatus.CONFIRMED
+        reservation.status = ReservationStatus.PENDING
         db.session.commit()
 
     #Validate datetimes (Use Case: Make a Reservation)
@@ -78,39 +80,16 @@ class ReservationSubsystem:
         return pickup, dropoff
 
     #Check car availability (Use Case: Make a Reservation)
-    def is_car_available(self, car_id: int, pickup: datetime, dropoff: datetime) -> bool:
+    def is_car_available(self, vehicle_id: int, pickup: datetime, dropoff: datetime) -> bool:
         overlapping = (
-            Reservation.query.filter(
-                Reservation.car_id == car_id,
-                Reservation.status != Reservation.status.CANCELLED,
-                or_(
-                    # new start inside existing
-                    and_(Reservation.pickup_date <= pickup,
-                         Reservation.return_date > pickup),
-                    # new end inside existing
-                    and_(Reservation.pickup_date < dropoff,
-                         Reservation.return_date >= dropoff),
-                    # existing fully inside new range
-                    and_(Reservation.pickup_date >= pickup,
-                         Reservation.return_date <= dropoff),
-                ),
+            Reservation.query
+            .filter(
+                Reservation.vehicle_id == vehicle_id,
+                Reservation.status.in_([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+                Reservation.pickup_date < dropoff,
+                Reservation.return_date > pickup
             )
-            .with_entities(Reservation.reservation_id)
             .first()
         )
 
         return overlapping is None
-    
-    def create_insurance_policy(self, user_id, car_id, pickup_date, return_date):
-        policy = InsurancePolicy(
-            customer_id=user_id,
-            car_id=car_id,
-            start_date=pickup_date,
-            end_date=return_date,
-            provider="Default",
-            payment_amount=29.99, 
-            policy_number=f"POL-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{user_id[:6]}"
-        )
-        db.session.add(policy)
-        db.session.flush()  # get policy id without full commit
-        return policy

@@ -50,7 +50,7 @@ def fleet_details(vehicle_id):
     reviews = get_vehicle_reviews(vehicle_id)
 
     return render_template(
-        "fleet_detail.html",
+        "car_details.html",
         vehicle=vehicle,
         reviews=reviews.get("reviews", [])
     )

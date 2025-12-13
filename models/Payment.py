@@ -20,7 +20,7 @@ class Payment(db.Model):
                        db.ForeignKey("users.id"),
                        nullable=False)
 
-    reservationid = db.Column(db.String(36),
+    reservationid = db.Column(db.Integer,
                               db.ForeignKey("reservations.reservation_id"),
                               nullable=True)
 

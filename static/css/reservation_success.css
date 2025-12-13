@@ -1,0 +1,11 @@
+body {
+  font-family: var(--text-font);
+}
+
+h1 {
+  color: var(--primary-text-color);
+}
+
+p {
+  color: var(--primary-text-color);
+}

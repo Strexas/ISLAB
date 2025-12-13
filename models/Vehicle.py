@@ -37,4 +37,4 @@ class Vehicle(db.Model):
     def current_price(self):
         if self.rent_prices:
             return self.rent_prices[0].price
-        return None
+        return 0.0

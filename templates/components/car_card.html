@@ -1,9 +1,7 @@
 {% macro car_card(car) %}
 <div class="car_card">
   {% if car.image_path %}
-    <div class="media" role="img"
-         style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0potgg_ZzLEfXTMob4IMtshtja_kUfPmHow&s')">
-    </div>
+    <img class="media" src="{{ car.image_path }}">
   {% endif %}
 
   <div class="body">
@@ -32,7 +30,7 @@
       </div>
 
       <div>
-        <a class="primary_button" href="/reservations/reserve/{{ car.id }}">
+        <a class="primary_button" href="/fleet/{{ car.id }}">
           Details
         </a>
       </div>

@@ -22,10 +22,21 @@
       <div class="rental-form-container">
         <h1>Complete your reservation</h1>
 
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="error_messages_container" style="width: 100%;">
+            {% for category, message in messages %}
+              <p class="error_message">{{ message }}</p>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endwith %}
+        
         <!-- Rental Details form -->
         <h3 style="margin-top: 50px;">Rental Details</h3>
         <form autocomplete="off" method="post" action="{{ url_for('reservations.reserve', vehicle_id=vehicle.id) }}">
-          
+
           <!-- Dates form -->
           <div class="row">
             <label class="reservation-field" style="width: 100%;">

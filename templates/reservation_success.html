@@ -12,20 +12,31 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
   </head>
 
-  <body>
+  <body class="blue_body">
     <!-- Navbar -->
     {% from "components/navbar.html" import navbar %}
     {{ navbar() }}
 
     <!-- Reservation Success Message -->
-    <section class="reservation-success-container">
-      <div class="success-message-box">
-        <h1>Reservation Successful!</h1>
-        <p>Thank you, {{ user.name }} {{ user.surname }}. Your reservation for the {{ vehicle.make }} {{ vehicle.model }} has been confirmed.</p>
-        <p>Pick-up Date: {{ pickup_date }}</p>
-        <p>Drop-off Date: {{ return_date }}</p>
-        <a href="{{ url_for('main.index') }}" class="back-home-button">Back to Home</a>
-      </div>
-    </section>
+    <div class="page_container">
+      <h1>Reservation Successful</h1>
+
+      <p>Reservation for the vehicle: {{ vehicle.manufacturer }} {{ vehicle.model }} with licence {{ vehicle.license_plate }}. Reservation amount: {{ reservation.total_amount }}€</p>
+      <p>Reservation dates: {{ reservation.pickup_date.strftime("%m/%d/%Y, %H:%M:%S") }} - {{ reservation.return_date.strftime("%m/%d/%Y, %H:%M:%S") }}</p>
+      
+      <!-- Show insurance detailes -->
+      {% if insurance_policy %}
+        <p style="margin-top: 40px; font-weight: bold;">Insurance detailes:</p>
+        <p>Provider: {{ insurance_policy.provider }}</p>
+        <p>Insurnace Amount: {{ insurance_policy.payment_amount }}€</p>
+        <p>Policy Number: {{ insurance_policy.policy_number }}</p>
+      {% endif %}
+
+        
+      <p style="margin-top: 40px; font-weight: bold;">Total Payment:
+        {{ reservation.total_amount + (insurance_policy.payment_amount if insurance_policy else 0) }}€
+      </p>
+
+    </div>
   </body>
 </html>

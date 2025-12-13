@@ -1,14 +1,17 @@
-{% from "_navbar.html" import navbar %}
+{% from "components/navbar.html" import navbar %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ vehicle.manufacturer }} {{ vehicle.model }}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
     <style>
         body {
-            background: #eef2f7;
-            padding-top: 80px;
+            background: var(--primary-backround-color);
             margin: 0;
             font-family: Arial, sans-serif;
         }
@@ -17,31 +20,18 @@
             width: 90%;
             max-width: 700px;
             margin: auto;
+            margin-top: 40px;
             background: white;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        img {
+        .container img {
             width: 100%;
             border-radius: 10px;
             margin-bottom: 15px;
         }
-
-        .btn {
-            padding: 10px 15px;
-            background: #004aad;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            margin-right: 8px;
-        }
-
-        .delete-btn {
-            background: #c0392b;
-        }
-
     </style>
 </head>
 
@@ -51,7 +41,7 @@
     <div class="container">
         <h2>{{ vehicle.manufacturer }} {{ vehicle.model }}</h2>
 
-        <img src="{{ vehicle.image_path or '/static/default_car.png' }}">
+        <img src="{{ vehicle.image_path }}">
 
         <p><strong>Plate:</strong> {{ vehicle.license_plate }}</p>
         <p><strong>Year:</strong> {{ vehicle.year }}</p>
@@ -62,19 +52,23 @@
 
         <p><strong>Current price:</strong> {{ vehicle.current_price() }} €</p>
 
-        {% if session.get("role") in ["employee", "accountant"] %}
-        <a href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.id) }}" class="btn">Edit</a>
+        <div style="margin-top: 30px;">
+            <a class="primary_button" href="/reservations/reserve/{{ vehicle.id }}">Reserve Car</a>
 
-        {% if session.get("role") == "accountant" %}
-        <form method="POST"
-              action="{{ url_for('fleet.fleet_delete', vehicle_id=vehicle.id) }}"
-              style="display:inline;">
-            <button class="btn delete-btn" onclick="return confirm('Delete this vehicle?');">
-                Delete
-            </button>
-        </form>
-        {% endif %}
-        {% endif %}
+            {% if session.get("role") in ["employee", "accountant"] %}
+                <a href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.id) }}" class="primary_button">Edit</a>
+
+                {% if session.get("role") == "accountant" %}
+                    <form method="POST"
+                        action="{{ url_for('fleet.fleet_delete', vehicle_id=vehicle.id) }}"
+                        style="display:inline;">
+                        <button class="danger_button" onclick="return confirm('Delete this vehicle?');">
+                            Delete
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
     </div>
 
 </body>
