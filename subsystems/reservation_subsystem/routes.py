@@ -3,6 +3,8 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from subsystems.reservation_subsystem.reservation_subsystem import ReservationSubsystem
 from models.Vehicle import Vehicle
 from models.User import User
+from models.Reservation import Reservation
+from models.InsurancePolicy import InsurancePolicy
 
 reservation_blueprint = Blueprint("reservations", __name__)
 reservation_subsystem = ReservationSubsystem()
@@ -25,21 +27,48 @@ def reserve(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
 
     # If form submitted, process reservation
-    if request.method == "POST":
-        # Create initial reservation
-        reservation = reservation_subsystem.create_reservation(
-            user=user,
-            vehicle=vehicle,
-            pickup_date=request.form.get("pickup_date"),
-            return_date=request.form.get("return_date")
-        )
+    try:
+        if request.method == "POST":
+            # Create initial reservation
+            reservation = reservation_subsystem.create_reservation(
+                user=user,
+                vehicle=vehicle,
+                pickup_date_s=request.form.get("pickup_date"),
+                return_date_s=request.form.get("return_date")
+            )
 
-        #Call Payment Subsystem to process payment here
+            # If user opted for insurance, add it to the reservation
+            wants_insurance = request.form.get("wants_insurance")
+            if wants_insurance:
+                reservation_subsystem.add_insurance_to_reservation(
+                    reservation=reservation,
+                    provider=request.form.get("insurance_provider"),
+                    amount=29.99
+                )
+                
+            
+            #Call Payment Subsystem to process payment here
+            #If payment successful, finalize reservation
+            reservation_subsystem.finalize_reservation(reservation)
 
-        # if wants_insurance := request.form.get("wants_insurance"):
-        #     reservation_subsystem.add_insurance(reservation)
-
-        pass
-
-
+            # Show success page
+            return redirect(url_for("reservations.reservation_success", reservation_id=reservation.reservation_id))
+    except:
+        
+        
     return render_template("car_reserve.html", logged_in=('user_id' in session), vehicle=vehicle, user=user)
+
+@reservation_blueprint.route("/reservations/success/<string:reservation_id>", methods=["GET"])
+def reservation_success(reservation_id):
+    # User must be logged to view reservation success
+    if 'user_id' not in session:
+        flash("You must be logged in to reserve a vehicle.", "error")
+        return redirect(url_for("user_management.login"))
+
+
+    #Fetch reservation details
+    reservation = Reservation.query.get_or_404(reservation_id)
+    insurnace_policy = InsurancePolicy.query.filter_by(reservation_id=reservation_id).first()
+
+    return render_template("reservation_success.html", logged_in=('user_id' in session), reservation=reservation, insurance_policy=insurnace_policy)
+    

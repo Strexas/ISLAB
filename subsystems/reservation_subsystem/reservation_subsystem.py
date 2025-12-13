@@ -16,7 +16,7 @@ class ReservationSubsystem:
         pickup_date, return_date = self.parse_dates(pickup_date_s, return_date_s)
         
         #Check availability
-        if not self.is_car_available(vehicle.vehicle_id, pickup_date, return_date):
+        if not self.is_car_available(vehicle.id, pickup_date, return_date):
             raise ValueError("The selected vehicle is not available for the chosen dates.")
 
         #Calculate total amount
@@ -37,6 +37,27 @@ class ReservationSubsystem:
         db.session.commit()
 
         return reservation
+
+    def add_insurance_to_reservation(self, reservation: Reservation, provider: str, amount: float) -> InsurancePolicy:
+        #Create insurance policy
+        policy = self.create_insurance_policy(
+            insurance_id=str(uuid.uuid4()),
+            reservation_id=reservation.reservation_id,
+            provider=provider,
+            payment_amount=amount,
+            start_date=reservation.pickup_date,
+            end_date=reservation.return_date,
+            policy_number=f"POL-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{reservation.reservation_id[:6]}"
+        )
+
+        db.session.add(policy)
+        db.session.commit()
+
+        return policy
+
+    def finalize_reservation(self, reservation: Reservation):
+        reservation.status = Reservation.ReservationStatus.CONFIRMED
+        db.session.commit()
 
     #Validate datetimes (Use Case: Make a Reservation)
     def parse_dates(self, pickup_str: str, return_str: str):
@@ -61,7 +82,7 @@ class ReservationSubsystem:
         overlapping = (
             Reservation.query.filter(
                 Reservation.car_id == car_id,
-                Reservation.status != Reservation.ReservationStatus.CANCELLED,
+                Reservation.status != Reservation.status.CANCELLED,
                 or_(
                     # new start inside existing
                     and_(Reservation.pickup_date <= pickup,

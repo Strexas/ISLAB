@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bolt Drive - Reservation Successful</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reservation_success.css') }}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    {% from "components/navbar.html" import navbar %}
+    {{ navbar() }}
+
+    <!-- Reservation Success Message -->
+    <section class="reservation-success-container">
+      <div class="success-message-box">
+        <h1>Reservation Successful!</h1>
+        <p>Thank you, {{ user.name }} {{ user.surname }}. Your reservation for the {{ vehicle.make }} {{ vehicle.model }} has been confirmed.</p>
+        <p>Pick-up Date: {{ pickup_date }}</p>
+        <p>Drop-off Date: {{ return_date }}</p>
+        <a href="{{ url_for('main.index') }}" class="back-home-button">Back to Home</a>
+      </div>
+    </section>
+  </body>
+</html>
