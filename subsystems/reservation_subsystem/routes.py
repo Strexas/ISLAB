@@ -13,6 +13,7 @@ reservation_subsystem = ReservationSubsystem()
 def index():
     return render_template("index.html", logged_in=('user_id' in session))
 
+# ===================== RESERVE A CAR ============================
 @reservation_blueprint.route("/reservations/reserve/<int:vehicle_id>", methods=["GET", "POST"])
 def reserve(vehicle_id):
     # User must be logged in to reserve a vehicle
@@ -61,6 +62,7 @@ def reserve(vehicle_id):
 
     return render_template("car_reserve.html", logged_in=('user_id' in session), vehicle=vehicle, user=user)
 
+# ===================== RESERVATION SUCCESSFUL PAGE ============================
 @reservation_blueprint.route("/reservations/success/<string:reservation_id>", methods=["GET"])
 def reservation_success(reservation_id):
     # User must be logged to view reservation success
@@ -77,6 +79,36 @@ def reservation_success(reservation_id):
 
     return render_template("reservation_success.html", vehicle=vehicle, user=user, reservation=reservation, insurance_policy=insurnace_policy)
     
-@reservation_blueprint.route("/reservations/delete/<int:reservation_id>")
-def delete_reservation():
+# ===================== LIST ALL RESERVATIONS ============================
+@reservation_blueprint.route("/reservations/list")
+def list_reservations():
+    #Check if user is logged
+    if 'user_id' not in session:
+        flash("You must be logged to access my reservations.", "error")
+        return redirect(url_for("user_management.login"))
     
+    reservations = Reservation.query.filter(
+        Reservation.user_id == session['user_id']
+    ).all();
+
+    return render_template("reservation_list.html", reservations=reservations); 
+
+# ===================== EDIT A RESERVATION ============================
+@reservation_blueprint.route("/reservations/edit/<int:reservation_id>")
+def edit_reservation(reservation_id: int):
+    #Check if user is logged
+    if 'user_id' not in session:
+        flash("You must be logged to edit a reservation", "error")
+        return redirect(url_for("user_management.login"))
+    
+    pass
+
+# ===================== DELETE A RESERVATION ============================
+@reservation_blueprint.route("/reservations/delete/<int:reservation_id>")
+def delete_reservation(reservation_id: int):
+    #Check if user is logged
+    if 'user_id' not in session:
+        flash("You must be logged to delete a reservation", "error")
+        return redirect(url_for("user_management.login"))
+    
+    pass    

@@ -17,3 +17,5 @@ class Reservation(db.Model):
     pickup_date = db.Column(db.DateTime, nullable=False)
     return_date = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.Enum(ReservationStatus), default=ReservationStatus.PENDING, nullable=False)
+
+    vehicle = db.relationship("Vehicle")

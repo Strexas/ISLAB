@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reservation List</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reservation_card.css') }}">
+
+    <style>
+      .fleet_grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        padding: 20px;
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+        .fleet_grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .fleet_grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="blue_body">
+    <!-- Navbar -->
+    {% from "components/navbar.html" import navbar %}
+    {{ navbar() }}
+
+    <div class="page_container">
+      {% from "components/reservation_card.html" import reservation_card %}
+      <!-- Show reservation list -->
+      {% if reservations %}
+        <div class="fleet_grid">
+          {% for reservation in reservations %}
+            {{ reservation_card(reservation) }}
+          {% endfor %}      
+        </div>
+      {% else %}
+        <!-- No reservations -->
+        <p class="no-results">No reservations yet</p>
+      {% endif %}
+    </div>
+  </body>
+</html>
