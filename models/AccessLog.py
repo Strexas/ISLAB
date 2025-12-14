@@ -1,6 +1,7 @@
 from context import db
 from datetime import datetime
 
+
 class AccessLog(db.Model):
     __tablename__ = 'access_logs'
 

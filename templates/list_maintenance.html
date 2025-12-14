@@ -64,7 +64,7 @@
         text-transform: uppercase;
     }
     tr:nth-child(even) { background: rgba(255,255,255,0.08); }
-    .btn-view, .btn-remove {
+    .btn-view {
         text-decoration: none;
         color: #fff;
         padding: 6px 12px;
@@ -72,83 +72,36 @@
     }
     .btn-view { background: rgba(255,255,255,0.2); }
     .btn-view:hover { background: rgba(255,255,255,0.4); }
-    .btn-remove { background: rgba(255,50,50,0.3); border: none; cursor: pointer; }
-    .btn-remove:hover { background: rgba(255,50,50,0.6); }
     footer { margin-top: auto; opacity: 0.8; font-size: 0.9em; }
 </style>
 </head>
 <body>
 <h1>🚗 Car Maintenance Records</h1>
 
-<!-- Combined Filter + Add Form -->
-<form id="mainForm">
-    <label>Car Name:</label><input type="text" id="carName" placeholder="Filter or add name">
-    <label>Model:</label><input type="text" id="carModel" placeholder="Filter or add model">
-    <label>Date:</label><input type="date" id="carDate">
-    <button type="button" id="filterBtn">Filter</button>
-    <button type="button" id="addBtn">Add</button>
-    <button type="button" id="resetBtn">Reset</button>
+{% if message %}
+<div>{{ message }}</div>
+{% endif %}
+
+<form id="mainForm" method="POST" action="/maintenances_list">
+    <label>Car Model:</label><input type="text" id="carName" name="model" placeholder="Filter or add name">
+    <label>Plate Number:</label><input type="text" id="carModel" name="plate" placeholder="Filter or add model">
+    <label>Maintenance Date:</label><input type="date" id="carDate" name="date">
+    <button type="submit" name="button" value="filter" id="filterBtn">Filter</button>
+    <button type="submit" name="button" value="add" id="addBtn">Add</button>
+    <button type="submit" name="button" value="reset" id="resetBtn">Reset</button>
 </form>
 
 <table id="carTable">
     <thead>
         <tr>
-            <th>Date</th><th>Car Name</th><th>Model</th><th>Details</th>
+            <th>ID</th><th>Car Model</th><th>Plate Number</th><th>Maintenance Date</th><th>Action</th>
         </tr>
     </thead>
     <tbody>
-        <tr><td>2025-10-10</td><td>Toyota Corolla</td><td>2018</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
-        <tr><td>2025-09-15</td><td>BMW 320i</td><td>2020</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
-        <tr><td>2025-07-12</td><td>Volkswagen Golf</td><td>2017</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
-        <tr><td>2025-08-05</td><td>Audi A4</td><td>2019</td><td><a class="btn-view" href="maintenance_page.html">View</a></td></tr>
+        {% for maintenance in maintenances %}
+        <tr><td>{{ maintenance[0] }}</td><td>{{ maintenance[1] }}</td><td>{{ maintenance[2] }}</td><td>{{ maintenance[3] }}</td><td><a class="btn-view" href="/maintenance_page/{{ maintenance[0] }}">View</a></td></tr>
+        {% endfor %}
     </tbody>
 </table>
-
-
-<script>
-const tableBody = document.querySelector("#carTable tbody");
-const carName = document.getElementById("carName");
-const carModel = document.getElementById("carModel");
-const carDate = document.getElementById("carDate");
-
-function addRow(date, name, model) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td>${date}</td>
-        <td>${name}</td>
-        <td>${model}</td>
-        <td><a class="btn-view" href="#">View</a></td>
-    `;
-    tableBody.appendChild(tr);
-}
-
-document.getElementById("addBtn").onclick = () => {
-    if (!carDate.value || !carName.value || !carModel.value) return alert("Fill all fields!");
-    addRow(carDate.value, carName.value, carModel.value);
-    carName.value = carModel.value = carDate.value = "";
-};
-
-document.getElementById("filterBtn").onclick = () => {
-    const nameFilter = carName.value.toLowerCase();
-    const modelFilter = carModel.value.toLowerCase();
-    const dateFilter = carDate.value;
-    for (const row of tableBody.rows) {
-        const [date, name, model] = [row.cells[0].textContent, row.cells[1].textContent.toLowerCase(), row.cells[2].textContent.toLowerCase()];
-        row.style.display =
-            (!nameFilter || name.includes(nameFilter)) &&
-            (!modelFilter || model.includes(modelFilter)) &&
-            (!dateFilter || date === dateFilter)
-            ? ""
-            : "none";
-    }
-};
-
-document.getElementById("resetBtn").onclick = () => {
-    carName.value = carModel.value = carDate.value = "";
-    for (const row of tableBody.rows) row.style.display = "";
-};
-
-document.querySelectorAll(".btn-remove").forEach(btn => btn.onclick = () => btn.closest("tr").remove());
-</script>
 </body>
 </html>
