@@ -21,8 +21,12 @@
   </div>
 
   <div class="reservation_card_buttons">
-    <a href="/reservations/edit/{{ reservation.reservation_id }}" class="primary_button">Edit</a>
-    <a href="/reservations/delete/{{ reservation.reservation_id }}" class="danger_button">Delete</a>
+    <button onclick="openEditModal(
+        {{ reservation.reservation_id }},
+        '{{ reservation.pickup_date.strftime('%Y-%m-%dT%H:%M') }}',
+        '{{ reservation.return_date.strftime('%Y-%m-%dT%H:%M') }}'
+      )" class="primary_button">Edit</button>
+    <button onclick='delete_reservation("{{ reservation.reservation_id }}")' class="danger_button">Delete</button>
   </div>
 </div>
 {% endmacro %}

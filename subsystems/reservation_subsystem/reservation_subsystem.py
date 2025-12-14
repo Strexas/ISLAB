@@ -5,12 +5,14 @@ from models.Reservation import Reservation, ReservationStatus
 from models.InsurancePolicy import InsurancePolicy
 from models.RentPrice import RentPrice
 from context import db
+from flask import jsonify
 import uuid
 
 class ReservationSubsystem:
     def __init__(self):
         pass
 
+    # ====================== CREATE RESERVATION ============================
     def create_reservation(self, user: User, vehicle: Vehicle, pickup_date_s: str, return_date_s: str) -> Reservation:
         #Parse and validate dates
         pickup_date, return_date = self.parse_dates(pickup_date_s, return_date_s)
@@ -24,6 +26,9 @@ class ReservationSubsystem:
 
         #Calculate total amount
         days = (return_date - pickup_date).days
+        # At least one day billing
+        if days <= 0:
+            days = 1 
         total_amount = daily_rate * days
 
         #Create reservation record
@@ -41,6 +46,7 @@ class ReservationSubsystem:
         
         return reservation
 
+    # ========================= ATTACH INSURNACE =========================
     def add_insurance_to_reservation(self, reservation: Reservation, provider: str, amount: float) -> InsurancePolicy:
         # Create insurance policy
         policy = InsurancePolicy(
@@ -57,11 +63,12 @@ class ReservationSubsystem:
 
         return policy
 
+    # ========================= FINALIZE AND SAVE RESERVATION =========================
     def finalize_reservation(self, reservation: Reservation):
         reservation.status = ReservationStatus.PENDING
         db.session.commit()
 
-    #Validate datetimes (Use Case: Make a Reservation)
+    # ========================= VALIDATE DATETIMES =========================
     def parse_dates(self, pickup_str: str, return_str: str):
         if not pickup_str or not return_str:
             raise ValueError("Please provide both pickup and return dates.")
@@ -79,9 +86,9 @@ class ReservationSubsystem:
 
         return pickup, dropoff
 
-    #Check car availability (Use Case: Make a Reservation)
-    def is_car_available(self, vehicle_id: int, pickup: datetime, dropoff: datetime) -> bool:
-        overlapping = (
+    # ========================= CHECK AVAILABILITY =========================
+    def is_car_available(self, vehicle_id: int, pickup: datetime, dropoff: datetime, exclude_reservation_id: int | None = None) -> bool:
+        q = (
             Reservation.query
             .filter(
                 Reservation.vehicle_id == vehicle_id,
@@ -89,7 +96,76 @@ class ReservationSubsystem:
                 Reservation.pickup_date < dropoff,
                 Reservation.return_date > pickup
             )
-            .first()
         )
 
-        return overlapping is None
+
+        # Exclude the reservation we're editing
+        if exclude_reservation_id is not None:
+            q = q.filter(Reservation.reservation_id != exclude_reservation_id)
+
+        return q.first() is None
+    
+    # ========================= DELETE RESERVATION =========================
+    def deletereservation(self, user_id, reservation_id):
+        reservation = Reservation.query.get(reservation_id)
+        if not reservation:
+            return jsonify({"ok": False, "error": "Reservation not found"}), 404
+        
+        # Ownership check
+        if reservation.user_id != user_id:
+            return jsonify({"ok": False, "error": "Forbidden"}), 403
+        
+        # Delete
+        db.session.delete(reservation)
+        db.session.commit()
+
+        return jsonify({"ok": True, "deleted_reservation_id": reservation_id})
+    
+    # ========================= EDIT RESERVATION =========================
+    def edit_reservation(self, user_id, reservation_id, pickup_date_s: str, return_date_s: str):
+        reservation = Reservation.query.get(reservation_id)
+        if not reservation:
+            return jsonify({"ok": False, "error": "Reservation not found"}), 404
+        
+        # Ownership check
+        if reservation.user_id != user_id:
+            return jsonify({"ok": False, "error": "Forbidden"}), 403
+        
+        #Parse and validate dates
+        pickup_date, return_date = self.parse_dates(pickup_date_s, return_date_s)
+
+        # CHeck avalability
+        if not self.is_car_available(reservation.vehicle_id, pickup_date, return_date, reservation.reservation_id):
+            return jsonify({"ok": False, "error": "Vehicle not available for these dates"}), 409
+        
+        #Get latest daily rate for this vehicle
+        price_row = (
+            RentPrice.query
+            .filter(RentPrice.vehicle_id == reservation.vehicle_id)
+            .order_by(RentPrice.date.desc())
+            .first()
+        )
+        daily_rate = price_row.price if price_row else 0.0
+        #Calculate total amount
+        days = (return_date - pickup_date).days
+        # At least one day billing
+        if days <= 0:
+            days = 1  
+        
+        total_amount = daily_rate * days
+
+        #Apply changes
+        reservation.pickup_date = pickup_date
+        reservation.return_date = return_date
+        reservation.total_amount = total_amount
+        db.session.commit()
+
+        return jsonify({
+            "ok": True,
+            "reservation_id": reservation.reservation_id,
+            "pickup_date": reservation.pickup_date.isoformat(),
+            "return_date": reservation.return_date.isoformat(),
+            "total_amount": str(reservation.total_amount),
+            "days": days
+        }), 200
+    

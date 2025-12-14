@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for, jsonify
 
 from subsystems.reservation_subsystem.reservation_subsystem import ReservationSubsystem
 from models.Vehicle import Vehicle
@@ -94,21 +94,34 @@ def list_reservations():
     return render_template("reservation_list.html", reservations=reservations); 
 
 # ===================== EDIT A RESERVATION ============================
-@reservation_blueprint.route("/reservations/edit/<int:reservation_id>")
+@reservation_blueprint.route("/reservations/edit/<int:reservation_id>", methods=["PUT"])
 def edit_reservation(reservation_id: int):
     #Check if user is logged
-    if 'user_id' not in session:
-        flash("You must be logged to edit a reservation", "error")
-        return redirect(url_for("user_management.login"))
-    
-    pass
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"ok": False, "error": "Unauthorized"}), 401
+
+    data = request.get_json()
+    pickup_date_s = data.get("pickup_date")
+    return_date_s = data.get("return_date")
+
+    if not pickup_date_s or not return_date_s:
+        return jsonify({"ok": False, "error": "pickup_date and return_date are required"}), 400
+
+    try:
+        return reservation_subsystem.edit_reservation(user_id, reservation_id, pickup_date_s, return_date_s)
+    except Exception as ex:
+        return jsonify({"ok": False, "error": ex.__str__()}), 500
 
 # ===================== DELETE A RESERVATION ============================
-@reservation_blueprint.route("/reservations/delete/<int:reservation_id>")
+@reservation_blueprint.route("/reservations/delete/<int:reservation_id>", methods=["DELETE"])
 def delete_reservation(reservation_id: int):
-    #Check if user is logged
-    if 'user_id' not in session:
-        flash("You must be logged to delete a reservation", "error")
-        return redirect(url_for("user_management.login"))
-    
-    pass    
+    # Must be logged in
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"ok": False, "error": "Unauthorized"}), 401
+
+    try:
+        return reservation_subsystem.deletereservation(user_id, reservation_id=reservation_id)
+    except Exception as ex:
+        return jsonify({"ok": False, "error": ex.__str__()}), 500

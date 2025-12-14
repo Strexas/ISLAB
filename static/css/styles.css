@@ -172,6 +172,7 @@
 
 .blue_body {
   background-color: var(--primary-backround-color);
+  font-family: var(--text-font);
   margin: 0px;
   display: flex;
   flex-direction: column;
