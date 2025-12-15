@@ -1,0 +1,32 @@
+{% macro reservation_card(reservation) %}
+<div class="reservation">
+  <div class="reservation-card__header">
+    <div class="reservation-card__title">
+      Reservation #{{ reservation.reservation_id or reservation.id }}
+    </div>
+    <div class="reservation-card__status">
+      {{ reservation.status.value if reservation.status else reservation.status }}
+    </div>
+  </div>
+
+  <div class="reservation-card__body">
+    <div><b>Pickup:</b> {{ reservation.pickup_date.strftime("%Y-%m-%d %H:%M") }}</div>
+    <div><b>Return:</b> {{ reservation.return_date.strftime("%Y-%m-%d %H:%M") }}</div>
+    <div><b>Total:</b> €{{ '%.2f'|format(reservation.total_amount) }}</div>
+
+    {# Optional: if you have relationship reservation.vehicle #}
+    {% if reservation.vehicle is defined and reservation.vehicle %}
+      <div><b>Vehicle:</b> {{ reservation.vehicle.manufacturer }} {{ reservation.vehicle.model }}</div>
+    {% endif %}
+  </div>
+
+  <div class="reservation_card_buttons">
+    <button onclick="openEditModal(
+        {{ reservation.reservation_id }},
+        '{{ reservation.pickup_date.strftime('%Y-%m-%dT%H:%M') }}',
+        '{{ reservation.return_date.strftime('%Y-%m-%dT%H:%M') }}'
+      )" class="primary_button">Edit</button>
+    <button onclick='delete_reservation("{{ reservation.reservation_id }}")' class="danger_button">Delete</button>
+  </div>
+</div>
+{% endmacro %}

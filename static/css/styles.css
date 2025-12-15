@@ -1,0 +1,185 @@
+:root {
+  /* Primary Button Colors */
+  --primary-button-color: #446bc1;
+  --primary-button-hover-color: #0a2455;
+  --primary-button-text-color: white;
+
+  /* Secondary Button Colors */
+  --secondary-button-color: transparent;
+  --secondary-button-text-color: white;
+  --secondary-button-border-color: white;
+  --secondary-button-hover-color: white;
+  --secondary-button-hover-text-color: black;
+
+  /* Danger Button Colors */
+  --danger-button-color: #de3623;
+  --danger-button-hover-color: #9c1b0f;
+  --danger-button-text-color: white;
+
+  /* Submit Button Colors */
+  --submit-button-color: #dc6a12;
+  --submit-button-hover-color: #a55506;
+  --submit-button-text-color: white;
+
+  /* Text Colors */
+  --text-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --primary-text-color: #ffffff;
+  --secondary-text-color: rgb(86, 86, 86);
+
+  /* Backround colors */
+  --primary-backround-color: #1454d4
+}
+
+.primary_button {
+  background-color: var(--primary-button-color);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: var(--primary-button-text-color);
+  font-size: 15px;
+  transition: background-color 0.3s;
+  text-decoration: none;
+}
+
+.primary_button:hover {
+  background-color: var(--primary-button-hover-color);
+  cursor: pointer;
+}
+
+.secondary_button {
+  background-color: var(--secondary-button-color);
+  color: var(--secondary-button-text-color);
+  border-radius: 10px;
+  border: solid 1px var(--secondary-button-border-color);
+  padding: 10px 20px;
+  font-size: 15px;
+  margin-top: auto;
+  font-weight: 420;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  transition: color 0.2s;
+}
+
+.secondary_button:hover {
+  background-color: var(--secondary-button-hover-color);
+  color: var(--secondary-button-hover-text-color);
+}
+
+.no-results {
+  font-style: italic;
+  color: var(--primary-text-color);
+}
+
+.danger_button {
+  background-color: var(--danger-button-color);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: var(--danger-button-text-color);
+  font-size: 15px;
+  transition: background-color 0.3s;
+  text-decoration: none;
+}
+
+.danger_button:hover {
+  background-color: var(--danger-button-hover-color);
+  cursor: pointer;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.reservation-form {
+  color: black;
+  background-color: white;
+  width: 30rem;
+  height: 20rem;
+  border-radius: 10px;
+  padding: 30px;
+  padding-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  float: left;
+}
+
+.reservation-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100%;
+}
+
+.reservation-form-text h1 {
+  font-weight: 400;
+  font-size: 70px;
+  margin: 0px;
+  margin-bottom: 30px;
+}
+
+.reservation-form-text p {
+  font-size: 20px;
+  line-height: 29px;
+}
+
+.reservation-form-text {
+  margin-left: 20px;
+}
+
+.reservation-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.reservation-field span {
+  font-size: 15px;
+}
+
+.check_box {
+  display: flex; 
+  flex-direction: row; 
+  gap: 10px;
+  align-items: center;
+}
+
+.reservation-field input {
+  padding: 10px;
+  border-radius: 10px;
+  border: solid 1px #cccccc;
+  margin-top: 10px;
+}
+
+.error_messages_container {
+  padding: 15px 0px;
+  border-radius: 10px; 
+  width: 100%; 
+  border: 2px solid rgb(243, 75, 75); 
+  background-color: rgb(237, 139, 139);
+}
+
+.error_message {
+  font-size:14px; 
+  font-weight: 600;
+  margin-left: 15px;
+  width: 100%;
+  margin-top: 0px;
+  margin-bottom: 3px;
+  margin-right: 10px;
+  color: red;
+}
+
+.blue_body {
+  background-color: var(--primary-backround-color);
+  font-family: var(--text-font);
+  margin: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page_container {
+  width: 60%;
+  margin: 20xp auto;
+}

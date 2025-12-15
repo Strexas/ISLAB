@@ -3,68 +3,67 @@
   <head>
     <title>Bolt Drive - Reserve Car</title>
 
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/car_reserve.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/car_reserve.css') }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
-
-    <script>
-      function navigation() {
-        const insurance = document.getElementById("insurance");
-        if (insurance.checked) {
-          window.location.href = "insurance.html";
-        } else {
-          window.location.href = "payment.html";
-        }
-      }
-    </script>
   </head>
 
   <body>
     <!-- Navbar -->
     {% from "components/navbar.html" import navbar %}
-    {{ navbar(logged_in=logged_in) }}
+    {{ navbar() }}
 
     <!-- Reserve car form -->
     <section class="reservation-form-container">
       <div class="rental-form-container">
         <h1>Complete your reservation</h1>
 
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="error_messages_container" style="width: 100%;">
+            {% for category, message in messages %}
+              <p class="error_message">{{ message }}</p>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endwith %}
+        
         <!-- Rental Details form -->
         <h3 style="margin-top: 50px;">Rental Details</h3>
-        <form autocomplete="off">
-          
+        <form autocomplete="off" method="post" action="{{ url_for('reservations.reserve', vehicle_id=vehicle.id) }}">
+
+          <!-- Dates form -->
           <div class="row">
             <label class="reservation-field" style="width: 100%;">
               <span>Pick-up Date</span>
-              <input type="date" required>
+              <input type="datetime-local" name="pickup_date" required>
             </label>
 
             <label class="reservation-field" style="width: 100%;">
               <span>Drop-off Date</span>
-              <input type="date" required>
+              <input type="datetime-local" name="return_date" required>
             </label>
           </div>
+        
 
-        </form>
-
-        <!-- Personal Info form -->
-        <h3 style="margin-top: 50px;">Personal Info</h3>
-        <form autocomplete="off">
-          
+          <!-- Personal Info -->
+          <h3 style="margin-top: 50px;">Personal Info</h3>
+            
           <!-- Name Surname-->
           <div class="row">
             <label class="reservation-field" style="width: 100%;">
               <span>Name: </span>
-              <input type="text" required placeholder="Enter Name">
+              <input type="text" disabled value="{{ user.name }}">
             </label>
 
             <label class="reservation-field" style="width: 100%;">
               <span>Surname: </span>
-              <input type="text" required placeholder="Enter Surname">
+              <input type="text" disabled value="{{ user.surname }}">
             </label>
           </div>
 
@@ -72,35 +71,32 @@
           <div class="row" style=" margin-top: 20px;">
             <label class="reservation-field" style="width: 100%;">
               <span>Email: </span>
-              <input type="email" required placeholder="Enter Email">
+              <input type="email" disabled value="{{ user.email }}">
             </label>
 
             <label class="reservation-field" style="width: 100%;">
-              <span>Phone Number: </span>
-              <input type="tel" required placeholder="Enter Phone Number">
+              <span>Drivers Licence Number: </span>
+              <input type="tel" disabled value="{{ user.driver_license }}">
             </label>
           </div>
-        </form>
 
-        <!-- Insurance Options -->
-        <h3 style="margin-top: 50px;">Insurance Options</h3>
-        
-        <label class="insurance-option">
-          <input type="checkbox" name="insurance" value="premium" id="insurance" />
-          <div class="insurance-content">
-            <div class="insurance-title">Premium Coverage</div>
-            <div class="insurance-description">
-              Get full insurance protection including theft, collision, and roadside assistance, with zero deductible.
+          <!-- Insurance Options -->
+          <h3 style="margin-top: 50px;">Insurance Options</h3>
+          
+          <label class="insurance-option">
+            <input type="checkbox" name="wants_insurance" value="premium" id="insurance" />
+            <div class="insurance-content">
+              <div class="insurance-title">Premium Coverage</div>
+              <div class="insurance-description">
+                Get full insurance protection including theft, collision, and roadside assistance, with zero deductible.
+              </div>
             </div>
-          </div>
-        </label>
-
-        <button class="button-submit" style="width: 500px; margin-top: 20px; float: right; margin-bottom: 30px;" onclick="navigation()">Continue</button>
+          </label>
+          
+          <!-- Submit Button -->
+          <button class="primary_button submit_button" type="submit">Continue</button>
+        </form>
       </div>
-    </section>
-    
-    <section>
-
     </section>
   </body>
 </html>

@@ -3,6 +3,9 @@ from flask import Flask
 from flask_migrate import Migrate
 
 from context import db, mail
+
+from models.User import User
+
 # Blueprints
 from subsystems.user_management.routes import user_management_bp
 from subsystems.reservation_subsystem.routes import reservation_blueprint
@@ -23,7 +26,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
 # DATABASE
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:Mariaajo8!@localhost:5432/islab_berku"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:possw0rd@localhost:5432/testcase"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # INITIALIZE EXTENSIONS
@@ -33,12 +36,13 @@ migrate = Migrate(app, db)
 
 # REGISTER BLUEPRINTS
 app.register_blueprint(dot_bp)
-app.register_blueprint(user_management_bp)
+app.register_blueprint(fleet_bp)
 app.register_blueprint(reservation_blueprint)
+app.register_blueprint(user_management_bp)
+app.register_blueprint(payment_bp)
+app.register_blueprint(maintenance_bp)
 
-from models.User import User
-from context import db
-from werkzeug.security import generate_password_hash
+app.template_folder = "templates"
 
 def create_default_admin():
     admin_email = "admin@carrenting.com"
@@ -52,7 +56,7 @@ def create_default_admin():
         email=admin_email,
         name="System",
         surname="Admin",
-        role="accountant",      
+        role="accountant",
         account_status=True,
         is_verified=True,
         is_banned=False
@@ -65,10 +69,6 @@ def create_default_admin():
 
 with app.app_context():
     create_default_admin()
-
-from models.Reservation import Reservation
-from models.InsurancePolicy import InsurancePolicy
-from models.User import User
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reservation List</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reservation_card.css') }}">
+
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <style>
+      .fleet_grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        padding: 20px;
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+        .fleet_grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .fleet_grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+
+      .modal.hidden {
+        display: none;
+      }
+
+      .modal-content {
+        background: #fff;
+        padding: 24px;
+        border-radius: 10px;
+        width: 400px;
+      }
+
+      .modal-actions {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+    </style>
+  </head>
+  <body class="blue_body">
+    <!-- Navbar -->
+    {% from "components/navbar.html" import navbar %}
+    {{ navbar() }}
+
+    <div class="page_container">
+      {% from "components/reservation_card.html" import reservation_card %}
+      <!-- Show reservation list -->
+      {% if reservations %}
+        <div class="fleet_grid">
+          {% for reservation in reservations %}
+            {{ reservation_card(reservation) }}
+          {% endfor %}      
+        </div>
+      {% else %}
+        <!-- No reservations -->
+        <p class="no-results">No reservations yet</p>
+      {% endif %}
+    </div>
+
+    <div id="editReservationModal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Edit Reservation</h2>
+
+        <form id="editReservationForm">
+          <input type="hidden" id="edit_reservation_id">
+
+          <label>
+            Pickup Date
+            <input type="datetime-local" id="edit_pickup_date" name="pickup_date" required>
+          </label>
+
+          <label>
+            Return Date
+            <input type="datetime-local" id="edit_return_date" name="return_date" required>
+          </label>
+
+          <div class="modal-actions">
+            <button type="button" onclick="closeEditModal()">Cancel</button>
+            <button type="submit" class="primary_button">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </body>
+
+  <script>
+    function openEditModal(id, pickup, ret) {
+      document.getElementById("edit_reservation_id").value = id;
+      document.getElementById("edit_pickup_date").value = pickup;
+      document.getElementById("edit_return_date").value = ret;
+
+      document.getElementById("editReservationModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editReservationModal").classList.add("hidden");
+    }
+
+    document.getElementById("editReservationForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById("edit_reservation_id").value;
+      const pickup = document.getElementById("edit_pickup_date").value;
+      const ret = document.getElementById("edit_return_date").value;
+
+      const res = await fetch(`/reservations/edit/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          pickup_date: pickup,
+          return_date: ret
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        location.reload();
+      } else {
+        alert(data.error || "Failed to update reservation");
+      }
+    });
+  </script>
+</html>

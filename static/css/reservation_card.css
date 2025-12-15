@@ -1,0 +1,28 @@
+.reservation {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  font-family: var(--text-font);
+  width: 185px;
+}
+
+.reservation-card__header {
+  margin-bottom: 20px;
+}
+
+.reservation-card__title {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.reservation-card__status {
+  color: gray;
+  font-style: italic;
+}
+
+.reservation-card__body {
+}
+
+.reservation_card_buttons {
+  margin-top: 20px;
+}

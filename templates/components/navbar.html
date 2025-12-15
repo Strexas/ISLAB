@@ -1,4 +1,4 @@
-{% macro navbar(logged_in) %}
+{% macro navbar() %}
 <!-- Navbar -->
 <nav class="navbar">
   <div class="navbar-container">
@@ -12,18 +12,20 @@
     <!-- Navigation -->
     <div class="navbar-links">
       <a href="/">Home</a>
-      <a href="fleetlist">Fleet</a>
+      <a href="/fleet">Fleet</a>
+      <a href="/reservations/list">My reservations</a>
     </div>
 
     <!-- User ctrl buttons -->
-    <div class="navbar-links" style="display: flex; gap: 10px;">
-      {% if not logged_in %}
-        <button><a style="color: white" href="login">Login</a></button>
-        <button><a style="color: white" href="register">Register</a></button>
+    <div style="display: flex; gap: 10px;">
+      {% if not session.get('user_id') %}
+        <a class="primary_button" style="color: white" href="/login">Login</a>
+        <a class="primary_button" style="color: white" href="/register">Register</a>
       {% endif %}
 
-      {% if logged_in %}
-        <button><a style="color: white" href="profile">Profile</a></button>
+      {% if session.get('user_id') %}
+        <a class="primary_button" style="color: white" href="/profile">Profile</a>
+        <a class="danger_button" style="color: white" href="/logout">Logout</a>
       {% endif %}
 
     </div>

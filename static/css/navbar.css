@@ -1,4 +1,5 @@
 .navbar {
+  font-family: var(--text-font);
   background: white;
   position: sticky;
   width: 100%;

@@ -1,121 +1,122 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Bolt Drive</title>
+  <title>Bolt Drive</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
   </head>
 
   <body>
-      <div class="index-wrap">
+    <div class="index-wrap">
 
-          <!-- Navbar -->
-          {% from "_navbar.html" import navbar %}
-          {{ navbar() }}
+      <!-- Navbar -->
+      {% from "components/navbar.html" import navbar %}
+      {{ navbar() }}
+      
+      <!-- Reserve car form -->
+      <section class="reservation-form-container">
 
-          <!-- Reserve car form -->
-          <section class="reservation-form-container">
+        <!-- Prometion text on the left -->
+        <div class="reservation-form-text">
+          <h1>Reserve your<br>car here!</h1>
+          <p>Great cars at great prices for your needs. <br>Experience luxury and comfort on every journey. </p>
+          <button class="button-promo" onclick="location.href = '/fleet';">Our Fleet</button>
+        </div>
 
-              <!-- Prometion text on the left -->
-              <div class="reservation-form-text">
-                  <h1>Reserve your<br>car here!</h1>
-                  <p>Great cars at great prices for your needs. <br>Experience luxury and comfort on every journey. </p>
-                  <button class="button-promo" onclick="location.href = 'fleetlist';">Our Fleet</button>
-              </div>
+        <!-- The reservation form -->
+        <div class="reservation-form">
+          <h2 style="margin-top: 0px; margin-bottom: 40px;">Book your car</h2>
 
-              <!-- The reservation form -->
-              <div class="reservation-form">
-                  <h2 style="margin-top: 0px; margin-bottom: 40px;">Book your car</h2>
+          <form autocomplete="off">
+            <!-- Pickup field -->
+            <label class="reservation-field">
+              <span>Pick-up Location</span>
+              <input type="text" placeholder="Enter location" required>
+            </label>
 
-                  <form autocomplete="off">
-                      <!-- Pickup field -->
-                      <label class="reservation-field">
-                          <span>Pick-up Location</span>
-                          <input type="text" placeholder="Enter location" required>
-                      </label>
+            <!-- Dates fields -->
+            <div class="row">
+              <label class="reservation-field">
+                <span>Pick-up Date</span>
+                <input type="date" name="pickup_date" required>
+              </label>
 
-                      <!-- Dates fields -->
-                      <div class="row">
-                          <label class="reservation-field">
-                              <span>Pick-up Date</span>
-                              <input type="date" name="pickup_date" required>
-                          </label>
+              <label class="reservation-field">
+                <span>Pick-up Date</span>
+                <input type="date" name="dropoff_date" required>
+              </label>
+            </div>
 
-                          <label class="reservation-field">
-                              <span>Pick-up Date</span>
-                              <input type="date" name="dropoff_date" required>
-                          </label>
-                      </div>
+            <button class="button-submit">Search Available Cars</button>
+          </form>
+        </div>
+      </section>
 
-                      <button class="button-submit">Search Available Cars</button>
-                  </form>
-              </div>
-          </section>
+      <!-- Promo Features section -->
+      <section class="features">
+        <h1>Why Choose Us</h1>
+        <h3>Experience the best car rental service with premium features</h3>
 
-          <!-- Promo Features section -->
-          <section class="features">
-              <h1>Why Choose Us</h1>
-              <h3>Experience the best car rental service with premium features</h3>
+        <div class="features-grid">
 
-              <div class="features-grid">
+          <!-- Card 1 -->
+          <article class="feature-card">
+            <div class="icon-wrap">
+              <!-- Shield icon -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2 4 5v6c0 5.25 3.44 9.92 8 11 4.56-1.08 8-5.75 8-11V5l-8-3Z" />
+              </svg>
+            </div>
+            <h3>Safe & Secure</h3>
+            <p>Regularly maintained vehicles and full insurance for peace of mind.</p>
+          </article>
 
-                  <!-- Card 1 -->
-                  <article class="feature-card">
-                      <div class="icon-wrap">
-                          <!-- Shield icon -->
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M12 2 4 5v6c0 5.25 3.44 9.92 8 11 4.56-1.08 8-5.75 8-11V5l-8-3Z" />
-                          </svg>
-                      </div>
-                      <h3>Safe & Secure</h3>
-                      <p>Regularly maintained vehicles and full insurance for peace of mind.</p>
-                  </article>
+          <!-- Card 2 -->
+          <article class="feature-card">
+            <div class="icon-wrap">
+              <!-- Dollar icon -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v2a4 4 0 0 1 0 8 4 4 0 0 0 0 8v2M7 5h10M7 19h10" />
+              </svg>
+            </div>
+            <h3>Best Prices</h3>
+            <p>Competitive rates with no hidden fees. Great value for your money.</p>
+          </article>
 
-                  <!-- Card 2 -->
-                  <article class="feature-card">
-                      <div class="icon-wrap">
-                          <!-- Dollar icon -->
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M12 3v2a4 4 0 0 1 0 8 4 4 0 0 0 0 8v2M7 5h10M7 19h10" />
-                          </svg>
-                      </div>
-                      <h3>Best Prices</h3>
-                      <p>Competitive rates with no hidden fees. Great value for your money.</p>
-                  </article>
+          <!-- Card 3 -->
+          <article class="feature-card">
+            <div class="icon-wrap">
+              <!-- Clock icon -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 8v5l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" />
+              </svg>
+            </div>
+            <h3>24/7 Service</h3>
+            <p>Round-the-clock support and flexible pick-up and drop-off times.</p>
+          </article>
 
-                  <!-- Card 3 -->
-                  <article class="feature-card">
-                      <div class="icon-wrap">
-                          <!-- Clock icon -->
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M12 8v5l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" />
-                          </svg>
-                      </div>
-                      <h3>24/7 Service</h3>
-                      <p>Round-the-clock support and flexible pick-up and drop-off times.</p>
-                  </article>
+          <!-- Card 4 -->
+          <article class="feature-card">
+            <div class="icon-wrap">
+              <!-- Headphones icon -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12a8 8 0 1 1 16 0v6a3 3 0 0 1-3 3h-1v-8h4M7 21H6a3 3 0 0 1-3-3v-6h4v8Z" />
+              </svg>
+            </div>
+            <h3>Customer Support</h3>
+            <p>Dedicated team ready to help whenever you need it.</p>
+          </article>
 
-                  <!-- Card 4 -->
-                  <article class="feature-card">
-                      <div class="icon-wrap">
-                          <!-- Headphones icon -->
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M4 12a8 8 0 1 1 16 0v6a3 3 0 0 1-3 3h-1v-8h4M7 21H6a3 3 0 0 1-3-3v-6h4v8Z" />
-                          </svg>
-                      </div>
-                      <h3>Customer Support</h3>
-                      <p>Dedicated team ready to help whenever you need it.</p>
-                  </article>
-
-              </div>
-          </section>
+        </div>
+      </section>
 
 
-      </div>
+    </div>
   </body>
 </html>
