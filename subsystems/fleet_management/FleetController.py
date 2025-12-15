@@ -13,7 +13,7 @@ class FleetController:
         return Vehicle.query.order_by(Vehicle.vehicle_id).all()
 
     @staticmethod
-    def get(vehicle_id):
+    def get_vehicle(vehicle_id):
         return Vehicle.query.get_or_404(vehicle_id)
 
     @staticmethod
