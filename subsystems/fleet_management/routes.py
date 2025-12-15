@@ -27,21 +27,21 @@ def allowed(filename):
 def can_manage():
     return session.get("role") in ["employee", "accountant"]
 
-
-# -------------------- LIST VEHICLES --------------------
+# ----------------- LIST VEHICLES -----------------
 
 @fleet_bp.route("/")
 def fleet_list():
-    vehicles = Vehicle.query.order_by(Vehicle.vehicle_id).all()
+    vehicles = FleetController.get_all_vehicles()
     return render_template("fleetlist.html", vehicles=vehicles)
 
+# ----------------- VEHICLE DETAILS -----------------
 
 # -------------------- VEHICLE DETAILS --------------------
 
 @fleet_bp.route("/<int:vehicle_id>")
 def vehicle_details(vehicle_id):
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
-    reviews = get_vehicle_reviews(vehicle_id)
+    vehicle = FleetController.get_vehicle(vehicle_id)
+    reviews = FleetController.get_reviews(vehicle_id)
 
     return render_template(
         "car_details.html",
@@ -114,7 +114,7 @@ def fleet_edit(vehicle_id):
         flash("Access denied.", "danger")
         return redirect(url_for("fleet.fleet_list"))
 
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    vehicle = FleetController.get_vehicle(vehicle_id)
     form = VehicleForm()
 
     # ---------- LOAD DATA ----------
@@ -127,7 +127,7 @@ def fleet_edit(vehicle_id):
         form.seats.data = vehicle.seat
         form.fuel_type.data = vehicle.fuel_type
         form.status.data = vehicle.status
-        form.current_price.data = vehicle.current_price() or 0
+        form.current_price.data = vehicle.current_price()
 
     # ---------- SUBMIT ----------
     if form.validate_on_submit():

@@ -29,7 +29,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
 # DATABASE
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:Mariaajo8!@localhost:5432/islab_berku"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:possw0rd@localhost:5432/car_rental_lab"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # INITIALIZE EXTENSIONS
