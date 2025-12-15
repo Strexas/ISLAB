@@ -66,7 +66,7 @@ def register():
             role=selected_role
         )
 
-        token_value = UserManagementController.generate(user.id, type="verify_email")
+        token_value = UserManagementController.generate_token(user.id, type="verify_email")
         verify_url = url_for(
             'user_management.verify_email',
             token=token_value,
@@ -225,7 +225,7 @@ def list_users():
 
 @user_management_bp.route('/ban_user/<int:user_id>', methods=['POST'])
 def ban_user(user_id):
-    if user not in ADMIN_ROLES:
+    if session.get('role') not in ADMIN_ROLES:
         flash("Access denied.", "danger")
         return redirect(url_for('user_management.list_users'))
 
@@ -256,7 +256,7 @@ def unban_user(user_id):
 
 @user_management_bp.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    if user not in ADMIN_ROLES:
+    if session.get('role') not in ADMIN_ROLES:
         flash("Access denied.", "danger")
         return redirect(url_for('user_management.list_users'))
 

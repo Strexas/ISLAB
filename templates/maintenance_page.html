@@ -186,7 +186,7 @@
               <label for="status">Car Status: </label>
             </span>
             <select type="text" class="info-value" id="status" name="status" {{ disabled }}>
-              <option {{ ["", "selected"][vehicle.status == "Active"] }}>Active</option>
+              <option {{ ["", "selected"][vehicle.status == "Available"] }}>Available</option>
               <option {{ ["", "selected"][vehicle.status == "Maintenance"] }}>Maintenance</option>
             </select>
           </div>

@@ -13,7 +13,7 @@ class Maintenance(db.Model):
     reported_problem = db.Column(db.String(255), nullable=True)
 
     vehicle_id = db.Column(db.Integer,
-                           db.ForeignKey('vehicles.id', ondelete="CASCADE", onupdate="CASCADE"),
+                           db.ForeignKey('vehicles.vehicle_id', ondelete="CASCADE", onupdate="CASCADE"),
                            nullable=False)
 
     orders = db.relationship("Order", backref="maintenance")

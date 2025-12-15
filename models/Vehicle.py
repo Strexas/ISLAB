@@ -35,12 +35,11 @@ class Vehicle(db.Model):
     )
     maintenance_records = db.relationship(
         "Maintenance",
-        back_populates="vehicle",
         cascade="save-update",   # no delete cascade
         passive_deletes=True     # allows SQL to decide behavior
     )
 
     def current_price(self):
-        if self.rent_prices:
-            return self.rent_prices[0].price
+        if self.rent_price:
+            return self.rent_price[0].price
         return 0.0

@@ -43,7 +43,7 @@ def fleet_list():
 
 # -------------------- VEHICLE DETAILS --------------------
 
-@fleet_bp.route('/<int:vehicle_vehicle_id>')
+@fleet_bp.route('/<int:vehicle_id>')
 def vehicle_details(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     reviews = get_vehicle_reviews(vehicle_id)
@@ -124,7 +124,7 @@ def fleet_add():
             model=form.model.data,
             year=form.year.data,
             transmission=form.transmission.data,
-            seats=form.seats.data,
+            seat=form.seats.data,
             fuel_type=form.fuel_type.data,
             status=form.status.data
         )
@@ -182,7 +182,7 @@ def fleet_edit(vehicle_id):
         form.model.data = vehicle.model
         form.year.data = vehicle.year
         form.transmission.data = vehicle.transmission
-        form.seats.data = vehicle.seats
+        form.seats.data = vehicle.seat
         form.fuel_type.data = vehicle.fuel_type
         form.status.data = vehicle.status
         form.current_price.data = vehicle.current_price() or 0
@@ -195,7 +195,7 @@ def fleet_edit(vehicle_id):
         vehicle.model = form.model.data
         vehicle.year = form.year.data
         vehicle.transmission = form.transmission.data
-        vehicle.seats = form.seats.data
+        vehicle.seat = form.seats.data
         vehicle.fuel_type = form.fuel_type.data
         vehicle.status = form.status.data
 

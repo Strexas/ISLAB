@@ -59,7 +59,7 @@ class MaintenanceController:
         :return: vehicle instance.
         """
 
-        vehicle = Vehicle.query.filter_by(id=vehicle_id).first()
+        vehicle = Vehicle.query.filter_by(vehicle_id=vehicle_id).first()
         return vehicle
 
     @staticmethod
@@ -120,7 +120,7 @@ class MaintenanceController:
     @staticmethod
     def update_description(maintenance_id, description, problem, start_date, end_date, status):
         maintenance = Maintenance.query.filter_by(id=maintenance_id).first()
-        vehicle = Vehicle.query.filter_by(id=maintenance.vehicle_id).first()
+        vehicle = Vehicle.query.filter_by(vehicle_id=maintenance.vehicle_id).first()
         maintenances_vehicles = Maintenance.query.filter_by(vehicle_id=maintenance.vehicle_id, end_date=None).all()
 
         if not maintenance:

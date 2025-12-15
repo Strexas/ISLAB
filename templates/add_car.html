@@ -52,15 +52,23 @@
 
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
-
+            <label>License Plate</label>
             {{ form.license_plate(label="License Plate") }}
+            <label>Manufacturer</label>
             {{ form.manufacturer(label="Manufacturer") }}
+            <label>Model</label>
             {{ form.model(label="Model") }}
+            <label>Year</label>
             {{ form.year(label="Year") }}
+            <label>Transmission</label>
             {{ form.transmission(label="Transmission") }}
+            <label>Seats</label>
             {{ form.seats(label="Seats") }}
+            <label>Fuel Type</label>
             {{ form.fuel_type(label="Fuel Type") }}
+            <label>Status</label>
             {{ form.status(label="Status") }}
+            <label>Price (€)</label>
             {{ form.current_price(label="Price (€)") }}
 
             <label>Image</label>
