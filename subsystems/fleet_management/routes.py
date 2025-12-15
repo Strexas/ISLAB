@@ -161,7 +161,7 @@ def fleet_add():
         flash("Vehicle added successfully.", "success")
         return redirect(url_for("fleet.fleet_list"))
 
-    return render_template("vehicle_form.html", form=form, mode="add")
+    return render_template("add_car.html", form=form, mode="add")
     
 
 # -------------------- EDIT VEHICLE --------------------
