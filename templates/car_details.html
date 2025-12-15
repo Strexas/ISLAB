@@ -57,15 +57,7 @@
         <div style="margin-top: 30px;">
             <h3>Customer Reviews</h3>
 
-            {% if reviews.reviews %}
-            {% for r in reviews.reviews %}
-            <p><strong>{{ r.reviewerName }}</strong>: {{ r.comment }}</p>
-            <p>Rating: {{ r.rating }}</p>
-            <hr>
-            {% endfor %}
-            {% else %}
-            <p>No reviews available.</p>
-            {% endif %}
+           
 
             <div style="display: flex; flex-direction: row; gap: 5px;">
                 <a class="primary_button"
@@ -87,14 +79,11 @@
                     </a>
 
                     {% if session.get("role") == "accountant" %}
-                        <form method="POST"
-                            action="{{ url_for('fleet.fleet_delete', vehicle_id=vehicle.vehicle_id) }}"
-                            style="display:inline;">
-                            <button class="danger_button"
-                                    onclick="return confirm('Delete this vehicle?');">
-                                Delete
-                            </button>
-                        </form>
+                        <form method="GET" action="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}">
+    <button class="warning_button">
+        Retire Vehicle
+    </button>
+</form>
                     {% endif %}
                 {% endif %}
             </div>

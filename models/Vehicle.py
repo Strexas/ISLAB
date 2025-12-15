@@ -36,6 +36,7 @@ class Vehicle(db.Model):
         "Maintenance",
         cascade="save-update",   # no delete cascade
         passive_deletes=True     # allows SQL to decide behavior
+
     )
     
 

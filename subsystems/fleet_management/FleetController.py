@@ -3,6 +3,7 @@ from models.Vehicle import Vehicle
 from models.RentPrice import RentPrice
 from models.ReviewCache import ReviewCache
 from werkzeug.utils import secure_filename
+from flask import session
 from datetime import datetime, date, timedelta
 import requests, os
 
@@ -10,7 +11,16 @@ class FleetController:
 
     @staticmethod
     def get_all_vehicles():
-        return Vehicle.query.order_by(Vehicle.vehicle_id).all()
+        # Customers: show only ACTIVE cars
+       role = session.get("role")
+
+        # Customers: show only ACTIVE cars
+       if role not in ["employee", "accountant"]:
+        return Vehicle.query.filter_by(status="Active").all()
+
+    # Employees + accountants: show ALL cars
+       return Vehicle.query.all()
+
 
     @staticmethod
     def get_vehicle(vehicle_id):
