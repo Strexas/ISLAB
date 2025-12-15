@@ -12,11 +12,11 @@
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
   </head>
 
-  <body>
+  <body class="blue_body">
       <div class="index-wrap">
 
           <!-- Navbar -->
-          {% from "components/navbar.html" import navbar %}
+          {% from "components/_navbar.html" import navbar %}
           {{ navbar() }}
 
           <!-- Reserve car form -->

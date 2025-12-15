@@ -8,7 +8,7 @@
     background: #ffffff;
     z-index: 1000;
     border-bottom: 1px solid #e5e7eb;
-    font-family: "Segoe UI", Tahoma, sans-serif;
+    font-family: var(--text-font);
 }
 
 /* Space reserved for fixed navbar */
