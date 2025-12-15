@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <title>List Users</title>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: var(--text-font);
             background: linear-gradient(135deg, #4f46e5, #9333ea);
             color: white;
             margin: 0;
-            padding: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -42,9 +44,9 @@
             transition: transform 0.2s ease;
         }
 
-            .user-card:hover {
-                transform: translateY(-6px);
-            }
+        .user-card:hover {
+            transform: translateY(-6px);
+        }
 
         .user-name {
             font-size: 1.3em;
@@ -108,7 +110,7 @@
 
 <body>
 
-    {% from "_navbar.html" import navbar %}
+    {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
 
     <h1>👥 List of Users</h1>

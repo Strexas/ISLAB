@@ -14,6 +14,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(512), nullable=False)
 
+    wallet_balance = db.Column(db.Float, default=0.0)
     role = db.Column(db.String(20), default='customer')       
     account_status = db.Column(db.Boolean, default=True)      
     is_banned = db.Column(db.Boolean, default=False)          

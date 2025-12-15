@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Maintenance Details - Toyota Corolla</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
   <style>
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -126,22 +129,6 @@
       opacity: 0.9;
     }
 
-    .back-link {
-      margin-top: 40px;
-      text-decoration: none;
-      color: #fff;
-      background: rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    .back-link:hover {
-      background: rgba(255,255,255,0.4);
-      transform: translateY(-2px);
-    }
-
     footer {
       margin-top: auto;
       opacity: 0.8;
@@ -156,12 +143,18 @@
       border-radius: 8px;
       margin-top: 15px;
     }
+
     select>option {
     background-color: black;
+    }
+    input, textarea, select {
+      font-size: 1.2em;
     }
   </style>
 </head>
 <body>
+    {% from "components/_navbar.html" import navbar %}
+    {{ navbar() }}
   <h1>🛠️ Maintenance Details</h1>
   <div class="subtitle">{{ vehicle.model }} ({{ vehicle.license_plate }}) Maintenance</div>
     <div class="info-section">
@@ -186,7 +179,7 @@
               <label for="status">Car Status: </label>
             </span>
             <select type="text" class="info-value" id="status" name="status" {{ disabled }}>
-              <option {{ ["", "selected"][vehicle.status == "Active"] }}>Active</option>
+              <option {{ ["", "selected"][vehicle.status == "Available"] }}>Available</option>
               <option {{ ["", "selected"][vehicle.status == "Maintenance"] }}>Maintenance</option>
             </select>
           </div>
@@ -250,7 +243,7 @@
           </thead>
           <tbody>
           {% for component in awaiting_order_details %}
-          <tr><td>{{ component.id }}</td><td><input class="info-value" name="{{ component.id }}" type="text" value="{{ component.name }}"></td><td><input class="info-value" name="{{ component.id }}" type="number" value="{{ component.quantity }}"></td><td><button class="btn edit" name="delete_component" value="{{ component.id }}">Remove</button></td></tr>
+          <tr><td>{{ component.id }}</td><td><input class="info-value" name="{{ component.id }}" type="text" value="{{ component.name }}"></td><td><input class="info-value" name="{{ component.id }}" type="number" min="1" step="1" value="{{ component.quantity }}"></td><td><button class="btn edit" name="delete_component" value="{{ component.id }}">Remove</button></td></tr>
           {% endfor %}
           </tbody>
         </table>
@@ -269,8 +262,11 @@ document.getElementById('deleteBtn').addEventListener('click', function (e) {
     e.preventDefault();
   }
 });
-var element_to_scroll_to = document.getElementById('scrollto');
-element_to_scroll_to.scrollIntoView();
+if ({{ scroll }})
+{
+  var element_to_scroll_to = document.getElementById('scrollto');
+  element_to_scroll_to.scrollIntoView();
+}
 </script>
 </body>
 </html>

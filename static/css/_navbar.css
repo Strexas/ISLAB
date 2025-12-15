@@ -1,0 +1,77 @@
+/* ===== NAVBAR BASE ===== */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    z-index: 1000;
+    border-bottom: 1px solid #e5e7eb;
+    font-family: var(--text-font);
+}
+
+/* Space reserved for fixed navbar */
+.navbar-spacer {
+    height: 74px;
+}
+
+/* ===== CONTAINER ===== */
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ===== LOGO ===== */
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+    text-decoration: none;
+}
+
+    .navbar-logo img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+    }
+
+/* ===== LINKS ===== */
+
+.navbar-links {
+    display: flex;
+    gap: 1.8rem;
+}
+
+    .navbar-links a {
+        text-decoration: none;
+        color: #374151;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+        .navbar-links a:hover {
+            color: #2563eb;
+        }
+
+/* Admin highlight */
+.admin-link {
+    color: #7c3aed;
+    font-weight: 600;
+}
+
+/* ===== ACTION BUTTONS ===== */
+
+.navbar-actions {
+    display: flex;
+    gap: 10px;
+}

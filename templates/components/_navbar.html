@@ -13,25 +13,50 @@
     z-index:1000;
 ">
 
-    <div style="display:flex; align-items:center; gap:10px;">
-        <img src="{{ url_for('static', filename='resources/site_logo.png') }}"
-             style="height:32px; width:auto; object-fit:contain;">
+<!-- Spacer to avoid overlap (fixed navbar) -->
+<div class="navbar-spacer"></div>
 
-        <span style="font-size:20px; font-weight:bold;">Bolt Drive</span>
+<nav class="navbar">
+    <div class="navbar-container">
+
+        <!-- LOGO -->
+        <a href="/" class="navbar-logo">
+            <img src="{{ url_for('static', filename='resources/site_logo.png') }}" alt="Bolt Drive">
+            <span>Bolt Drive</span>
+        </a>
+
+        <!-- MAIN LINKS -->
+        <div class="navbar-links">
+
+            <a href="/">Home</a>
+            <a href="/fleet">Fleet</a>
+
+            {% if session.get('user_id') %}
+            <a href="/reservations/list">My Reservations</a>
+            {% endif %}
+
+            {% if session.get('role') in ["employee", "accountant"] %}
+            <a href="{{ url_for('user_management.admin_dashboard') }}" class="admin-link">
+                Admin
+            </a>
+            {% endif %}
+
+        </div>
+
+        <!-- USER ACTIONS -->
+        <div class="navbar-actions">
+
+            {% if not session.get('user_id') %}
+            <a href="/login" class="primary_button">Login</a>
+            <a href="/register" class="secondary_button blue_outline">Register</a>
+            {% else %}
+            <a href="/profile" class="secondary_button blue_outline">Profile</a>
+            <a href="/logout" class="danger_button">Logout</a>
+            {% endif %}
+
+        </div>
+
     </div>
-
-    <div style="display:flex; gap:15px; align-items:center;">
-        <a href="/" style="color:white; text-decoration:none;">Home</a>
-        <a href="/fleetlist" style="color:white; text-decoration:none;">Fleet</a>
-
-        {% if not session.get('user_id') %}
-        <a href="/login" style="color:white; text-decoration:none;">Login</a>
-        <a href="/register" style="color:white; text-decoration:none;">Register</a>
-        {% else %}
-        <a href="/profile" style="color:white; text-decoration:none;">Profile</a>
-        <a href="/logout" style="color:white; text-decoration:none;">Logout</a>
-        {% endif %}
-    </div>
-
 </nav>
+
 {% endmacro %}

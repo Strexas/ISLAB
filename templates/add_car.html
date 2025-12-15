@@ -1,45 +1,68 @@
-{% from "_navbar.html" import navbar %}
+{% from "components/navbar.html" import navbar %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ 'Edit Vehicle' if mode=='edit' else 'Add Vehicle' }}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
     <style>
         body {
-            background: #eef2f7;
-            padding-top: 80px;
+            background: var(--primary-backround-color);
             margin: 0;
             font-family: Arial, sans-serif;
         }
 
-        .card {
-            width: 450px;
+        .container {
+            width: 90%;
+            max-width: 700px;
             margin: auto;
+            margin-top: 40px;
             background: white;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+        .form-group {
+            margin-bottom: 18px;
         }
 
-        .btn {
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
             padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .btn-primary {
+            padding: 12px;
             width: 100%;
             background: #004aad;
             color: white;
-            text-align: center;
             border-radius: 6px;
-            margin-top: 15px;
             border: none;
             cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #003b8a;
+        }
+
+        .image-input {
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -47,26 +70,63 @@
 <body>
     {{ navbar() }}
 
-    <div class="card">
+    <div class="container">
         <h2>{{ 'Edit Vehicle' if mode=='edit' else 'Add Vehicle' }}</h2>
 
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
 
-            {{ form.license_plate(label="License Plate") }}
-            {{ form.manufacturer(label="Manufacturer") }}
-            {{ form.model(label="Model") }}
-            {{ form.year(label="Year") }}
-            {{ form.transmission(label="Transmission") }}
-            {{ form.seats(label="Seats") }}
-            {{ form.fuel_type(label="Fuel Type") }}
-            {{ form.status(label="Status") }}
-            {{ form.current_price(label="Price (€)") }}
+            <div class="form-group">
+                <label>License Plate</label>
+                {{ form.license_plate(class="form-control") }}
+            </div>
 
-            <label>Image</label>
-            <input type="file" name="image">
+            <div class="form-group">
+                <label>Manufacturer</label>
+                {{ form.manufacturer(class="form-control") }}
+            </div>
 
-            <button class="btn" type="submit">
+            <div class="form-group">
+                <label>Model</label>
+                {{ form.model(class="form-control") }}
+            </div>
+
+            <div class="form-group">
+                <label>Year</label>
+                {{ form.year(class="form-control") }}
+            </div>
+
+            <div class="form-group">
+                <label>Transmission</label>
+                {{ form.transmission(class="form-control") }}
+            </div>
+
+            <div class="form-group">
+                <label>Seats</label>
+                {{ form.seats(class="form-control") }}
+            </div>
+
+            <div class="form-group">
+                <label>Fuel Type</label>
+                {{ form.fuel_type(class="form-control") }}
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                {{ form.status(class="form-control") }}
+            </div>
+
+            <div class="form-group">
+                <label>Price (€)</label>
+                {{ form.current_price(class="form-control") }}
+            </div>
+
+            <div class="form-group">
+                <label>Image</label>
+                <input type="file" name="image" class="image-input">
+            </div>
+
+            <button class="btn-primary" type="submit">
                 {{ 'Save Changes' if mode=='edit' else 'Add Vehicle' }}
             </button>
         </form>

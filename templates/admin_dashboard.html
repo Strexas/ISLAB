@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+
     <style>
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #4f46e5, #9333ea);
             color: #fff;
+            margin: 0;
+        }
+
+        main {
+            min-height: calc(100vh - 80px); /* espacio para navbar */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            text-align: center;
         }
 
         h1 {
@@ -25,41 +33,49 @@
         .link-container {
             display: flex;
             gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        a {
-            text-decoration: none;
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 15px 30px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
-            a:hover {
-                background: rgba(255, 255, 255, 0.3);
-                transform: translateY(-3px);
+            .link-container a {
+                text-decoration: none;
+                color: white;
+                background: rgba(255, 255, 255, 0.15);
+                padding: 15px 30px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                font-size: 1.1em;
+                font-weight: 500;
             }
 
+                .link-container a:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: translateY(-3px);
+                }
+
         footer {
-            position: absolute;
-            bottom: 20px;
+            margin-top: 40px;
             font-size: 0.9em;
             opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    {% from "_navbar.html" import navbar %}
+
+    {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
-    <h1>Admin Dashboard</h1>
-    <div class="link-container">
-        <a href="/list_users">👤 List Users</a>
-        <a href="/fleet">🚗 List Cars</a>
-        <a href="/maintenances_list">🔧 List Maintenance</a>
-    </div>
-    <footer>© 2025 Admin Panel</footer>
+
+    <main>
+        <h1>Admin Dashboard</h1>
+
+        <div class="link-container">
+            <a href="/list_users">👤 List Users</a>
+            <a href="/fleet">🚗 List Cars</a>
+            <a href="/maintenances_list">🔧 List Maintenance</a>
+        </div>
+
+        <footer>© 2025 Admin Panel</footer>
+    </main>
+
 </body>
 </html>

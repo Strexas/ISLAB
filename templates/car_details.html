@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <title>{{ vehicle.manufacturer }} {{ vehicle.model }}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <style>
@@ -27,30 +27,28 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .container img {
-            width: 100%;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
+            .container img {
+                width: 100%;
+                border-radius: 10px;
+                margin-bottom: 15px;
+            }
     </style>
 </head>
 
 <body>
     {{ navbar() }}
-    <a class="primary_button"
-   href="{{ url_for('fleet_management.update_reviews', vehicle_id=vehicle.id) }}">
-   Update Reviews
-    </a>
 
     <div class="container">
         <h2>{{ vehicle.manufacturer }} {{ vehicle.model }}</h2>
 
+        {% if vehicle.image_path %}
         <img src="{{ vehicle.image_path }}">
+        {% endif %}
 
         <p><strong>Plate:</strong> {{ vehicle.license_plate }}</p>
         <p><strong>Year:</strong> {{ vehicle.year }}</p>
         <p><strong>Transmission:</strong> {{ vehicle.transmission }}</p>
-        <p><strong>Seats:</strong> {{ vehicle.seats }}</p>
+        <p><strong>Seats:</strong> {{ vehicle.seat }}</p>
         <p><strong>Fuel:</strong> {{ vehicle.fuel_type }}</p>
         <p><strong>Status:</strong> {{ vehicle.status }}</p>
 
@@ -59,31 +57,37 @@
         <div style="margin-top: 30px;">
             <h3>Customer Reviews</h3>
 
-{% if reviews.reviews %}
-    {% for r in reviews.reviews %}
-        <p><strong>{{ r.reviewerName }}</strong>: {{ r.comment }}</p>
-        <p>Rating: {{ r.rating }}</p>
-        <hr>
-    {% endfor %}
-{% else %}
-    <p>No reviews available.</p>
-{% endif %}
+           
 
-            <a class="primary_button" href="/reservations/reserve/{{ vehicle.id }}">Reserve Car</a>
-            
-            {% if session.get("role") in ["employee", "accountant"] %}
-                <a href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.id) }}" class="primary_button">Edit</a>
+            <div style="display: flex; flex-direction: row; gap: 5px;">
+                <a class="primary_button"
+                    href="/fleet/{{ vehicle.vehicle_id }}/reviews/">
+                    Update Reviews
+                </a>
 
-                {% if session.get("role") == "accountant" %}
-                    <form method="POST"
-                        action="{{ url_for('fleet.fleet_delete', vehicle_id=vehicle.id) }}"
-                        style="display:inline;">
-                        <button class="danger_button" onclick="return confirm('Delete this vehicle?');">
-                            Delete
-                        </button>
-                    </form>
+                <!-- RESERVE -->
+                <a class="primary_button"
+                href="/reservations/reserve/{{ vehicle.vehicle_id }}">
+                    Reserve Car
+                </a>
+
+                <!-- EMPLOYEE / ACCOUNTANT ACTIONS -->
+                {% if session.get("role") in ["employee", "accountant"] %}
+                    <a href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.vehicle_id) }}"
+                    class="primary_button">
+                        Edit
+                    </a>
+
+                    {% if session.get("role") == "accountant" %}
+                        <form method="GET" action="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}">
+    <button class="warning_button">
+        Retire Vehicle
+    </button>
+</form>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
+            </div>
+
         </div>
     </div>
 

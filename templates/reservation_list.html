@@ -3,7 +3,7 @@
   <head>
     <title>Reservation List</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reservation_card.css') }}">
 
@@ -61,7 +61,7 @@
   </head>
   <body class="blue_body">
     <!-- Navbar -->
-    {% from "components/navbar.html" import navbar %}
+    {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
 
     <div class="page_container">

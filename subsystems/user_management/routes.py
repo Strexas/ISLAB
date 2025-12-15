@@ -28,6 +28,7 @@ import os
 import requests
 from flask import request, jsonify
 import requests
+import re
 from context import db
 
 user_management_bp = Blueprint('user_management', __name__)
@@ -66,7 +67,7 @@ def register():
             role=selected_role
         )
 
-        token_value = UserManagementController.generate(user.id, type="verify_email")
+        token_value = UserManagementController.generate_token(user.id, type="verify_email")
         verify_url = url_for(
             'user_management.verify_email',
             token=token_value,
@@ -225,7 +226,7 @@ def list_users():
 
 @user_management_bp.route('/ban_user/<int:user_id>', methods=['POST'])
 def ban_user(user_id):
-    if user not in ADMIN_ROLES:
+    if session.get('role') not in ADMIN_ROLES:
         flash("Access denied.", "danger")
         return redirect(url_for('user_management.list_users'))
 
@@ -256,7 +257,7 @@ def unban_user(user_id):
 
 @user_management_bp.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    if user not in ADMIN_ROLES:
+    if session.get('role') not in ADMIN_ROLES:
         flash("Access denied.", "danger")
         return redirect(url_for('user_management.list_users'))
 
@@ -320,6 +321,9 @@ def update_email():
     flash("Email updated successfully!", "success")
     return redirect(url_for('user_management.profile'))
 
+from datetime import date
+import re
+
 @user_management_bp.route('/edit_license', methods=['POST'])
 def edit_license():
     user = UserManagementController.get_current()
@@ -329,34 +333,24 @@ def edit_license():
         flash("Invalid form input.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    license_number = form.driver_license.data
+    license_number = form.driver_license.data.strip()
     expiration_date = form.license_expiration.data
 
-    try:
-        response = requests.post(
-            "http://127.0.0.1:5000/external/dot/check",
-            json={"license": license_number},
-            timeout=3
-        )
-        result = response.json()
-
-    except Exception:
-        flash("DOT service unavailable.", "danger")
-        return redirect(url_for('user_management.profile'))
-
-    if result.get("status") != "valid":
-        user.license_verified = False
-        db.session.commit()
-        flash("DOT rejected your license.", "danger")
+    if not re.match(r'^[A-Z0-9-]{4,50}$', license_number):
+        flash("Invalid driver license format.", "danger")
         return redirect(url_for('user_management.profile'))
 
     user.driver_license = license_number
     user.license_expiration = expiration_date
-    user.license_verified = True
+
+    user.license_verified = False
+
     db.session.commit()
 
-    flash("License verified successfully!", "success")
+    flash("License submitted. Pending verification by staff.", "info")
     return redirect(url_for('user_management.profile'))
+
+
 
 @user_management_bp.route('/upload_license_photo', methods=['POST'])
 def upload_license_photo():
@@ -390,13 +384,17 @@ def upload_license_photo():
         file.save(upload_path)
 
         user.license_photo_path = f"/static/uploads/licenses/{unique_filename}"
+
+        user.license_verified = False
+
         db.session.commit()
 
-        flash("License photo uploaded successfully!", "success")
+        flash("License photo uploaded. Pending verification.", "info")
     else:
         flash("Invalid file type. Allowed: png, jpg, jpeg", "danger")
 
     return redirect(url_for('user_management.profile'))
+
 
 @user_management_bp.route("/profile/<int:user_id>")
 def view_user_profile(user_id):
@@ -415,3 +413,29 @@ def view_user_profile(user_id):
         delete_form=None,
         password_form=None
     )
+
+@user_management_bp.route('/admin_dashboard')
+def admin_dashboard():
+    if session.get("role") not in ADMIN_ROLES:
+        flash("Access denied.", "danger")
+        return redirect(url_for("user_management.profile"))
+
+    return render_template("admin_dashboard.html")
+
+@user_management_bp.route('/verify_license/<int:user_id>', methods=['POST'])
+def verify_license(user_id):
+    if session.get('role') not in ['employee', 'accountant']:
+        flash("Access denied.", "danger")
+        return redirect(url_for('user_management.profile'))
+
+    user = UserManagementController.get_by_id(user_id)
+
+    if not user.driver_license or not user.license_photo_path:
+        flash("License data or photo missing.", "danger")
+        return redirect(url_for('user_management.view_user_profile', user_id=user.id))
+
+    user.license_verified = True
+    db.session.commit()
+
+    flash("Driver license verified successfully.", "success")
+    return redirect(url_for('user_management.view_user_profile', user_id=user.id))
