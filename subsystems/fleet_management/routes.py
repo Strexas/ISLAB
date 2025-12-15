@@ -222,38 +222,69 @@ def fleet_edit(vehicle_id):
 
 # -------------------- REVIEW CACHE --------------------
 
-def get_vehicle_reviews(vehicle_id):
+def get_reviews(vehicle_id):
     cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
+    now = datetime.utcnow()
 
-    if cache:
-        age = datetime.utcnow() - cache.fetched_at
-        if age < timedelta(hours=24):
-            return cache.data
+    # 24-hour cache
+    if cache and now - cache.fetched_at < timedelta(hours=24):
+        return cache.data
+
+    external_id = VEHICLE_REVIEW_MAP.get(vehicle_id, 1)
+    url = f"https://dummyjson.com/products/{external_id}/reviews"
 
     try:
-        response = requests.get(
-            f"https://dummyjson.com/products/{vehicle_id}/reviews",
-            timeout=5
-        )
-        response.raise_for_status()
+        response = requests.get(url, timeout=5)
         data = response.json()
 
         if cache:
             cache.data = data
-            cache.fetched_at = datetime.utcnow()
+            cache.fetched_at = now
         else:
             cache = ReviewCache(
                 vehicle_id=vehicle_id,
                 data=data,
-                fetched_at=datetime.utcnow()
+                fetched_at=now
             )
             db.session.add(cache)
 
         db.session.commit()
         return data
 
-    except Exception:
+    except:
         return {"reviews": []}
+def get_reviews(vehicle_id):
+    cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
+    now = datetime.utcnow()
+
+    # 24-hour cache
+    if cache and now - cache.fetched_at < timedelta(hours=24):
+        return cache.data
+
+    external_id = VEHICLE_REVIEW_MAP.get(vehicle_id, 1)
+    url = f"https://dummyjson.com/products/{external_id}/reviews"
+
+    try:
+        response = requests.get(url, timeout=5)
+        data = response.json()
+
+        if cache:
+            cache.data = data
+            cache.fetched_at = now
+        else:
+            cache = ReviewCache(
+                vehicle_id=vehicle_id,
+                data=data,
+                fetched_at=now
+            )
+            db.session.add(cache)
+
+        db.session.commit()
+        return data
+
+    except:
+        return {"reviews": []}
+
 
 # -------------------- RETIRE VEHICLE --------------------
 
