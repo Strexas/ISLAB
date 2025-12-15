@@ -5,6 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ 'Edit Vehicle' if mode=='edit' else 'Add Vehicle' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
+
     <style>
         body {
             background: #eef2f7;
@@ -45,6 +47,7 @@
 </head>
 
 <body>
+    {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
 
     <div class="card">

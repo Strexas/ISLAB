@@ -6,7 +6,7 @@
     
     <title>Dolt Drive - Fleet</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/carcard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fleetlist.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
@@ -17,36 +17,41 @@
   <body style="margin: 0px; background-color: #1454d4;">
 
     <!-- Navbar -->
-    {% from "components/navbar.html" import navbar %}
+    {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
 
     <main>
-      <div class="controls" aria-label="Search and filters">
+        <div class="controls" aria-label="Search and filters">
 
-        <button class="primary_button" onclick="location.href='/fleet/add'">+ Add Car</button>
-        <input id="search" type="search" placeholder="Search by model, brand..." />
-        <select id="typeFilter">
-          <option value="">All types</option>
-          <option>Economy</option>
-          <option>Sedan</option>
-          <option>SUV</option>
-          <option>Van</option>
-          <option>Luxury</option>
-        </select>
-        <select id="seatsFilter">
-          <option value="">Any seats</option>
-          <option value="2">2+</option>
-          <option value="4">4+</option>
-          <option value="5">5+</option>
-          <option value="7">7+</option>
-        </select>
-        <select id="sort">
-          <option value="recommended">Recommended</option>
-          <option value="price-asc">Price: low → high</option>
-          <option value="price-desc">Price: high → low</option>
-        </select>
-        <button id="reset" class="secondary_button">Reset</button>
-      </div>
+            {% if session.get('role') in ['employee', 'accountant'] %}
+            <button class="primary_button" onclick="location.href='/fleet/add'">
+                + Add Car
+            </button>
+            {% endif %}
+
+            <input id="search" type="search" placeholder="Search by model, brand..." />
+            <select id="typeFilter">
+                <option value="">All types</option>
+                <option>Economy</option>
+                <option>Sedan</option>
+                <option>SUV</option>
+                <option>Van</option>
+                <option>Luxury</option>
+            </select>
+            <select id="seatsFilter">
+                <option value="">Any seats</option>
+                <option value="2">2+</option>
+                <option value="4">4+</option>
+                <option value="5">5+</option>
+                <option value="7">7+</option>
+            </select>
+            <select id="sort">
+                <option value="recommended">Recommended</option>
+                <option value="price-asc">Price: low → high</option>
+                <option value="price-desc">Price: high → low</option>
+            </select>
+            <button id="reset" class="secondary_button">Reset</button>
+        </div>
 
       <!-- Display Vehicles -->
       {% if vehicles %}

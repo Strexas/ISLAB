@@ -3,7 +3,7 @@
   <head>
     <title>Bolt Drive - Reservation Successful</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reservation_success.css') }}">
 
@@ -14,7 +14,7 @@
 
   <body class="blue_body">
     <!-- Navbar -->
-    {% from "components/navbar.html" import navbar %}
+    {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
 
     <!-- Reservation Success Message -->

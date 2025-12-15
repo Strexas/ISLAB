@@ -3,7 +3,7 @@
   <head>
     <title>Bolt Drive - Reserve Car</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/car_reserve.css') }}">
 
@@ -13,90 +13,90 @@
   </head>
 
   <body>
-    <!-- Navbar -->
-    {% from "components/navbar.html" import navbar %}
-    {{ navbar() }}
+      <!-- Navbar -->
+      {% from "components/navbar.html" import navbar %}
+      {{ navbar() }}
 
-    <!-- Reserve car form -->
-    <section class="reservation-form-container">
-      <div class="rental-form-container">
-        <h1>Complete your reservation</h1>
+      <!-- Reserve car form -->
+      <section class="reservation-form-container">
+          <div class="rental-form-container">
+              <h1>Complete your reservation</h1>
 
-        <!-- FLASH MESSAGES -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-          <div class="error_messages_container" style="width: 100%;">
-            {% for category, message in messages %}
-              <p class="error_message">{{ message }}</p>
-            {% endfor %}
-          </div>
-          {% endif %}
-        {% endwith %}
-        
-        <!-- Rental Details form -->
-        <h3 style="margin-top: 50px;">Rental Details</h3>
-        <form autocomplete="off" method="post" action="{{ url_for('reservations.reserve', vehicle_id=vehicle.id) }}">
-
-          <!-- Dates form -->
-          <div class="row">
-            <label class="reservation-field" style="width: 100%;">
-              <span>Pick-up Date</span>
-              <input type="datetime-local" name="pickup_date" required>
-            </label>
-
-            <label class="reservation-field" style="width: 100%;">
-              <span>Drop-off Date</span>
-              <input type="datetime-local" name="return_date" required>
-            </label>
-          </div>
-        
-
-          <!-- Personal Info -->
-          <h3 style="margin-top: 50px;">Personal Info</h3>
-            
-          <!-- Name Surname-->
-          <div class="row">
-            <label class="reservation-field" style="width: 100%;">
-              <span>Name: </span>
-              <input type="text" disabled value="{{ user.name }}">
-            </label>
-
-            <label class="reservation-field" style="width: 100%;">
-              <span>Surname: </span>
-              <input type="text" disabled value="{{ user.surname }}">
-            </label>
-          </div>
-
-          <!-- Email Phone -->
-          <div class="row" style=" margin-top: 20px;">
-            <label class="reservation-field" style="width: 100%;">
-              <span>Email: </span>
-              <input type="email" disabled value="{{ user.email }}">
-            </label>
-
-            <label class="reservation-field" style="width: 100%;">
-              <span>Drivers Licence Number: </span>
-              <input type="tel" disabled value="{{ user.driver_license }}">
-            </label>
-          </div>
-
-          <!-- Insurance Options -->
-          <h3 style="margin-top: 50px;">Insurance Options</h3>
-          
-          <label class="insurance-option">
-            <input type="checkbox" name="wants_insurance" value="premium" id="insurance" />
-            <div class="insurance-content">
-              <div class="insurance-title">Premium Coverage</div>
-              <div class="insurance-description">
-                Get full insurance protection including theft, collision, and roadside assistance, with zero deductible.
+              <!-- FLASH MESSAGES -->
+              {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+              <div class="error_messages_container" style="width: 100%;">
+                  {% for category, message in messages %}
+                  <p class="error_message">{{ message }}</p>
+                  {% endfor %}
               </div>
-            </div>
-          </label>
-          
-          <!-- Submit Button -->
-          <button class="primary_button submit_button" type="submit">Continue</button>
-        </form>
-      </div>
-    </section>
+              {% endif %}
+              {% endwith %}
+
+              <!-- Rental Details form -->
+              <h3 style="margin-top: 50px;">Rental Details</h3>
+              <form autocomplete="off" method="post" action="{{ url_for('reservations.reserve', vehicle_id=vehicle.id) }}">
+
+                  <!-- Dates form -->
+                  <div class="row">
+                      <label class="reservation-field" style="width: 100%;">
+                          <span>Pick-up Date</span>
+                          <input type="datetime-local" name="pickup_date" required>
+                      </label>
+
+                      <label class="reservation-field" style="width: 100%;">
+                          <span>Drop-off Date</span>
+                          <input type="datetime-local" name="return_date" required>
+                      </label>
+                  </div>
+
+
+                  <!-- Personal Info -->
+                  <h3 style="margin-top: 50px;">Personal Info</h3>
+
+                  <!-- Name Surname-->
+                  <div class="row">
+                      <label class="reservation-field" style="width: 100%;">
+                          <span>Name: </span>
+                          <input type="text" disabled value="{{ user.name }}">
+                      </label>
+
+                      <label class="reservation-field" style="width: 100%;">
+                          <span>Surname: </span>
+                          <input type="text" disabled value="{{ user.surname }}">
+                      </label>
+                  </div>
+
+                  <!-- Email Phone -->
+                  <div class="row" style=" margin-top: 20px;">
+                      <label class="reservation-field" style="width: 100%;">
+                          <span>Email: </span>
+                          <input type="email" disabled value="{{ user.email }}">
+                      </label>
+
+                      <label class="reservation-field" style="width: 100%;">
+                          <span>Drivers Licence Number: </span>
+                          <input type="tel" disabled value="{{ user.driver_license }}">
+                      </label>
+                  </div>
+
+                  <!-- Insurance Options -->
+                  <h3 style="margin-top: 50px;">Insurance Options</h3>
+
+                  <label class="insurance-option">
+                      <input type="checkbox" name="wants_insurance" value="premium" id="insurance" />
+                      <div class="insurance-content">
+                          <div class="insurance-title">Premium Coverage</div>
+                          <div class="insurance-description">
+                              Get full insurance protection including theft, collision, and roadside assistance, with zero deductible.
+                          </div>
+                      </div>
+                  </label>
+
+                  <!-- Submit Button -->
+                  <button class="primary_button submit_button" type="submit">Continue</button>
+              </form>
+          </div>
+      </section>
   </body>
 </html>

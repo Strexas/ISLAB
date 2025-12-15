@@ -1,0 +1,49 @@
+{% macro navbar() %}
+
+<!-- Spacer to avoid overlap (fixed navbar) -->
+<div class="navbar-spacer"></div>
+
+<nav class="navbar">
+    <div class="navbar-container">
+
+        <!-- LOGO -->
+        <a href="/" class="navbar-logo">
+            <img src="{{ url_for('static', filename='resources/site_logo.png') }}" alt="Bolt Drive">
+            <span>Bolt Drive</span>
+        </a>
+
+        <!-- MAIN LINKS -->
+        <div class="navbar-links">
+
+            <a href="/">Home</a>
+            <a href="/fleet">Fleet</a>
+
+            {% if session.get('user_id') %}
+            <a href="/reservations/list">My Reservations</a>
+            {% endif %}
+
+            {% if session.get('role') in ["employee", "accountant"] %}
+            <a href="{{ url_for('user_management.admin_dashboard') }}" class="admin-link">
+                Admin
+            </a>
+            {% endif %}
+
+        </div>
+
+        <!-- USER ACTIONS -->
+        <div class="navbar-actions">
+
+            {% if not session.get('user_id') %}
+            <a href="/login" class="btn btn-primary">Login</a>
+            <a href="/register" class="btn btn-outline">Register</a>
+            {% else %}
+            <a href="/profile" class="btn btn-outline">Profile</a>
+            <a href="/logout" class="btn btn-danger">Logout</a>
+            {% endif %}
+
+        </div>
+
+    </div>
+</nav>
+
+{% endmacro %}
