@@ -78,10 +78,13 @@
                         Edit
                     </a>
 
-                    {% if session.get("role") == "accountant" %}
-                        <form method="GET" action="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}">
-                            <button class="danger_button">Retire Vehicle</button>
-                        </form>
+                {% if session.get("role") == "accountant" %}
+                    <a class="primary_button">
+                     href="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}"
+                     Retire Vehicle
+                    </a>
+ 
+
                     {% endif %}
                 {% endif %}
             </div>

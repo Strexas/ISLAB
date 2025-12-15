@@ -257,7 +257,7 @@ def get_vehicle_reviews(vehicle_id):
 
 # -------------------- RETIRE VEHICLE --------------------
 
-@fleet_bp.route("/<int:vehicle_id>/retire", methods=["GET", "POST"])
+@fleet_bp.route("/<string:vehicle_id>/retire", methods=["GET", "POST"])
 def retire_vehicle(vehicle_id):
     if not can_manage():
         flash("Access denied.", "danger")
