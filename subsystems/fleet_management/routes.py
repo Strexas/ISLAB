@@ -3,7 +3,7 @@ from datetime import datetime
 from context import db
 
 from form.VehicleForm import VehicleForm, RetireVehicleForm, ReviewCacheForm
-from controllers.FleetController import FleetController
+from .FleetController import FleetController
 
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
 
