@@ -2,29 +2,40 @@
     render_template, request, redirect, url_for,
     flash, session, Blueprint, current_app
 )
-from form.PasswordChangeForm import PasswordChangeForm
-from form.EditLicenseForm import EditLicenseForm as LicenseForm
-from werkzeug.utils import secure_filename
-import os
-import requests
-from datetime import datetime
-from models.AccessLog import AccessLog
+
 from form.RegistrationForm import RegistrationForm
 from form.LoginForm import LoginForm
 from form.DeleteProfileForm import DeleteProfileForm
-from form.EditLicenseForm import EditLicenseForm
+from form.EditLicenseForm import EditLicenseForm, EditLicenseForm as LicenseForm
+from form.PasswordChangeForm import PasswordChangeForm
+
 
 from models.User import User
 from models.Token import Token
-from models.AccessLog import AccessLog
+from models.Log import Log
+
+
+from .UserManagementController import UserManagementController
+
+
 from context import db, mail
 
+
+from werkzeug.utils import secure_filename
 from flask_mail import Message
+from datetime import datetime
+import os
+import requests
+from flask import request, jsonify
+import requests
+from context import db
 
 user_management_bp = Blueprint('user_management', __name__)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-# ---------- UTILS ----------
+
+
+ADMIN_ROLES = ["employee", "accountant"]
 
 def login_required():
     if 'user_id' not in session:
@@ -33,29 +44,20 @@ def login_required():
     return True
 
 
-def simulate_dot_check(license_number: str):
-    """
-    Simula el Department Of Transport.
-    A efectos de demo: licencias que empiezan por 'A' son válidas.
-    """
-    return license_number.upper().startswith('A')
+# ---------- REGISTER ----------
 
-
-# ---------- REGISTER + EMAIL VERIFICATION ----------
 @user_management_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
 
-        # Si un employee/accountant está loggeado → puede elegir rol
         if session.get("role") in ["employee", "accountant"]:
             selected_role = form.role.data
         else:
             selected_role = "customer"
 
-        # Crear usuario
-        user = User.create_user(
+        user = UserManagementController.create_user(
             email=form.email.data,
             password=form.password.data,
             name=form.name.data,
@@ -64,16 +66,18 @@ def register():
             role=selected_role
         )
 
-        # Generar token de verificación
-        token_value = Token.generate(user.id, type="verify_email")
-
-        verify_url = url_for('user_management.verify_email', token=token_value, _external=True)
+        token_value = UserManagementController.generate(user.id, type="verify_email")
+        verify_url = url_for(
+            'user_management.verify_email',
+            token=token_value,
+            _external=True
+        )
 
         msg = Message(
             subject="Verify your Car Rental account",
             sender="noreply@carrental.com",
             recipients=[user.email],
-            body=f"Welcome!\n\nPlease click the following link to verify your account:\n{verify_url}"
+            body=f"Welcome!\n\nVerify your account:\n{verify_url}"
         )
         mail.send(msg)
 
@@ -83,6 +87,7 @@ def register():
     return render_template('register.html', form=form)
 
 
+# ---------- EMAIL VERIFICATION ----------
 
 @user_management_bp.route('/verify/<token>')
 def verify_email(token):
@@ -92,25 +97,29 @@ def verify_email(token):
         flash("Invalid or expired verification link.", "danger")
         return redirect(url_for('user_management.login'))
 
-    user = User.get_by_id(t.user_id)
+    user = UserManagementController.get_by_id(t.user_id)
     user.is_verified = True
     db.session.commit()
 
-    flash("Your email has been verified. You can now log in.", "success")
+    flash("Your email has been verified.", "success")
     return redirect(url_for('user_management.login'))
 
 
 # ---------- LOGIN / LOGOUT ----------
+
 @user_management_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
 
     if form.validate_on_submit():
 
-        result = User.authenticate(form.email.data, form.password.data)
+        result = UserManagementController.authenticate(
+            form.email.data,
+            form.password.data
+        )
 
         if result == "banned":
-            flash("Your account has been banned. Contact support.", "danger")
+            flash("Your account has been banned.", "danger")
             return render_template("login.html", form=form)
 
         if result == "disabled":
@@ -124,18 +133,22 @@ def login():
         user = result
 
         if not user.is_verified:
-            flash("Please verify your email before logging in.", "info")
+            flash("Please verify your email first.", "info")
             return render_template("login.html", form=form)
 
         session["user_id"] = user.id
         session["role"] = user.role
 
-        if user.role == "accountant":
-            return redirect(url_for("user_management.list_users"))  # ADMIN PANEL
-
-        return redirect(url_for("user_management.profile"))  # CUSTOMER AREA
+        return redirect(
+            url_for(
+                "user_management.list_users"
+                if user.role in ["accountant", "employee"]
+                else "user_management.profile"
+            )
+        )
 
     return render_template("login.html", form=form)
+
 
 @user_management_bp.route('/logout')
 def logout():
@@ -144,124 +157,152 @@ def logout():
     return redirect(url_for('user_management.login'))
 
 
-# ---------- PROFILE & DELETE PROFILE ----------
+# ---------- PROFILE ----------
+
 @user_management_bp.route("/profile")
 def profile():
-    user = User.get_current()
+    user = UserManagementController.get_current()
     if not user:
         return redirect(url_for("user_management.login"))
-
-    license_form = LicenseForm()
-    delete_form = DeleteProfileForm()
-    password_form = PasswordChangeForm()  
-
+    db.session.refresh(user)
     return render_template(
         "profile.html",
         user=user,
-        license_form=license_form,
-        delete_form=delete_form,
-        password_form=password_form
+        license_form=LicenseForm(),
+        delete_form=DeleteProfileForm(),
+        password_form=PasswordChangeForm()
     )
 
 
+# ---------- DELETE OWN PROFILE ----------
 
 @user_management_bp.route('/delete_profile', methods=['POST'])
 def delete_profile():
     if not login_required():
         return redirect(url_for('user_management.login'))
 
-    user = User.get_current()
+    user = UserManagementController.get_current()
     form = DeleteProfileForm()
 
     if form.validate_on_submit() and user.verify_password(form.current_password.data):
-        user.delete()
+        UserManagementController.delete(user)
         session.clear()
-        flash("Your profile has been permanently deleted.", "success")
+        flash("Profile deleted.", "success")
         return redirect(url_for('user_management.login'))
 
-    flash("Incorrect password. Profile could not be deleted.", "danger")
+    flash("Incorrect password.", "danger")
     return redirect(url_for('user_management.profile'))
 
 
-# ---------- LIST USERS (Office Employee + Accountant) ----------
+# ---------- LIST USERS ----------
+
 @user_management_bp.route('/list_users')
 def list_users():
     role = session.get('role')
 
-    if role not in ['employee', 'accountant']:
-        flash("You don't have permission to access this page.", "danger")
+    if role not in ADMIN_ROLES:
+        flash("Access denied.", "danger")
         return redirect(url_for('user_management.profile'))
 
     search = request.args.get("search", "").strip()
-
     query = User.query
 
     if search:
-        search_term = f"%{search}%"
+        term = f"%{search}%"
         query = query.filter(
             db.or_(
-                User.name.ilike(search_term),
-                User.surname.ilike(search_term),
-                User.email.ilike(search_term)
+                User.name.ilike(term),
+                User.surname.ilike(term),
+                User.email.ilike(term)
             )
         )
 
     users = query.order_by(User.id).all()
-
     return render_template('list_users.html', users=users, search=search)
 
 
-# ---------- BAN USER (solo Accountant) ----------
+# ---------- BAN / UNBAN ----------
 
 @user_management_bp.route('/ban_user/<int:user_id>', methods=['POST'])
 def ban_user(user_id):
-    role = session.get('role')
-
-    if role != 'accountant':
-        flash("Access denied. Only accountants can ban users.", "danger")
+    if user not in ADMIN_ROLES:
+        flash("Access denied.", "danger")
         return redirect(url_for('user_management.list_users'))
 
-    user_to_ban = User.get_by_id(user_id)
-    user_to_ban.ban()
+    user = UserManagementController.get_by_id(user_id)
+    UserManagementController.ban(user)
 
-    if session.get('user_id') == user_to_ban.id:
+    if session.get('user_id') == user.id:
         session.clear()
 
-    flash(f"User {user_to_ban.email} has been banned.", "success")
+    flash(f"User {user.email} banned.", "success")
     return redirect(url_for('user_management.list_users'))
 
-# ---------- ADMIN DASHBOARD ----------
-@user_management_bp.route('/admin_dashboard')
-def admin_dashboard():
-    role = session.get("role")
-    if role not in ['employee', 'accountant']:
-        flash("Access denied.", "danger")
-        return redirect(url_for('user_management.login'))
-
-    return render_template("admin_dashboard.html")
 
 @user_management_bp.route('/unban_user/<int:user_id>', methods=['POST'])
 def unban_user(user_id):
-    role = session.get('role')
-
-    if role != 'accountant':
-        flash("Access denied. Only accountants can unban users.", "danger")
+    if session.get('role') != 'accountant':
+        flash("Access denied.", "danger")
         return redirect(url_for('user_management.list_users'))
 
-    user_to_unban = User.get_by_id(user_id)
-    user_to_unban.unban()
+    user = UserManagementController.get_by_id(user_id)
+    UserManagementController.unban(user)
 
-    flash(f"User {user_to_unban.email} has been unbanned.", "success")
+    flash(f"User {user.email} unbanned.", "success")
     return redirect(url_for('user_management.list_users'))
 
 
-# ---------- UPDATE EMAIL ----------
+# ---------- DELETE USER (ADMIN) ----------
+
+@user_management_bp.route('/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    if user not in ADMIN_ROLES:
+        flash("Access denied.", "danger")
+        return redirect(url_for('user_management.list_users'))
+
+    user = UserManagementController.get_by_id(user_id)
+
+    if user.id == session.get("user_id"):
+        flash("You cannot delete your own account.", "warning")
+        return redirect(url_for('user_management.list_users'))
+
+    UserManagementController.delete(user)
+    flash(f"User {user.email} deleted.", "success")
+    return redirect(url_for('user_management.list_users'))
+
+
+# ---------- CHANGE PASSWORD ----------
+
+@user_management_bp.route("/change_password", methods=["POST"])
+def change_password():
+    form = PasswordChangeForm()
+    user = UserManagementController.get_current()
+
+    if form.validate_on_submit():
+
+        if not user.verify_password(form.old_password.data):
+            flash("Incorrect current password.", "danger")
+            return redirect(url_for("user_management.profile"))
+
+        if form.new_password.data != form.confirm_new_password.data:
+            flash("Passwords do not match.", "danger")
+            return redirect(url_for("user_management.profile"))
+
+        user.set_password(form.new_password.data)
+        db.session.commit()
+
+        flash("Password updated.", "success")
+        return redirect(url_for("user_management.profile"))
+
+    flash("Invalid input.", "danger")
+    return redirect(url_for("user_management.profile"))
+
 @user_management_bp.route('/update_email', methods=['POST'])
 def update_email():
     if not login_required():
         return redirect(url_for('user_management.login'))
 
-    user = User.get_current()
+    user = UserManagementController.get_current()
     new_email = request.form.get("new_email")
 
     if not new_email:
@@ -279,17 +320,9 @@ def update_email():
     flash("Email updated successfully!", "success")
     return redirect(url_for('user_management.profile'))
 
-@user_management_bp.route('/index')
-def index():
-    return render_template('index.html')
-
-
 @user_management_bp.route('/edit_license', methods=['POST'])
 def edit_license():
-    if not login_required():
-        return redirect(url_for('user_management.login'))
-
-    user = User.get_current()
+    user = UserManagementController.get_current()
     form = EditLicenseForm()
 
     if not form.validate_on_submit():
@@ -299,7 +332,6 @@ def edit_license():
     license_number = form.driver_license.data
     expiration_date = form.license_expiration.data
 
-    # --- 3RD PARTY REQUEST ---
     try:
         response = requests.post(
             "http://127.0.0.1:5000/external/dot/check",
@@ -308,27 +340,16 @@ def edit_license():
         )
         result = response.json()
 
-        # Registrar log del DOT
-        log = AccessLog(
-            employee_id=user.id,
-            action=f"DOT license check: {result}",
-            timestamp=datetime.utcnow()
-        )
-        db.session.add(log)
-        db.session.commit()
-
-    except Exception as e:
+    except Exception:
         flash("DOT service unavailable.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    # --- RESPONSE HANDLING ---
     if result.get("status") != "valid":
         user.license_verified = False
         db.session.commit()
         flash("DOT rejected your license.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    # DOT aceptó la licencia
     user.driver_license = license_number
     user.license_expiration = expiration_date
     user.license_verified = True
@@ -337,17 +358,12 @@ def edit_license():
     flash("License verified successfully!", "success")
     return redirect(url_for('user_management.profile'))
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 @user_management_bp.route('/upload_license_photo', methods=['POST'])
 def upload_license_photo():
-    if 'user_id' not in session:
-        flash("You must be logged in.", "warning")
+    if not login_required():
         return redirect(url_for('user_management.login'))
 
-    user = User.get_current()
+    user = UserManagementController.get_current()
 
     if 'license_photo' not in request.files:
         flash("No file part.", "danger")
@@ -359,13 +375,16 @@ def upload_license_photo():
         flash("No selected file.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    if file and allowed_file(file.filename):
+    if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
         filename = secure_filename(file.filename)
-
         unique_filename = f"user_{user.id}_{filename}"
 
         upload_path = os.path.join(
-            current_app.root_path, 'static', 'uploads', 'licenses', unique_filename
+            current_app.root_path,
+            'static',
+            'uploads',
+            'licenses',
+            unique_filename
         )
 
         file.save(upload_path)
@@ -379,88 +398,6 @@ def upload_license_photo():
 
     return redirect(url_for('user_management.profile'))
 
-@user_management_bp.route("/create_admin", methods=["POST"])
-def create_admin():
-    from flask import current_app
-
-    # Seguridad básica: solo permitir cuando el servidor está en modo debug
-    if not current_app.debug:
-        return {"error": "Not allowed in production"}, 403
-
-    data = request.json or {}
-
-    email = data.get("email")
-    password = data.get("password")
-
-    if not email or not password:
-        return {"error": "Email and password required"}, 400
-
-    # Comprobar si ya existe
-    existing = User.query.filter_by(email=email).first()
-    if existing:
-        return {"error": "User already exists"}, 400
-
-    # Crear usuario admin
-    admin = User(
-        email=email,
-        name="System",
-        surname="Admin",
-        role="accountant",        # <<< Admin
-        account_status=True,
-        is_verified=True           # Saltamos verificación email
-    )
-    admin.set_password(password)
-
-    db.session.add(admin)
-    db.session.commit()
-
-    return {"message": "Admin created successfully"}
-
-@user_management_bp.route('/delete_user/<int:user_id>', methods=['POST'])
-def delete_user(user_id):
-    # Solo accountant puede borrar
-    if session.get("role") != "accountant":
-        flash("Access denied. Only accountants can delete users.", "danger")
-        return redirect(url_for('user_management.list_users'))
-
-    user = User.get_by_id(user_id)
-
-    # Evita que un admin se elimine a sí mismo
-    if user.id == session.get("user_id"):
-        flash("You cannot delete your own account.", "warning")
-        return redirect(url_for('user_management.list_users'))
-
-    # Eliminar usuario
-    db.session.delete(user)
-    db.session.commit()
-
-    flash(f"User {user.email} has been permanently deleted.", "success")
-    return redirect(url_for('user_management.list_users'))
-
-@user_management_bp.route("/change_password", methods=["POST"])
-def change_password():
-    password_form = PasswordChangeForm()
-
-    if password_form.validate_on_submit():
-        user = User.get_current()
-
-        if not user.verify_password(password_form.old_password.data):
-            flash("Incorrect current password.", "danger")
-            return redirect(url_for("user_management.profile"))
-
-        if password_form.new_password.data != password_form.confirm_new_password.data:
-            flash("New passwords do not match.", "danger")
-            return redirect(url_for("user_management.profile"))
-
-        user.set_password(password_form.new_password.data)
-        db.session.commit()
-
-        flash("Password updated successfully!", "success")
-        return redirect(url_for("user_management.profile"))
-
-    flash("Invalid input.", "danger")
-    return redirect(url_for("user_management.profile"))
-
 @user_management_bp.route("/profile/<int:user_id>")
 def view_user_profile(user_id):
     role = session.get("role")
@@ -469,12 +406,12 @@ def view_user_profile(user_id):
         flash("Access denied.", "danger")
         return redirect(url_for("user_management.profile"))
 
-    user = User.get_by_id(user_id)
+    user = UserManagementController.get_by_id(user_id)
 
     return render_template(
         "profile.html",
         user=user,
-        license_form=None,   
-        delete_form=None,   
-        password_form=None   
+        license_form=None,
+        delete_form=None,
+        password_form=None
     )

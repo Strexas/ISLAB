@@ -9,10 +9,8 @@ def check_license():
     data = request.get_json()
     license_number = data.get("license")
 
-    # Simulamos retraso de red (3rd party real)
     time.sleep(1.2)
 
-    # Formato realista de licencias
     pattern = r"^[A-Z]{1,2}[0-9]{5,8}$"
     if not re.match(pattern, license_number.upper()):
         return jsonify({
@@ -21,7 +19,6 @@ def check_license():
             "source": "DOT"
         }), 400
 
-    # Regla simulada del DOT
     if license_number.upper().startswith("A"):
         return jsonify({
             "status": "valid",

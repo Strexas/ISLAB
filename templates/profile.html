@@ -90,7 +90,7 @@
 
         <h2>User Profile</h2>
 
-        <!-- ========== USER INFORMATION ========== -->
+        <!--USER INFORMATION -->
         <div class="section-title">User Information</div>
         <div class="info-box">
             <div class="info-line"><strong>Name:</strong> {{ user.name or "—" }}</div>
@@ -116,7 +116,7 @@
         </div>
 
 
-        <!-- ========== EMAIL SECTION (ONLY IF EDITABLE) ========== -->
+        <!-- EMAIL SECTION -->
         {% if delete_form %}
         <div class="section-title">Email</div>
         <div class="info-box">
@@ -134,7 +134,7 @@
         </div>
         {% endif %}
 
-        <!-- ========== PASSWORD SECTION (ONLY IF EDITABLE) ========== -->
+        <!-- PASSWORD SECTION -->
         {% if password_form %}
         <div class="section-title">Change Password</div>
         <div class="info-box">
@@ -155,7 +155,7 @@
         </div>
         {% endif %}
 
-        <!-- ========== DRIVER LICENSE SECTION (Editable only if logged user) ========== -->
+        <!--DRIVER LICENSE SECTION -->
         <div class="section-title">Driver License</div>
         <div class="info-box">
 
@@ -181,31 +181,34 @@
             {% if license_form %}
             <button class="edit-btn" onclick="enableLicenseEdit()">Edit License</button>
 
-            <form id="license-form" action="{{ url_for('user_management.edit_license') }}"
-                  method="POST" style="display:none; margin-top:10px;">
+            <form id="license-form"
+                  action="{{ url_for('user_management.edit_license') }}"
+                  method="POST"
+                  style="display:none; margin-top:10px;">
 
                 {{ license_form.hidden_tag() }}
 
                 {{
- license_form.driver_license(
-                value=user.driver_license,
-                placeholder="License number",
-                style="width:100%; padding:8px; margin-bottom:8px;"
-            )
+                license_form.driver_license(
+                    placeholder="License number",
+                    style="width:100%; padding:8px; margin-bottom:8px;"
+                   )
                 }}
 
                 {{
- license_form.license_expiration(
-                value=user.license_expiration,
-                style="width:100%; padding:8px; margin-bottom:8px;"
+                  license_form.license_expiration(
+            style="width:100%; padding:8px; margin-bottom:8px;"
             )
                 }}
 
-                <button type="submit" class="edit-btn" style="float:none; width:100%;">Save License</button>
+                <button type="submit" class="edit-btn" style="float:none; width:100%;">
+                    Save License
+                </button>
             </form>
             {% endif %}
 
         </div>
+
 
         <!-- LICENSE PHOTO -->
         <div class="section-title">License Photo</div>

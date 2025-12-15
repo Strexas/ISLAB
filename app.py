@@ -1,17 +1,15 @@
 import os
-
 from flask import Flask
 from flask_migrate import Migrate
 
 from context import db, mail
 
+from models.User import User
+
 # Blueprints
-from subsystems.fleet_management.routes import fleet_bp
-from subsystems.payment.routes import payment_bp
+from subsystems.user_management.routes import user_management_bp
 from subsystems.reservation_subsystem.routes import reservation_blueprint
 from subsystems.user_management.dot_service import dot_bp
-from subsystems.user_management.routes import user_management_bp
-from subsystems.maintenance_subsystem.routes import maintenance_bp
 
 app = Flask(__name__)
 
@@ -45,6 +43,32 @@ app.register_blueprint(payment_bp)
 app.register_blueprint(maintenance_bp)
 
 app.template_folder = "templates"
+
+def create_default_admin():
+    admin_email = "admin@carrenting.com"
+    admin_password = "admin123"
+
+    existing = User.query.filter_by(email=admin_email).first()
+    if existing:
+        return
+
+    admin = User(
+        email=admin_email,
+        name="System",
+        surname="Admin",
+        role="accountant",
+        account_status=True,
+        is_verified=True,
+        is_banned=False
+    )
+    admin.set_password(admin_password)
+
+    db.session.add(admin)
+    db.session.commit()
+    print("Default admin created")
+
+with app.app_context():
+    create_default_admin()
 
 if __name__ == '__main__':
     app.run(debug=True)
