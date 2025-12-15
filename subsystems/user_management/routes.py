@@ -28,6 +28,7 @@ import os
 import requests
 from flask import request, jsonify
 import requests
+import re
 from context import db
 
 user_management_bp = Blueprint('user_management', __name__)
@@ -320,43 +321,46 @@ def update_email():
     flash("Email updated successfully!", "success")
     return redirect(url_for('user_management.profile'))
 
+from datetime import date
+import re
+
 @user_management_bp.route('/edit_license', methods=['POST'])
 def edit_license():
     user = UserManagementController.get_current()
     form = EditLicenseForm()
 
+    # 1️⃣ Validación WTForms
     if not form.validate_on_submit():
         flash("Invalid form input.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    license_number = form.driver_license.data
+    # 2️⃣ Leer datos
+    license_number = form.driver_license.data.strip()
     expiration_date = form.license_expiration.data
 
-    try:
-        response = requests.post(
-            "http://127.0.0.1:5000/external/dot/check",
-            json={"license": license_number},
-            timeout=3
-        )
-        result = response.json()
-
-    except Exception:
-        flash("DOT service unavailable.", "danger")
-        return redirect(url_for('user_management.profile'))
-
-    if result.get("status") != "valid":
+    # 3️⃣ VALIDACIÓN DE FORMATO (AQUÍ VA EL REGEX)
+    if not re.match(r'^[A-Z0-9-]{4,50}$', license_number):
         user.license_verified = False
         db.session.commit()
-        flash("DOT rejected your license.", "danger")
+        flash("Invalid driver license format.", "danger")
         return redirect(url_for('user_management.profile'))
 
+    # 4️⃣ VALIDACIÓN DE EXPIRACIÓN
+    if expiration_date and expiration_date < date.today():
+        user.license_verified = False
+        db.session.commit()
+        flash("Driver license is expired.", "danger")
+        return redirect(url_for('user_management.profile'))
+
+    # 5️⃣ GUARDAR
     user.driver_license = license_number
     user.license_expiration = expiration_date
     user.license_verified = True
-    db.session.commit()
 
-    flash("License verified successfully!", "success")
+    db.session.commit()
+    flash("Driver license updated successfully.", "success")
     return redirect(url_for('user_management.profile'))
+
 
 @user_management_bp.route('/upload_license_photo', methods=['POST'])
 def upload_license_photo():
