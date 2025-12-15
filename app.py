@@ -29,7 +29,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
 # DATABASE
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:possw0rd@localhost:5432/car_rental_lab"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:1223334444@localhost:5432/car_rental_lab"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # INITIALIZE EXTENSIONS
@@ -47,31 +47,31 @@ app.register_blueprint(maintenance_bp)
 
 app.template_folder = "templates"
 
-def create_default_admin():
-    admin_email = "admin@carrenting.com"
-    admin_password = "admin123"
+# def create_default_admin():
+#     admin_email = "admin@carrenting.com"
+#     admin_password = "admin123"
 
-    existing = User.query.filter_by(email=admin_email).first()
-    if existing:
-        return
+#     existing = User.query.filter_by(email=admin_email).first()
+#     if existing:
+#         return
 
-    admin = User(
-        email=admin_email,
-        name="system",
-        surname="admin",
-        role="accountant",
-        account_status=True,
-        is_verified=True,
-        is_banned=False
-    )
-    admin.set_password(admin_password)
+#     admin = User(
+#         email=admin_email,
+#         name="system",
+#         surname="admin",
+#         role="accountant",
+#         account_status=True,
+#         is_verified=True,
+#         is_banned=False
+#     )
+#     admin.set_password(admin_password)
 
-    db.session.add(admin)
-    db.session.commit()
-    print("default admin created")
+#     db.session.add(admin)
+#     db.session.commit()
+#     print("default admin created")
 
-with app.app_context():
-    create_default_admin()
+# with app.app_context():
+#     create_default_admin()
 
 if __name__ == '__main__':
     app.run(debug=True)
