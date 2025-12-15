@@ -37,7 +37,7 @@ def upgrade():
     sa.UniqueConstraint('email')
     )
     op.create_table('vehicles',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('vehicle_id', sa.Integer(), nullable=False),
     sa.Column('license_plate', sa.String(length=20), nullable=False),
     sa.Column('manufacturer', sa.String(length=80), nullable=False),
     sa.Column('model', sa.String(length=80), nullable=False),
@@ -47,7 +47,7 @@ def upgrade():
     sa.Column('seats', sa.Integer(), nullable=True),
     sa.Column('fuel_type', sa.String(length=40), nullable=True),
     sa.Column('image_path', sa.String(length=255), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('vehicle_id'),
     sa.UniqueConstraint('license_plate')
     )
     op.create_table('access_logs',
@@ -74,7 +74,7 @@ def upgrade():
     sa.Column('vehicle_id', sa.Integer(), nullable=False),
     sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('date', sa.Date(), nullable=False),
-    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.id'], ),
+    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.vehicle_id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('reservations',
@@ -86,7 +86,7 @@ def upgrade():
     sa.Column('return_date', sa.DateTime(), nullable=False),
     sa.Column('status', sa.Enum('PENDING', 'ACTIVE', 'CANCELLED', 'COMPLETED', name='reservationstatus'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.id'], ),
+    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.vehicle_id'], ),
     sa.PrimaryKeyConstraint('reservation_id')
     )
     op.create_table('review_cache',
@@ -96,7 +96,7 @@ def upgrade():
     sa.Column('review_count', sa.Integer(), nullable=False),
     sa.Column('last_updated', sa.Date(), nullable=False),
     sa.Column('source', sa.String(length=80), nullable=True),
-    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.id'], ),
+    sa.ForeignKeyConstraint(['vehicle_id'], ['vehicles.vehicle_id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('vehicle_id')
     )
