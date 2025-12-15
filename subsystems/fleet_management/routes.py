@@ -46,15 +46,17 @@ def fleet_list():
 @fleet_bp.route('/<int:vehicle_vehicle_id>')
 def vehicle_details(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
+    reviews = get_vehicle_reviews(vehicle_id)
 
     return render_template(
         "car_details.html",
         vehicle=vehicle,
         rent_price=vehicle.rent_price,
-        review_cache=vehicle.review_cache
+        review_cache=vehicle.review_cache,
+        reviews=reviews
     )
 
-@fleet_bp.route('/<int:vehicle_vehicle_id>/reviews', methods=['GET', 'POST'])
+@fleet_bp.route('/<int:vehicle_id>/reviews', methods=['GET', 'POST'])
 def update_reviews(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     form = ReviewCacheForm()
@@ -164,7 +166,7 @@ def fleet_add():
 
 # -------------------- EDIT VEHICLE --------------------
 
-@fleet_bp.route("/<int:vehicle_vehicle_id>/edit", methods=["GET", "POST"])
+@fleet_bp.route("/<int:vehicle_id>/edit", methods=["GET", "POST"])
 def fleet_edit(vehicle_id):
     if not can_manage():
         flash("Access denied.", "danger")
@@ -229,32 +231,20 @@ def fleet_edit(vehicle_id):
 
 # -------------------- DELETE VEHICLE --------------------
 
-@fleet_bp.route("/<int:vehicle_vehicle_id>/delete", methods=["POST"])
-def fleet_delete(vehicle_id):
-    if session.get("role") != "accountant":
-        flash("Only accountants can delete vehicles.", "danger")
-        return redirect(url_for("fleet.fleet_list"))
-
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
-
-    db.session.delete(vehicle)
-    db.session.commit()
-
-    flash("Vehicle deleted.", "success")
-    return redirect(url_for("fleet.fleet_list"))
-
 def get_vehicle_reviews(vehicle_id):
     """Returns reviews via cache or external API."""
-    
-    # ---- 1. Check cache ----
+
+    from models.ReviewCache import ReviewCache
+
+    # 1. Check cache
     cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
 
     if cache:
         age = datetime.utcnow() - cache.fetched_at
-        if age < timedelta(hours=24):  # Cache still valid
-            return cache.data
+        if age < timedelta(hours=24):
+            return cache.data  # Return cached data
 
-    # ---- 2. Fetch from external API ----
+    # 2. Fetch from external API
     try:
         api_url = f"https://dummyjson.com/products/{vehicle_id}/reviews"
         response = requests.get(api_url, timeout=5)
@@ -262,7 +252,7 @@ def get_vehicle_reviews(vehicle_id):
 
         data = response.json()
 
-        # ---- 3. Save new cache ----
+        # 3. Save new cache
         if cache:
             cache.data = data
             cache.fetched_at = datetime.utcnow()
@@ -270,20 +260,21 @@ def get_vehicle_reviews(vehicle_id):
             cache = ReviewCache(
                 vehicle_id=vehicle_id,
                 data=data,
-                fetched_at=date.utcnow()
+                fetched_at=datetime.utcnow()
             )
             db.session.add(cache)
 
         db.session.commit()
-
         return data
 
     except Exception as e:
         print("Review API error:", e)
         return {"reviews": []}  # fallback
+    
+   
 
 # Retire Vehicle
-@fleet_bp.route('/<string:vehicle_vehicle_id>/retire', methods=['GET', 'POST'])
+@fleet_bp.route('/<string:vehicle_id>/retire', methods=['GET', 'POST'])
 def retire_vehicle(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     form = RetireVehicleForm()

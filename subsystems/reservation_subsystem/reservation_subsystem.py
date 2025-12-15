@@ -34,7 +34,7 @@ class ReservationSubsystem:
         #Create reservation record
         reservation = Reservation(
             user_id=user.id,
-            vehicle_id=vehicle.id,
+            vehicle_id=vehicle.vehicle_id,
             total_amount=total_amount,
             pickup_date=pickup_date,
             return_date=return_date,

@@ -57,8 +57,20 @@
         <p><strong>Current price:</strong> {{ vehicle.current_price() }} €</p>
 
         <div style="margin-top: 30px;">
-            <a class="primary_button" href="/reservations/reserve/{{ vehicle.id }}">Reserve Car</a>
+            <h3>Customer Reviews</h3>
 
+{% if reviews.reviews %}
+    {% for r in reviews.reviews %}
+        <p><strong>{{ r.reviewerName }}</strong>: {{ r.comment }}</p>
+        <p>Rating: {{ r.rating }}</p>
+        <hr>
+    {% endfor %}
+{% else %}
+    <p>No reviews available.</p>
+{% endif %}
+
+            <a class="primary_button" href="/reservations/reserve/{{ vehicle.id }}">Reserve Car</a>
+            
             {% if session.get("role") in ["employee", "accountant"] %}
                 <a href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.id) }}" class="primary_button">Edit</a>
 
