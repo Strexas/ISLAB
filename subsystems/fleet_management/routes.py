@@ -166,7 +166,7 @@ def fleet_edit(vehicle_id):
         flash("Vehicle updated successfully.", "success")
         return redirect(url_for("fleet.vehicle_details", vehicle_id=vehicle.vehicle_id))
 
-    return render_template("vehicle_form.html", form=form, mode="edit", vehicle=vehicle)
+    return render_template("add_car.html", form=form, mode="edit", vehicle=vehicle)
 
 # -------------------- REVIEW CACHE --------------------
 
@@ -210,31 +210,22 @@ def retire_vehicle(vehicle_id):
     if not can_manage():
         flash("Access denied.", "danger")
         return redirect(url_for("fleet.fleet_list"))
-
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    vehicle = FleetController.get_vehicle(vehicle_id)
     form = RetireVehicleForm()
 
+    # Handle confirmation submit
     if form.validate_on_submit():
         if not form.confirm.data:
             flash("Please confirm retirement.", "warning")
-            return render_template(
-                "retire_vehicle.html",
-                form=form,
-                vehicle=vehicle
-            )
+            return render_template("retire_vehicle.html", form=form, vehicle=vehicle)
 
-        vehicle.status = "Inactive"
-        vehicle.updated_at = datetime.utcnow()
-        db.session.commit()
+        # Use controller method
+        FleetController.retire(vehicle)
 
         flash("Vehicle retired successfully.", "success")
         return redirect(url_for("fleet.fleet_list"))
 
-    return render_template(
-        "retire_vehicle.html",
-        form=form,
-        vehicle=vehicle
-    )
+    return render_template("retire_vehicle.html", form=form, vehicle=vehicle)
 
 @fleet_bp.route("/<int:vehicle_id>/delete", methods=["POST"])
 def fleet_delete(vehicle_id):

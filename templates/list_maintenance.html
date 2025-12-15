@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Car Maintenance Records</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 <style>
     body {
         font-family: "Segoe UI", sans-serif;
@@ -76,6 +78,8 @@
 </style>
 </head>
 <body>
+    {% from "components/_navbar.html" import navbar %}
+    {{ navbar() }}
 <h1>🚗 Car Maintenance Records</h1>
 
 {% if message %}
