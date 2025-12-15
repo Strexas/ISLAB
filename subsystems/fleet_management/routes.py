@@ -14,16 +14,15 @@ from models.ReviewCache import ReviewCache
 from form.VehicleForm import VehicleForm, RetireVehicleForm, ReviewCacheForm
 from subsystems.fleet_management.FleetController import FleetController
 
+
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
 
 ALLOWED_IMG = {"png", "jpg", "jpeg"}
-
 
 # -------------------- UTILS --------------------
 
 def allowed(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG
-
 
 def can_manage():
     return session.get("role") in ["employee", "accountant"]
@@ -51,7 +50,6 @@ def vehicle_details(vehicle_id):
         review_cache=vehicle.review_cache,
         reviews=reviews
     )
-
 
 # -------------------- ADD VEHICLE --------------------
 
@@ -105,7 +103,6 @@ def fleet_add():
         return redirect(url_for("fleet.fleet_list"))
 
     return render_template("add_car.html", form=form, mode="add")
-
 
 # -------------------- EDIT VEHICLE --------------------
 
@@ -171,7 +168,6 @@ def fleet_edit(vehicle_id):
 
     return render_template("vehicle_form.html", form=form, mode="edit", vehicle=vehicle)
 
-
 # -------------------- REVIEW CACHE --------------------
 
 def get_vehicle_reviews(vehicle_id):
@@ -206,7 +202,6 @@ def get_vehicle_reviews(vehicle_id):
 
     except Exception:
         return {"reviews": []}
-
 
 # -------------------- RETIRE VEHICLE --------------------
 

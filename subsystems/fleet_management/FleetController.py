@@ -9,14 +9,12 @@ import requests, os
 class FleetController:
 
     @staticmethod
-    def list_all():
+    def get_all_vehicles():
         return Vehicle.query.order_by(Vehicle.vehicle_id).all()
-
 
     @staticmethod
     def get(vehicle_id):
         return Vehicle.query.get_or_404(vehicle_id)
-
 
     @staticmethod
     def add_vehicle(data, image_file, upload_folder):
@@ -53,7 +51,6 @@ class FleetController:
         db.session.commit()
         return vehicle
 
-
     @staticmethod
     def update_vehicle(vehicle, data, image_file, upload_folder):
 
@@ -88,14 +85,12 @@ class FleetController:
         db.session.commit()
         return vehicle
 
-
     @staticmethod
     def retire(vehicle):
         vehicle.status = "Inactive"
         vehicle.updated_at = datetime.utcnow()
         db.session.commit()
         return True
-
 
     @staticmethod
     def get_reviews(vehicle_id):
@@ -129,7 +124,6 @@ class FleetController:
         except:
             return {"reviews": []}
 
-
     @staticmethod
     def update_review_cache(vehicle_id, data):
 
@@ -152,3 +146,4 @@ class FleetController:
 
         db.session.commit()
         return cache
+
