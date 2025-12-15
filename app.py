@@ -36,6 +36,36 @@ app.register_blueprint(dot_bp)
 app.register_blueprint(user_management_bp)
 app.register_blueprint(reservation_blueprint)
 
+from models.User import User
+from context import db
+from werkzeug.security import generate_password_hash
+
+def create_default_admin():
+    admin_email = "admin@carrenting.com"
+    admin_password = "admin123"
+
+    existing = User.query.filter_by(email=admin_email).first()
+    if existing:
+        return
+
+    admin = User(
+        email=admin_email,
+        name="System",
+        surname="Admin",
+        role="accountant",      
+        account_status=True,
+        is_verified=True,
+        is_banned=False
+    )
+    admin.set_password(admin_password)
+
+    db.session.add(admin)
+    db.session.commit()
+    print("Default admin created")
+
+with app.app_context():
+    create_default_admin()
+
 from models.Reservation import Reservation
 from models.InsurancePolicy import InsurancePolicy
 from models.User import User

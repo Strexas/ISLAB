@@ -1,8 +1,8 @@
-"""Initial clean migration
+"""Initial schema
 
-Revision ID: 9ca205c9ff13
+Revision ID: f43286c3877a
 Revises: 
-Create Date: 2025-12-07 15:21:16.313580
+Create Date: 2025-12-14 15:14:54.122205
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9ca205c9ff13'
+revision = 'f43286c3877a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,22 +34,24 @@ def upgrade():
     sa.Column('surname', sa.String(length=120), nullable=True),
     sa.Column('birthdate', sa.Date(), nullable=True),
     sa.Column('email', sa.String(length=120), nullable=False),
-    sa.Column('password_hash', sa.String(length=128), nullable=False),
+    sa.Column('password_hash', sa.String(length=512), nullable=False),
     sa.Column('role', sa.String(length=20), nullable=True),
     sa.Column('account_status', sa.Boolean(), nullable=True),
+    sa.Column('is_banned', sa.Boolean(), nullable=True),
     sa.Column('is_verified', sa.Boolean(), nullable=True),
     sa.Column('driver_license', sa.String(length=50), nullable=True),
     sa.Column('license_expiration', sa.Date(), nullable=True),
     sa.Column('license_verified', sa.Boolean(), nullable=True),
+    sa.Column('license_photo_path', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
     op.create_table('access_logs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('employee_id', sa.Integer(), nullable=False),
-    sa.Column('action', sa.String(length=200), nullable=False),
+    sa.Column('action', sa.String(length=255), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['employee_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['employee_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('insurance_policies',
@@ -70,7 +72,7 @@ def upgrade():
     sa.Column('token', sa.String(length=128), nullable=False),
     sa.Column('type', sa.String(length=50), nullable=True),
     sa.Column('expires_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('token')
     )

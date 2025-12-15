@@ -187,14 +187,18 @@
             </a>
 
             <!-- ONLY ACCOUNTANT CAN BAN/UNBAN USERS -->
-            {% if session.get('role') == 'accountant' %}
+            {% if session.role in ['accountant', 'employee'] %}
 
             {% if user.id != session.get('user_id') %}
 
             {% if user.account_status %}
             <!-- BAN BUTTON -->
             <form method="POST" action="{{ url_for('user_management.ban_user', user_id=user.id) }}">
-                <button class="btn btn-ban" type="submit">BAN USER</button>
+                <button class="btn btn-ban"
+                        type="button"
+                        onclick="openBanModal({{ user.id }}, '{{ user.email }}')">
+                    BAN USER
+                </button>
             </form>
             {% else %}
             <!-- UNBAN BUTTON -->
@@ -206,7 +210,7 @@
             {% endif %}
             {% endif %}
 
-            {% if session.get('role') == 'accountant' and user.id != session.get('user_id') %}
+            {% if session.role in ['accountant', 'employee'] and user.id != session.get('user_id') %}
             <form method="POST" action="{{ url_for('user_management.delete_user', user_id=user.id) }}">
                 <button type="submit"
                         style="background:#e74c3c; color:white; padding:10px; width:100%;
@@ -225,6 +229,61 @@
     <footer>
         © 2025 Admin Panel
     </footer>
+
+    <!-- BAN CONFIRMATION MODAL -->
+    <div id="banModal"
+         style="display:none;
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background:rgba(0,0,0,0.6);
+            justify-content:center;
+            align-items:center;
+            z-index:1000;">
+
+        <div style="
+        background: rgba(31,41,55,0.95);
+        padding: 25px;
+        border-radius: 12px;
+        width: 320px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    ">
+
+            <h3 style="color:#f87171; margin-top:0;">
+                Confirm ban
+            </h3>
+
+            <p id="banText" style="margin:15px 0; opacity:0.9;"></p>
+
+            <form id="banForm" method="POST">
+                <button type="submit" class="btn btn-ban">
+                    Yes, ban user
+                </button>
+            </form>
+
+            <button class="btn btn-profile"
+                    style="margin-top:10px;"
+                    onclick="closeBanModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+    <script>
+    function openBanModal(userId, email) {
+        document.getElementById("banText").innerText =
+            "Are you sure you want to ban " + email + "?";
+
+        document.getElementById("banForm").action =
+            "{{ url_for('user_management.ban_user', user_id=0) }}".replace("0", userId);
+
+        document.getElementById("banModal").style.display = "flex";
+    }
+
+    function closeBanModal() {
+        document.getElementById("banModal").style.display = "none";
+    }
+    </script>
 
 </body>
 </html>

@@ -2,13 +2,30 @@ from context import db
 from models.User import User
 from flask import session
 from werkzeug.security import generate_password_hash, check_password_hash
+from models.Token import Token
+from datetime import datetime, timedelta
+import secrets
 class UserManagementController:
     
-    def set_password(self, password: str):
-        self.password_hash = generate_password_hash(password)
+    @staticmethod
+    def generate_token(user_id, type="verify_email", hours_valid=1):
+        Token.query.filter_by(
+            user_id=user_id,
+            type=type
+        ).delete()
 
-    def verify_password(self, password: str) -> bool:
-        return check_password_hash(self.password_hash, password)
+        token_value = secrets.token_urlsafe(32)
+
+        token = Token(
+            user_id=user_id,
+            token=token_value,
+            type=type,
+            expires_at=datetime.utcnow() + timedelta(hours=hours_valid)
+        )
+
+        db.session.add(token)
+        db.session.commit()
+        return token_value
 
     @staticmethod
     def create_user(email, password, name=None, surname=None, birthdate=None, role="customer"):
