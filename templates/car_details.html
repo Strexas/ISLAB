@@ -37,6 +37,10 @@
 
 <body>
     {{ navbar() }}
+    <a class="primary_button"
+   href="{{ url_for('fleet_management.update_reviews', vehicle_id=vehicle.id) }}">
+   Update Reviews
+    </a>
 
     <div class="container">
         <h2>{{ vehicle.manufacturer }} {{ vehicle.model }}</h2>
