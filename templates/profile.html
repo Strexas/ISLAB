@@ -6,7 +6,7 @@
 
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <style>
@@ -83,7 +83,7 @@
 </head>
 <body>
 
-    {% from "components/navbar.html" import navbar %}
+    {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
 
     <div class="card">

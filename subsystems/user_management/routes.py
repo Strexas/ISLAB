@@ -141,7 +141,7 @@ def login():
 
         return redirect(
             url_for(
-                "user_management.list_users"
+                "user_management.admin_dashboard"
                 if user.role in ["accountant", "employee"]
                 else "user_management.profile"
             )
@@ -415,3 +415,11 @@ def view_user_profile(user_id):
         delete_form=None,
         password_form=None
     )
+
+@user_management_bp.route('/admin_dashboard')
+def admin_dashboard():
+    if session.get("role") not in ADMIN_ROLES:
+        flash("Access denied.", "danger")
+        return redirect(url_for("user_management.profile"))
+
+    return render_template("admin_dashboard.html")

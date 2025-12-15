@@ -1,11 +1,16 @@
 .navbar {
   font-family: var(--text-font);
   background: white;
-  position: sticky;
-  width: 100%;
+  position: fixed;     /* CLAVE */
   top: 0;
   left: 0;
+  width: 100%;
   z-index: 1000;
+}
+
+/* Espacio que reserva la altura del navbar */
+.navbar-spacer {
+  height: 80px;
 }
 
 .navbar-container {
