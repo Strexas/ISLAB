@@ -67,7 +67,7 @@ def reserve(vehicle_id):
     dropoff_date_str = request.args.get("dropoff_date")
 
     try:
-        if pickup_date_str and dropoff_date_str:
+        if pickup_date_str and pickup_date_str != "" and dropoff_date_str and dropoff_date_str != "":
             pickup_date, dropoff_date = reservation_subsystem.parse_dates(pickup_date_str, dropoff_date_str)
             return render_template("car_reserve.html", logged_in=('user_id' in session), vehicle=vehicle, user=user, pickup_date=pickup_date, dropoff_date=dropoff_date)
     except Exception as e:

@@ -12,14 +12,14 @@ class FleetController:
     @staticmethod
     def get_all_vehicles():
         # Customers: show only ACTIVE cars
-       role = session.get("role")
+        role = session.get("role")
 
         # Customers: show only ACTIVE cars
-       if role not in ["employee", "accountant"]:
-        return Vehicle.query.filter_by(status="Active").all()
+        if role not in ["employee", "accountant"]:
+            return Vehicle.query.filter_by(status="Available").all()
 
-    # Employees + accountants: show ALL cars
-       return Vehicle.query.all()
+        # Employees + accountants: show ALL cars
+        return Vehicle.query.all()
 
 
     @staticmethod

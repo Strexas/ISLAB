@@ -40,9 +40,12 @@ def fleet_list():
     
     vehicles = FleetController.get_all_vehicles()
 
+    print(vehicles)
+
     final = []
     #Dates are requested
-    if pickup_date_str and dropoff_date_str:
+    if pickup_date_str and pickup_date_str != "" and dropoff_date_str and dropoff_date_str != "":
+        print(pickup_date_str, dropoff_date_str)
         try:
             pickup_date, dropoff_date = rs.parse_dates(pickup_date_str, dropoff_date_str)
 
@@ -76,17 +79,19 @@ def vehicle_details(vehicle_id):
         #Get dates from index search
         pickup_date_str = request.args.get("pickup_date")
         dropoff_date_str = request.args.get("dropoff_date")
-        pickup_date, dropoff_date = rs.parse_dates(pickup_date_str, dropoff_date_str)
+        
+        if pickup_date_str and pickup_date_str != "" and dropoff_date_str and dropoff_date_str != "":
+            pickup_date, dropoff_date = rs.parse_dates(pickup_date_str, dropoff_date_str)
 
-        return render_template(
-            "car_details.html",
-            vehicle=vehicle,
-            rent_price=vehicle.rent_price[-1] if vehicle.rent_price else None,
-            review_cache=vehicle.review_cache,
-            reviews=reviews,
-            pickup_date=pickup_date,
-            dropoff_date=dropoff_date
-        )
+            return render_template(
+                "car_details.html",
+                vehicle=vehicle,
+                rent_price=vehicle.rent_price[-1] if vehicle.rent_price else None,
+                review_cache=vehicle.review_cache,
+                reviews=reviews,
+                pickup_date=pickup_date,
+                dropoff_date=dropoff_date
+            )
     except Exception as e:
         flash(f"invalid dates requested: {e}")
 
