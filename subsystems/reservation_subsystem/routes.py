@@ -42,14 +42,15 @@ def reserve(vehicle_id):
             # If user opted for insurance, add it to the reservation
             wants_insurance = request.form.get("wants_insurance")
             if wants_insurance:
+                session["pending_reservation_id"] = reservation.reservation_id
+                return redirect(url_for("reservations.add_insurance"))
+                # reservation_subsystem.add_insurance_to_reservation(
+                #     reservation=reservation,
+                #     provider="Placeholder Provider",
+                #     amount=29.99
+                # )
                 
-                reservation_subsystem.add_insurance_to_reservation(
-                    reservation=reservation,
-                    provider="Placeholder Provider",
-                    amount=29.99
-                )
-                
-            #Call Payment Subsystem to process payment here
+            redirect(url_for(""))
 
             #If payment successful, finalize reservation
             reservation_subsystem.finalize_reservation(reservation)
@@ -138,3 +139,7 @@ def delete_reservation(reservation_id: int):
         return reservation_subsystem.deletereservation(user_id, reservation_id=reservation_id)
     except Exception as ex:
         return jsonify({"ok": False, "error": ex.__str__()}), 500
+    
+@reservation_blueprint.route("/reservations/reserve/addinsurance", methods=["GET"])
+def add_insurance():
+    return render_template("insurance.html")
