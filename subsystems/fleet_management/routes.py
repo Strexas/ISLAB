@@ -13,6 +13,7 @@ from models.RentPrice import RentPrice
 from models.ReviewCache import ReviewCache
 from form.VehicleForm import VehicleForm, RetireVehicleForm, ReviewCacheForm
 from subsystems.fleet_management.FleetController import FleetController
+from subsystems.reservation_subsystem.reservation_subsystem import ReservationSubsystem
 
 
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
@@ -31,8 +32,34 @@ def can_manage():
 
 @fleet_bp.route("/")
 def fleet_list():
+    rs = ReservationSubsystem()
+
+    #Get dates from index search
+    pickup_date_str = request.args.get("pickup_date")
+    dropoff_date_str = request.args.get("dropoff_date")
+    
     vehicles = FleetController.get_all_vehicles()
-    return render_template("fleetlist.html", vehicles=vehicles)
+
+    final = []
+    #Dates are requested
+    if pickup_date_str and dropoff_date_str:
+        try:
+            pickup_date, dropoff_date = rs.parse_dates(pickup_date_str, dropoff_date_str)
+
+            #Check all the vehicles in the requested dates if they are available
+            for vehicle in vehicles:
+                if rs.is_car_available(vehicle.vehicle_id, pickup_date, dropoff_date):
+                    final.append(vehicle)
+
+            return render_template("fleetlist.html", vehicles=final, pickup_date=pickup_date, dropoff_date=dropoff_date)
+        except Exception as e:
+            flash(f"Invalid dates requested {e}", "error")
+            final = vehicles    
+    
+    else:
+        final = vehicles
+        
+    return render_template("fleetlist.html", vehicles=final)
 
 # ----------------- VEHICLE DETAILS -----------------
 
@@ -43,12 +70,32 @@ def vehicle_details(vehicle_id):
     vehicle = FleetController.get_vehicle(vehicle_id)
     reviews = FleetController.get_reviews(vehicle_id)
 
+    try:
+        rs = ReservationSubsystem()
+
+        #Get dates from index search
+        pickup_date_str = request.args.get("pickup_date")
+        dropoff_date_str = request.args.get("dropoff_date")
+        pickup_date, dropoff_date = rs.parse_dates(pickup_date_str, dropoff_date_str)
+
+        return render_template(
+            "car_details.html",
+            vehicle=vehicle,
+            rent_price=vehicle.rent_price[-1] if vehicle.rent_price else None,
+            review_cache=vehicle.review_cache,
+            reviews=reviews,
+            pickup_date=pickup_date,
+            dropoff_date=dropoff_date
+        )
+    except Exception as e:
+        flash(f"invalid dates requested: {e}")
+
     return render_template(
         "car_details.html",
         vehicle=vehicle,
         rent_price=vehicle.rent_price[-1] if vehicle.rent_price else None,
         review_cache=vehicle.review_cache,
-        reviews=reviews
+        reviews=reviews,
     )
 
 # -------------------- ADD VEHICLE --------------------

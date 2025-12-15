@@ -1,4 +1,4 @@
-{% macro car_card(car) %}
+{% macro car_card(car, pickup_date = None, dropoff_date = None) %}
 <div class="car_card">
   {% if car.image_path %}
     <img class="media" src="{{ car.image_path }}">
@@ -30,7 +30,7 @@
       </div>
 
       <div>
-        <a class="primary_button" href="/fleet/{{ car.vehicle_id }}">
+        <a class="primary_button" href="{{ url_for('fleet.vehicle_details', vehicle_id=car.vehicle_id, pickup_date=pickup_date, dropoff_date=dropoff_date) }}">
           Details
         </a>
       </div>

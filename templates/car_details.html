@@ -75,7 +75,7 @@
 
                 <!-- RESERVE -->
                 <a class="primary_button"
-                href="/reservations/reserve/{{ vehicle.vehicle_id }}">
+                href="{{ url_for('reservations.reserve', vehicle_id=vehicle.vehicle_id, pickup_date=pickup_date, dropoff_date=dropoff_date) }}">
                     Reserve Car
                 </a>
 

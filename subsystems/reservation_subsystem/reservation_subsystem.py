@@ -98,7 +98,6 @@ class ReservationSubsystem:
             )
         )
 
-
         # Exclude the reservation we're editing
         if exclude_reservation_id is not None:
             q = q.filter(Reservation.reservation_id != exclude_reservation_id)
