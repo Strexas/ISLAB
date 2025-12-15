@@ -1,8 +1,8 @@
-﻿from flask import render_template, Blueprint, request, flash
+﻿""" Routing rules for maintenance subsystem and admin page """
 
-from context import db
+from flask import render_template, Blueprint, request, redirect
 
-from .MaintenanceController import MaintenanceController
+from .maintenance_controller import MaintenanceController
 
 
 maintenance_bp = Blueprint('maintenance_subsystem', __name__)
@@ -10,11 +10,21 @@ maintenance_bp = Blueprint('maintenance_subsystem', __name__)
 
 @maintenance_bp.route('/admin')
 def route_admin():
+    """
+    Renders static admin page.
+    :return: Admin dashboard page.
+    """
+
     return render_template('admin_dashboard.html')
 
 
 @maintenance_bp.route('/maintenances_list', methods=["GET", "POST"])
 def route_maintenances_list():
+    """
+    Lists maintenances. Filters and adds new maintenances.
+    :return: List of maintenances page.
+    """
+
     controller = MaintenanceController()
 
     message = ''
@@ -28,7 +38,9 @@ def route_maintenances_list():
             model = form['model']
             date = form['date']
         elif form['button'] == "add":
-            message = controller.add_maintenance(model=form['model'], plate=form['plate'], date=form['date'])
+            message = controller.add_maintenance(model=form['model'],
+                                                 plate=form['plate'],
+                                                 date=form['date'])
         elif form['button'] == "reset":
             pass
         else:
@@ -38,450 +50,65 @@ def route_maintenances_list():
     table_view = []
     for maintenance in maintenances:
         vehicle = controller.get_vehicle_by_id(maintenance.vehicle_id)
-        if plate in vehicle.license_plate and model in vehicle.model and (date == "" or date == str(maintenance.start_date)):
-            table_view.append([maintenance.id, vehicle.model, vehicle.license_plate, str(maintenance.start_date)])
+        if (plate in vehicle.license_plate and
+                model in vehicle.model and
+                (date == "" or date == str(maintenance.start_date))):
+            table_view.append([maintenance.id,
+                               vehicle.model,
+                               vehicle.license_plate,
+                               str(maintenance.start_date)])
 
-    return render_template('list_maintenance.html', maintenances=table_view, message=message)
+    return render_template('list_maintenance.html',
+                           maintenances=table_view, message=message)
 
 
-@maintenance_bp.route("/maintenance/<int:id>")
-def route_maintenance(id):
-    return render_template('maintenace_page.html')
+@maintenance_bp.route("/maintenance_page/<int:id_maintenance>", methods=["GET", "POST"])
+def route_maintenance(id_maintenance):
+    """
+    Displays maintenance page, process editing.
 
+    :param id_maintenance: id of the maintenance.
+    :return: Maintenance information page.
+    """
 
-# # @maintenance_bp.route('/register', methods=['GET', 'POST'])
-# # def register():
-# #     form = RegistrationForm()
-# #
-# #     if form.validate_on_submit():
-# #
-# #         # Si un employee/accountant está loggeado → puede elegir rol
-# #         if session.get("role") in ["employee", "accountant"]:
-# #             selected_role = form.role.data
-# #         else:
-# #             selected_role = "customer"
-# #
-# #         # Crear usuario
-# #         user = User.create_user(
-# #             email=form.email.data,
-# #             password=form.password.data,
-# #             name=form.name.data,
-# #             surname=form.surname.data,
-# #             birthdate=form.birthdate.data,
-# #             role=selected_role
-# #         )
-# #
-# #         # Generar token de verificación
-# #         token_value = Token.generate(user.id, type="verify_email")
-# #
-# #         verify_url = url_for('user_management.verify_email', token=token_value, _external=True)
-# #
-# #         msg = Message(
-# #             subject="Verify your Car Rental account",
-# #             sender="noreply@carrental.com",
-# #             recipients=[user.email],
-# #             body=f"Welcome!\n\nPlease click the following link to verify your account:\n{verify_url}"
-# #         )
-# #         mail.send(msg)
-# #
-# #         flash("Account created! Check your email to verify your account.", "info")
-# #         return redirect(url_for('user_management.login'))
-# #
-# #     return render_template('register.html', form=form)
-# #
-# #
-# #
-# # @user_management_bp.route('/verify/<token>')
-# # def verify_email(token):
-# #     t = Token.query.filter_by(token=token, type="verify_email").first()
-# #
-# #     if not t or not t.is_valid():
-# #         flash("Invalid or expired verification link.", "danger")
-# #         return redirect(url_for('user_management.login'))
-# #
-# #     user = User.get_by_id(t.user_id)
-# #     user.is_verified = True
-# #     db.session.commit()
-# #
-# #     flash("Your email has been verified. You can now log in.", "success")
-# #     return redirect(url_for('user_management.login'))
-# #
-# #
-# # # ---------- LOGIN / LOGOUT ----------
-# # @user_management_bp.route('/login', methods=['GET', 'POST'])
-# # def login():
-# #     form = LoginForm()
-# #
-# #     if form.validate_on_submit():
-# #
-# #         result = User.authenticate(form.email.data, form.password.data)
-# #
-# #         if result == "banned":
-# #             flash("Your account has been banned. Contact support.", "danger")
-# #             return render_template("login.html", form=form)
-# #
-# #         if result == "disabled":
-# #             flash("Your account has been deactivated.", "danger")
-# #             return render_template("login.html", form=form)
-# #
-# #         if not result:
-# #             flash("Invalid email or password.", "danger")
-# #             return render_template("login.html", form=form)
-# #
-# #         user = result
-# #
-# #         if not user.is_verified:
-# #             flash("Please verify your email before logging in.", "info")
-# #             return render_template("login.html", form=form)
-# #
-# #         session["user_id"] = user.id
-# #         session["role"] = user.role
-# #
-# #         if user.role == "accountant":
-# #             return redirect(url_for("user_management.list_users"))  # ADMIN PANEL
-# #
-# #         return redirect(url_for("user_management.profile"))  # CUSTOMER AREA
-# #
-# #     return render_template("login.html", form=form)
-# #
-# # @user_management_bp.route('/logout')
-# # def logout():
-# #     session.clear()
-# #     flash("Logged out successfully.", "info")
-# #     return redirect(url_for('user_management.login'))
-# #
-# #
-# # # ---------- PROFILE & DELETE PROFILE ----------
-# # @user_management_bp.route("/profile")
-# # def profile():
-# #     user = User.get_current()
-# #     if not user:
-# #         return redirect(url_for("user_management.login"))
-# #
-# #     license_form = LicenseForm()
-# #     delete_form = DeleteProfileForm()
-# #     password_form = PasswordChangeForm()
-# #
-# #     return render_template(
-# #         "profile.html",
-# #         user=user,
-# #         license_form=license_form,
-# #         delete_form=delete_form,
-# #         password_form=password_form
-# #     )
-# #
-# #
-# #
-# # @user_management_bp.route('/delete_profile', methods=['POST'])
-# # def delete_profile():
-# #     if not login_required():
-# #         return redirect(url_for('user_management.login'))
-# #
-# #     user = User.get_current()
-# #     form = DeleteProfileForm()
-# #
-# #     if form.validate_on_submit() and user.verify_password(form.current_password.data):
-# #         user.delete()
-# #         session.clear()
-# #         flash("Your profile has been permanently deleted.", "success")
-# #         return redirect(url_for('user_management.login'))
-# #
-# #     flash("Incorrect password. Profile could not be deleted.", "danger")
-# #     return redirect(url_for('user_management.profile'))
-# #
-# #
-# # # ---------- LIST USERS (Office Employee + Accountant) ----------
-# # @user_management_bp.route('/list_users')
-# # def list_users():
-# #     role = session.get('role')
-# #
-# #     if role not in ['employee', 'accountant']:
-# #         flash("You don't have permission to access this page.", "danger")
-# #         return redirect(url_for('user_management.profile'))
-# #
-# #     search = request.args.get("search", "").strip()
-# #
-# #     query = User.query
-# #
-# #     if search:
-# #         search_term = f"%{search}%"
-# #         query = query.filter(
-# #             db.or_(
-# #                 User.name.ilike(search_term),
-# #                 User.surname.ilike(search_term),
-# #                 User.email.ilike(search_term)
-# #             )
-# #         )
-# #
-# #     users = query.order_by(User.id).all()
-# #
-# #     return render_template('list_users.html', users=users, search=search)
-# #
-# #
-# # # ---------- BAN USER (solo Accountant) ----------
-# #
-# # @user_management_bp.route('/ban_user/<int:user_id>', methods=['POST'])
-# # def ban_user(user_id):
-# #     role = session.get('role')
-# #
-# #     if role != 'accountant':
-# #         flash("Access denied. Only accountants can ban users.", "danger")
-# #         return redirect(url_for('user_management.list_users'))
-# #
-# #     user_to_ban = User.get_by_id(user_id)
-# #     user_to_ban.ban()
-# #
-# #     if session.get('user_id') == user_to_ban.id:
-# #         session.clear()
-# #
-# #     flash(f"User {user_to_ban.email} has been banned.", "success")
-# #     return redirect(url_for('user_management.list_users'))
-# #
-# # # ---------- ADMIN DASHBOARD ----------
-# # @user_management_bp.route('/admin_dashboard')
-# # def admin_dashboard():
-# #     role = session.get("role")
-# #     if role not in ['employee', 'accountant']:
-# #         flash("Access denied.", "danger")
-# #         return redirect(url_for('user_management.login'))
-# #
-# #     return render_template("admin_dashboard.html")
-# #
-# # @user_management_bp.route('/unban_user/<int:user_id>', methods=['POST'])
-# # def unban_user(user_id):
-# #     role = session.get('role')
-# #
-# #     if role != 'accountant':
-# #         flash("Access denied. Only accountants can unban users.", "danger")
-# #         return redirect(url_for('user_management.list_users'))
-# #
-# #     user_to_unban = User.get_by_id(user_id)
-# #     user_to_unban.unban()
-# #
-# #     flash(f"User {user_to_unban.email} has been unbanned.", "success")
-# #     return redirect(url_for('user_management.list_users'))
-# #
-# #
-# # # ---------- UPDATE EMAIL ----------
-# # @user_management_bp.route('/update_email', methods=['POST'])
-# # def update_email():
-# #     if not login_required():
-# #         return redirect(url_for('user_management.login'))
-# #
-# #     user = User.get_current()
-# #     new_email = request.form.get("new_email")
-# #
-# #     if not new_email:
-# #         flash("Email cannot be empty.", "danger")
-# #         return redirect(url_for('user_management.profile'))
-# #
-# #     existing = User.query.filter_by(email=new_email).first()
-# #     if existing and existing.id != user.id:
-# #         flash("This email is already in use.", "danger")
-# #         return redirect(url_for('user_management.profile'))
-# #
-# #     user.email = new_email
-# #     db.session.commit()
-# #
-# #     flash("Email updated successfully!", "success")
-# #     return redirect(url_for('user_management.profile'))
-# #
-# # @user_management_bp.route('/index')
-# # def index():
-# #     return render_template('index.html')
-# #
-# #
-# # @user_management_bp.route('/edit_license', methods=['POST'])
-# # def edit_license():
-# #     if not login_required():
-# #         return redirect(url_for('user_management.login'))
-# #
-# #     user = User.get_current()
-# #     form = EditLicenseForm()
-# #
-# #     if not form.validate_on_submit():
-# #         flash("Invalid form input.", "danger")
-# #         return redirect(url_for('user_management.profile'))
-# #
-# #     license_number = form.driver_license.data
-# #     expiration_date = form.license_expiration.data
-# #
-# #     # --- 3RD PARTY REQUEST ---
-# #     try:
-# #         response = requests.post(
-# #             "http://127.0.0.1:5000/external/dot/check",
-# #             json={"license": license_number},
-# #             timeout=3
-# #         )
-# #         result = response.json()
-# #
-# #         # Registrar log del DOT
-# #         log = AccessLog(
-# #             employee_id=user.id,
-# #             action=f"DOT license check: {result}",
-# #             timestamp=datetime.utcnow()
-# #         )
-# #         db.session.add(log)
-# #         db.session.commit()
-# #
-# #     except Exception as e:
-# #         flash("DOT service unavailable.", "danger")
-# #         return redirect(url_for('user_management.profile'))
-# #
-# #     # --- RESPONSE HANDLING ---
-#     if result.get("status") != "valid":
-#         user.license_verified = False
-#         db.session.commit()
-#         flash("DOT rejected your license.", "danger")
-#         return redirect(url_for('user_management.profile'))
-#
-#     # DOT aceptó la licencia
-#     user.driver_license = license_number
-#     user.license_expiration = expiration_date
-#     user.license_verified = True
-#     db.session.commit()
-#
-#     flash("License verified successfully!", "success")
-#     return redirect(url_for('user_management.profile'))
-#
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-#
-#
-# @user_management_bp.route('/upload_license_photo', methods=['POST'])
-# def upload_license_photo():
-#     if 'user_id' not in session:
-#         flash("You must be logged in.", "warning")
-#         return redirect(url_for('user_management.login'))
-#
-#     user = User.get_current()
-#
-#     if 'license_photo' not in request.files:
-#         flash("No file part.", "danger")
-#         return redirect(url_for('user_management.profile'))
-#
-#     file = request.files['license_photo']
-#
-#     if file.filename == '':
-#         flash("No selected file.", "danger")
-#         return redirect(url_for('user_management.profile'))
-#
-#     if file and allowed_file(file.filename):
-#         filename = secure_filename(file.filename)
-#
-#         unique_filename = f"user_{user.id}_{filename}"
-#
-#         upload_path = os.path.join(
-#             current_app.root_path, 'static', 'uploads', 'licenses', unique_filename
-#         )
-#
-#         file.save(upload_path)
-#
-#         user.license_photo_path = f"/static/uploads/licenses/{unique_filename}"
-#         db.session.commit()
-#
-#         flash("License photo uploaded successfully!", "success")
-#     else:
-#         flash("Invalid file type. Allowed: png, jpg, jpeg", "danger")
-#
-#     return redirect(url_for('user_management.profile'))
-#
-# @user_management_bp.route("/create_admin", methods=["POST"])
-# def create_admin():
-#     from flask import current_app
-#
-#     # Seguridad básica: solo permitir cuando el servidor está en modo debug
-#     if not current_app.debug:
-#         return {"error": "Not allowed in production"}, 403
-#
-#     data = request.json or {}
-#
-#     email = data.get("email")
-#     password = data.get("password")
-#
-#     if not email or not password:
-#         return {"error": "Email and password required"}, 400
-#
-#     # Comprobar si ya existe
-#     existing = User.query.filter_by(email=email).first()
-#     if existing:
-#         return {"error": "User already exists"}, 400
-#
-#     # Crear usuario admin
-#     admin = User(
-#         email=email,
-#         name="System",
-#         surname="Admin",
-#         role="accountant",        # <<< Admin
-#         account_status=True,
-#         is_verified=True           # Saltamos verificación email
-#     )
-#     admin.set_password(password)
-#
-#     db.session.add(admin)
-#     db.session.commit()
-#
-#     return {"message": "Admin created successfully"}
-#
-# @user_management_bp.route('/delete_user/<int:user_id>', methods=['POST'])
-# def delete_user(user_id):
-#     # Solo accountant puede borrar
-#     if session.get("role") != "accountant":
-#         flash("Access denied. Only accountants can delete users.", "danger")
-#         return redirect(url_for('user_management.list_users'))
-#
-#     user = User.get_by_id(user_id)
-#
-#     # Evita que un admin se elimine a sí mismo
-#     if user.id == session.get("user_id"):
-#         flash("You cannot delete your own account.", "warning")
-#         return redirect(url_for('user_management.list_users'))
-#
-#     # Eliminar usuario
-#     db.session.delete(user)
-#     db.session.commit()
-#
-#     flash(f"User {user.email} has been permanently deleted.", "success")
-#     return redirect(url_for('user_management.list_users'))
-#
-# @user_management_bp.route("/change_password", methods=["POST"])
-# def change_password():
-#     password_form = PasswordChangeForm()
-#
-#     if password_form.validate_on_submit():
-#         user = User.get_current()
-#
-#         if not user.verify_password(password_form.old_password.data):
-#             flash("Incorrect current password.", "danger")
-#             return redirect(url_for("user_management.profile"))
-#
-#         if password_form.new_password.data != password_form.confirm_new_password.data:
-#             flash("New passwords do not match.", "danger")
-#             return redirect(url_for("user_management.profile"))
-#
-#         user.set_password(password_form.new_password.data)
-#         db.session.commit()
-#
-#         flash("Password updated successfully!", "success")
-#         return redirect(url_for("user_management.profile"))
-#
-#     flash("Invalid input.", "danger")
-#     return redirect(url_for("user_management.profile"))
-#
-# @user_management_bp.route("/profile/<int:user_id>")
-# def view_user_profile(user_id):
-#     role = session.get("role")
-#
-#     if role not in ["employee", "accountant"]:
-#         flash("Access denied.", "danger")
-#         return redirect(url_for("user_management.profile"))
-#
-#     user = User.get_by_id(user_id)
-#
-#     return render_template(
-#         "profile.html",
-#         user=user,
-#         license_form=None,
-#         delete_form=None,
-#         password_form=None
-#     )
+    controller = MaintenanceController()
+    message = ''
+    scroll = False
+    if request.method == "POST":
+        form = request.form
+        if "button" in form:
+            if form['button'] == "delete":
+                controller.delete_maintenance(id_maintenance)
+                return redirect('/maintenances_list')
+            elif form['button'] == "save_description":
+                message = controller.update_description(maintenance_id=id_maintenance,
+                                                         description=form['description'],
+                                                         problem=form['problem'],
+                                                         start_date=form['start_date'],
+                                                         end_date=form['end_date'],
+                                                         status=form['status'])
+            elif form['button'] == "save_need":
+                components = {}
+                for ids in form.keys():
+                    if ids == 'button':
+                        continue
+                    components[ids] = form.getlist(ids)
+                controller.save_components(components)
+            elif form['button'] == "add_need":
+                controller.add_empty_need_order_row(controller.get_awaiting_order(id_maintenance).id)
+                scroll = True
+        elif 'delete_component' in form:
+            controller.delete_component(form['delete_component'])
+            scroll = True
+        else:
+            message = "Error: Not Implemented"
+    maintenance = controller.get_maintenance_by_id(id_maintenance)
+    vehicle = controller.get_vehicle_by_id(maintenance.vehicle_id)
+    awaiting_order_details = controller.get_awaiting_order_components(maintenance.id)
+
+    return render_template('maintenance_page.html',
+                           vehicle=vehicle,
+                           maintenance=maintenance,
+                           message=message,
+                           awaiting_order_details=awaiting_order_details,
+                           scroll=scroll)
