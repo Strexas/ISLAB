@@ -5,7 +5,6 @@ class Vehicle(db.Model):
     __tablename__ = "vehicles"
 
     vehicle_id = db.Column(db.Integer, primary_key=True)
-    
     license_plate = db.Column(db.String(20), unique=True, nullable=False)
     manufacturer = db.Column(db.String(80), nullable=False)
     model = db.Column(db.String(80), nullable=False)
@@ -38,6 +37,7 @@ class Vehicle(db.Model):
         cascade="save-update",   # no delete cascade
         passive_deletes=True     # allows SQL to decide behavior
     )
+    
 
     def current_price(self):
         if self.rent_price:
