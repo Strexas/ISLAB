@@ -1,4 +1,4 @@
-﻿""" Routing rules for maintenance subsystem and admin page """
+﻿""" Routing rules for maintenance subsystem """
 
 from flask import render_template, Blueprint, request, redirect
 
@@ -7,22 +7,12 @@ from .maintenance_controller import MaintenanceController
 
 maintenance_bp = Blueprint('maintenance_subsystem', __name__)
 
-
-@maintenance_bp.route('/admin')
-def route_admin():
-    """
-    Renders static admin page.
-    :return: Admin dashboard page.
-    """
-
-    return render_template('admin_dashboard.html')
-
-
 @maintenance_bp.route('/maintenances_list', methods=["GET", "POST"])
 def route_maintenances_list():
     """
     Lists maintenances. Filters and adds new maintenances.
     :return: List of maintenances page.
+    :return: List of maintenancsces page.
     """
 
     controller = MaintenanceController()
@@ -94,6 +84,7 @@ def route_maintenance(id_maintenance):
                         continue
                     components[ids] = form.getlist(ids)
                 controller.save_components(components)
+                scroll = True
             elif form['button'] == "add_need":
                 controller.add_empty_need_order_row(controller.get_awaiting_order(id_maintenance).id)
                 scroll = True
@@ -111,4 +102,4 @@ def route_maintenance(id_maintenance):
                            maintenance=maintenance,
                            message=message,
                            awaiting_order_details=awaiting_order_details,
-                           scroll=scroll)
+                           scroll=str(scroll).lower())

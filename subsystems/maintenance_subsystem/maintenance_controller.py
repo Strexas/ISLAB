@@ -89,7 +89,7 @@ class MaintenanceController:
             return "More than one vehicle found."
 
         vehicle = vehicles[0]
-        existing_maintenance = Maintenance.query.filter_by(vehicle_id=vehicle.id, end_date=None).all()
+        existing_maintenance = Maintenance.query.filter_by(vehicle_id=vehicle.vehicle_id, end_date=None).all()
         if existing_maintenance:
             return (f"Maintenance for this car is already planned on"
                     f" {str(existing_maintenance[0].start_date)} and was not finished")
@@ -97,7 +97,7 @@ class MaintenanceController:
         maintenance = Maintenance()
         if date:
             maintenance.start_date = date
-        maintenance.vehicle_id = vehicle.id
+        maintenance.vehicle_id = vehicle.vehicle_id
         db.session.add(maintenance)
         db.session.commit()
 
@@ -126,7 +126,7 @@ class MaintenanceController:
         if not maintenance:
             return "Maintenance does not exist."
 
-        if not end_date and (len(maintenances_vehicles) > 0 and maintenance.end_date or maintenances_vehicles):
+        if not end_date and (len(maintenances_vehicles) > 0 and maintenance.end_date or len(maintenances_vehicles) > 1):
             return "Can't have at the same two ongoing maintenances."
 
 
@@ -170,7 +170,7 @@ class MaintenanceController:
         component = Component()
         component.order_id = order_id
         component.name = "None"
-        component.quantity = 0
+        component.quantity = 1
         component.price = 0
         db.session.add(component)
         db.session.commit()
