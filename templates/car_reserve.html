@@ -35,7 +35,8 @@
 
               <!-- Rental Details form -->
               <h3 style="margin-top: 50px;">Rental Details</h3>
-              <form autocomplete="off" method="post" action="{{ url_for('reservations.reserve', vehicle_id=vehicle.id) }}">
+              <form autocomplete="off" method="post" action="{{ url_for('reservations.reserve', vehicle_id=vehicle.vehicle_id) }}"
+>
 
                   <!-- Dates form -->
                   <div class="row">

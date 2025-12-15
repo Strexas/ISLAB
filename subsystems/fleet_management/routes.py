@@ -4,32 +4,27 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 import os
-from datetime import date
+from datetime import date, datetime, timedelta
 import requests
-from datetime import datetime, timedelta
 
 from context import db
 from models.Vehicle import Vehicle
 from models.RentPrice import RentPrice
 from models.ReviewCache import ReviewCache
-from form.VehicleForm import VehicleForm, RetireVehicleForm,ReviewCacheForm
-
+from form.VehicleForm import VehicleForm, RetireVehicleForm, ReviewCacheForm
 
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
 
-# Allowed file extensions for vehicle image upload
 ALLOWED_IMG = {"png", "jpg", "jpeg"}
 
 
 # -------------------- UTILS --------------------
 
 def allowed(filename):
-    """Check if uploaded file has a valid image extension."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMG
 
 
 def can_manage():
-    """Employees + accountants can modify fleet."""
     return session.get("role") in ["employee", "accountant"]
 
 
@@ -43,7 +38,7 @@ def fleet_list():
 
 # -------------------- VEHICLE DETAILS --------------------
 
-@fleet_bp.route('/<int:vehicle_id>')
+@fleet_bp.route("/<int:vehicle_id>")
 def vehicle_details(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     reviews = get_vehicle_reviews(vehicle_id)
@@ -51,60 +46,12 @@ def vehicle_details(vehicle_id):
     return render_template(
         "car_details.html",
         vehicle=vehicle,
-        rent_price=vehicle.rent_price,
+        rent_price=vehicle.rent_price[-1] if vehicle.rent_price else None,
         review_cache=vehicle.review_cache,
         reviews=reviews
     )
 
-@fleet_bp.route('/<int:vehicle_id>/reviews', methods=['GET', 'POST'])
-def update_reviews(vehicle_id):
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
-    form = ReviewCacheForm()
 
-    review_cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
-
-    if form.validate_on_submit():
-        try:
-            if review_cache:
-                # Update existing cache
-                review_cache.average_rating = form.average_rating.data
-                review_cache.review_count = form.review_count.data
-                review_cache.last_updated = form.last_updated.data
-                review_cache.source = form.source.data
-            else:
-                # Create new cache entry
-                review_cache = ReviewCache(
-                    vehicle_id=vehicle_id,
-                    average_rating=form.average_rating.data,
-                    review_count=form.review_count.data,
-                    last_updated=form.last_updated.data,
-                    source=form.source.data
-                )
-                db.session.add(review_cache)
-
-            db.session.commit()
-            flash("Review cache updated successfully.", "success")
-            return redirect(url_for(
-                'fleet.vehicle_details',
-                vehicle_id=vehicle.id
-            ))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error updating review cache: {e}", "error")
-
-    # Pre-fill form if cache exists
-    if review_cache and request.method == "GET":
-        form.average_rating.data = review_cache.average_rating
-        form.review_count.data = review_cache.review_count
-        form.last_updated.data = review_cache.last_updated
-        form.source.data = review_cache.source
-
-    return render_template(
-        "update_reviews.html",
-        vehicle=vehicle,
-        form=form
-    )
 # -------------------- ADD VEHICLE --------------------
 
 @fleet_bp.route("/add", methods=["GET", "POST"])
@@ -117,7 +64,6 @@ def fleet_add():
 
     if form.validate_on_submit():
 
-        # Create vehicle
         vehicle = Vehicle(
             license_plate=form.license_plate.data,
             manufacturer=form.manufacturer.data,
@@ -129,9 +75,8 @@ def fleet_add():
             status=form.status.data
         )
 
-        # ---------- IMAGE UPLOAD ----------
+        # ---------- IMAGE ----------
         file = request.files.get("image")
-
         if file and file.filename and allowed(file.filename):
             filename = secure_filename(file.filename)
             unique = f"{vehicle.license_plate}_{filename}"
@@ -140,29 +85,26 @@ def fleet_add():
             )
             os.makedirs(os.path.dirname(upload_path), exist_ok=True)
             file.save(upload_path)
-
             vehicle.image_path = f"/static/vehicles/{unique}"
 
-        # Save vehicle so ID exists
         db.session.add(vehicle)
-        db.session.flush()
+        db.session.flush()  # get vehicle_id
 
-        # ---------- INITIAL PRICE ----------
-        rent_price = RentPrice(
-                price=form.current_price.data,
-                date=date.today()
-            )
+        # ---------- INITIAL PRICE (FIXED) ----------
+        price = RentPrice(
+            price=form.current_price.data,
+            date=date.today()
+        )
+        vehicle.rent_price.append(price)
+        db.session.add(price)
 
-        vehicle.rent_price = rent_price
-
-        db.session.add(vehicle)
         db.session.commit()
 
         flash("Vehicle added successfully.", "success")
         return redirect(url_for("fleet.fleet_list"))
 
     return render_template("add_car.html", form=form, mode="add")
-    
+
 
 # -------------------- EDIT VEHICLE --------------------
 
@@ -175,7 +117,7 @@ def fleet_edit(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     form = VehicleForm()
 
-    # ------------- LOAD EXISTING DATA -------------
+    # ---------- LOAD DATA ----------
     if request.method == "GET":
         form.license_plate.data = vehicle.license_plate
         form.manufacturer.data = vehicle.manufacturer
@@ -187,7 +129,7 @@ def fleet_edit(vehicle_id):
         form.status.data = vehicle.status
         form.current_price.data = vehicle.current_price() or 0
 
-    # ------------- SUBMIT CHANGES -------------
+    # ---------- SUBMIT ----------
     if form.validate_on_submit():
 
         vehicle.license_plate = form.license_plate.data
@@ -199,16 +141,17 @@ def fleet_edit(vehicle_id):
         vehicle.fuel_type = form.fuel_type.data
         vehicle.status = form.status.data
 
-        # PRICE CHANGE? Create new RentPrice
-        if vehicle.rent_price:
-                vehicle.rent_price.price = form.current_price.data
-                vehicle.rent_price.date = date.today()
-        else:
-                vehicle.rent_price = RentPrice(
-                    price=form.current_price.data,
-                    date=date.today()
-                )
-        # IMAGE UPDATE
+        # ---------- PRICE CHANGE (FIXED) ----------
+        last_price = vehicle.rent_price[-1] if vehicle.rent_price else None
+        if not last_price or last_price.price != form.current_price.data:
+            new_price = RentPrice(
+                price=form.current_price.data,
+                date=date.today()
+            )
+            vehicle.rent_price.append(new_price)
+            db.session.add(new_price)
+
+        # ---------- IMAGE ----------
         file = request.files.get("image")
         if file and file.filename and allowed(file.filename):
             filename = secure_filename(file.filename)
@@ -218,41 +161,34 @@ def fleet_edit(vehicle_id):
             )
             os.makedirs(os.path.dirname(upload_path), exist_ok=True)
             file.save(upload_path)
-
             vehicle.image_path = f"/static/vehicles/{unique}"
 
         db.session.commit()
 
         flash("Vehicle updated successfully.", "success")
-        return redirect(url_for("fleet.fleet_details", vehicle_id=vehicle.id))
+        return redirect(url_for("fleet.vehicle_details", vehicle_id=vehicle.vehicle_id))
 
     return render_template("vehicle_form.html", form=form, mode="edit", vehicle=vehicle)
 
 
-# -------------------- DELETE VEHICLE --------------------
+# -------------------- REVIEW CACHE --------------------
 
 def get_vehicle_reviews(vehicle_id):
-    """Returns reviews via cache or external API."""
-
-    from models.ReviewCache import ReviewCache
-
-    # 1. Check cache
     cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
 
     if cache:
         age = datetime.utcnow() - cache.fetched_at
         if age < timedelta(hours=24):
-            return cache.data  # Return cached data
+            return cache.data
 
-    # 2. Fetch from external API
     try:
-        api_url = f"https://dummyjson.com/products/{vehicle_id}/reviews"
-        response = requests.get(api_url, timeout=5)
+        response = requests.get(
+            f"https://dummyjson.com/products/{vehicle_id}/reviews",
+            timeout=5
+        )
         response.raise_for_status()
-
         data = response.json()
 
-        # 3. Save new cache
         if cache:
             cache.data = data
             cache.fetched_at = datetime.utcnow()
@@ -267,36 +203,53 @@ def get_vehicle_reviews(vehicle_id):
         db.session.commit()
         return data
 
-    except Exception as e:
-        print("Review API error:", e)
-        return {"reviews": []}  # fallback
-    
-   
+    except Exception:
+        return {"reviews": []}
 
-# Retire Vehicle
-@fleet_bp.route('/<string:vehicle_id>/retire', methods=['GET', 'POST'])
+
+# -------------------- RETIRE VEHICLE --------------------
+
+@fleet_bp.route("/<int:vehicle_id>/retire", methods=["GET", "POST"])
 def retire_vehicle(vehicle_id):
+    if not can_manage():
+        flash("Access denied.", "danger")
+        return redirect(url_for("fleet.fleet_list"))
+
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     form = RetireVehicleForm()
-    
+
     if form.validate_on_submit():
-        try:
-            if not form.confirm.data:
-                flash('Please confirm the retirement', 'error')
-                return render_template('retire_vehicle.html', form=form, vehicle=vehicle)
-            
-            # Update vehicle status
-            vehicle.status = 'Inactive'
-            vehicle.updated_at = datetime.utcnow()
-            
-            # In a real system, you might want to store retirement details in a separate table
-            db.session.commit()
-            
-            flash(f'Vehicle {vehicle.manufacturer} {vehicle.model} has been retired.', 'success')
-            return redirect(url_for('fleet.fleet_list'))
-            
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error retiring vehicle: {str(e)}', 'error')
-    
-    return render_template('retire_vehicle.html', form=form, vehicle=vehicle)
+        if not form.confirm.data:
+            flash("Please confirm retirement.", "warning")
+            return render_template(
+                "retire_vehicle.html",
+                form=form,
+                vehicle=vehicle
+            )
+
+        vehicle.status = "Inactive"
+        vehicle.updated_at = datetime.utcnow()
+        db.session.commit()
+
+        flash("Vehicle retired successfully.", "success")
+        return redirect(url_for("fleet.fleet_list"))
+
+    return render_template(
+        "retire_vehicle.html",
+        form=form,
+        vehicle=vehicle
+    )
+
+@fleet_bp.route("/<int:vehicle_id>/delete", methods=["POST"])
+def fleet_delete(vehicle_id):
+    if session.get("role") != "accountant":
+        flash("Access denied.", "danger")
+        return redirect(url_for("fleet.fleet_list"))
+
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+
+    db.session.delete(vehicle)
+    db.session.commit()
+
+    flash("Vehicle deleted successfully.", "success")
+    return redirect(url_for("fleet.fleet_list"))
