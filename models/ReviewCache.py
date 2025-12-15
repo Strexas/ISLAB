@@ -5,7 +5,7 @@ class ReviewCache(db.Model):
     __tablename__ = "review_cache"
 
     id = db.Column(db.Integer, primary_key=True)
-    vehicle_id = db.Column(db.Integer, db.ForeignKey("vehicles.id"), unique=True)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey("vehicles.vehicle_id"), unique=True)
 
     average_rating = db.Column(db.Float, nullable=False, default=0.0)
     review_count = db.Column(db.Integer, nullable=False, default=0)

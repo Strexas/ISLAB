@@ -12,7 +12,7 @@ from context import db
 from models.Vehicle import Vehicle
 from models.RentPrice import RentPrice
 from models.ReviewCache import ReviewCache
-from form.VehicleForm import VehicleForm, RetireVehicleForm
+from form.VehicleForm import VehicleForm, RetireVehicleForm,ReviewCacheForm
 
 
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
@@ -37,25 +37,72 @@ def can_manage():
 
 @fleet_bp.route("/")
 def fleet_list():
-    vehicles = Vehicle.query.order_by(Vehicle.id).all()
+    vehicles = Vehicle.query.order_by(Vehicle.vehicle_id).all()
     return render_template("fleetlist.html", vehicles=vehicles)
 
 
 # -------------------- VEHICLE DETAILS --------------------
 
-@fleet_bp.route("/<int:vehicle_id>")
-def fleet_details(vehicle_id):
+@fleet_bp.route('/<int:vehicle_vehicle_id>')
+def vehicle_details(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
-
-    reviews = get_vehicle_reviews(vehicle_id)
 
     return render_template(
         "car_details.html",
         vehicle=vehicle,
-        reviews=reviews.get("reviews", [])
+        rent_price=vehicle.rent_price,
+        review_cache=vehicle.review_cache
     )
 
+@fleet_bp.route('/<int:vehicle_vehicle_id>/reviews', methods=['GET', 'POST'])
+def update_reviews(vehicle_id):
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    form = ReviewCacheForm()
 
+    review_cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
+
+    if form.validate_on_submit():
+        try:
+            if review_cache:
+                # Update existing cache
+                review_cache.average_rating = form.average_rating.data
+                review_cache.review_count = form.review_count.data
+                review_cache.last_updated = form.last_updated.data
+                review_cache.source = form.source.data
+            else:
+                # Create new cache entry
+                review_cache = ReviewCache(
+                    vehicle_id=vehicle_id,
+                    average_rating=form.average_rating.data,
+                    review_count=form.review_count.data,
+                    last_updated=form.last_updated.data,
+                    source=form.source.data
+                )
+                db.session.add(review_cache)
+
+            db.session.commit()
+            flash("Review cache updated successfully.", "success")
+            return redirect(url_for(
+                'fleet.vehicle_details',
+                vehicle_id=vehicle.id
+            ))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating review cache: {e}", "error")
+
+    # Pre-fill form if cache exists
+    if review_cache and request.method == "GET":
+        form.average_rating.data = review_cache.average_rating
+        form.review_count.data = review_cache.review_count
+        form.last_updated.data = review_cache.last_updated
+        form.source.data = review_cache.source
+
+    return render_template(
+        "update_reviews.html",
+        vehicle=vehicle,
+        form=form
+    )
 # -------------------- ADD VEHICLE --------------------
 
 @fleet_bp.route("/add", methods=["GET", "POST"])
@@ -99,13 +146,14 @@ def fleet_add():
         db.session.flush()
 
         # ---------- INITIAL PRICE ----------
-        price_entry = RentPrice(
-            vehicle_id=vehicle.id,
-            price=form.current_price.data,
-            date=date.today()
-        )
-        db.session.add(price_entry)
+        rent_price = RentPrice(
+                price=form.current_price.data,
+                date=date.today()
+            )
 
+        vehicle.rent_price = rent_price
+
+        db.session.add(vehicle)
         db.session.commit()
 
         flash("Vehicle added successfully.", "success")
@@ -116,7 +164,7 @@ def fleet_add():
 
 # -------------------- EDIT VEHICLE --------------------
 
-@fleet_bp.route("/<int:vehicle_id>/edit", methods=["GET", "POST"])
+@fleet_bp.route("/<int:vehicle_vehicle_id>/edit", methods=["GET", "POST"])
 def fleet_edit(vehicle_id):
     if not can_manage():
         flash("Access denied.", "danger")
@@ -150,15 +198,14 @@ def fleet_edit(vehicle_id):
         vehicle.status = form.status.data
 
         # PRICE CHANGE? Create new RentPrice
-        new_price = form.current_price.data
-        if vehicle.current_price() != new_price:
-            new_price_entry = RentPrice(
-                vehicle_id=vehicle.id,
-                price=new_price,
-                date=date.today()
-            )
-            db.session.add(new_price_entry)
-
+        if vehicle.rent_price:
+                vehicle.rent_price.price = form.current_price.data
+                vehicle.rent_price.date = date.today()
+        else:
+                vehicle.rent_price = RentPrice(
+                    price=form.current_price.data,
+                    date=date.today()
+                )
         # IMAGE UPDATE
         file = request.files.get("image")
         if file and file.filename and allowed(file.filename):
@@ -182,7 +229,7 @@ def fleet_edit(vehicle_id):
 
 # -------------------- DELETE VEHICLE --------------------
 
-@fleet_bp.route("/<int:vehicle_id>/delete", methods=["POST"])
+@fleet_bp.route("/<int:vehicle_vehicle_id>/delete", methods=["POST"])
 def fleet_delete(vehicle_id):
     if session.get("role") != "accountant":
         flash("Only accountants can delete vehicles.", "danger")
@@ -236,7 +283,7 @@ def get_vehicle_reviews(vehicle_id):
         return {"reviews": []}  # fallback
 
 # Retire Vehicle
-@fleet_bp.route('/<string:vehicle_id>/retire', methods=['GET', 'POST'])
+@fleet_bp.route('/<string:vehicle_vehicle_id>/retire', methods=['GET', 'POST'])
 def retire_vehicle(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
     form = RetireVehicleForm()
@@ -245,7 +292,7 @@ def retire_vehicle(vehicle_id):
         try:
             if not form.confirm.data:
                 flash('Please confirm the retirement', 'error')
-                return render_template('fleet_management/retire_vehicle.html', form=form, vehicle=vehicle)
+                return render_template('retire_vehicle.html', form=form, vehicle=vehicle)
             
             # Update vehicle status
             vehicle.status = 'Inactive'
@@ -255,10 +302,10 @@ def retire_vehicle(vehicle_id):
             db.session.commit()
             
             flash(f'Vehicle {vehicle.manufacturer} {vehicle.model} has been retired.', 'success')
-            return redirect(url_for('fleet_management.fleet_list'))
+            return redirect(url_for('fleet.fleet_list'))
             
         except Exception as e:
             db.session.rollback()
             flash(f'Error retiring vehicle: {str(e)}', 'error')
     
-    return render_template('fleet_management/retire_vehicle.html', form=form, vehicle=vehicle)
+    return render_template('retire_vehicle.html', form=form, vehicle=vehicle)

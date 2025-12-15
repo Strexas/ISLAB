@@ -30,3 +30,15 @@ class VehicleForm(FlaskForm):
 class RetireVehicleForm(FlaskForm):
     reason = TextAreaField('Reason for Retirement', validators=[DataRequired(), Length(min=5, max=500)])
     confirm = BooleanField('Confirm retirement', validators=[DataRequired()])
+
+class ReviewCacheForm(FlaskForm):
+    average_rating = DecimalField(
+        "Average Rating",
+        validators=[NumberRange(min=0, max=5)]
+    )
+    review_count = IntegerField(
+        "Review Count",
+        validators=[NumberRange(min=0)]
+    )
+    source = StringField("Source", validators=[Length(max=80)])
+    submit = SubmitField("Save")
