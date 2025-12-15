@@ -65,6 +65,26 @@
   color: var(--secondary-button-hover-text-color);
 }
 
+.blue_outline {
+  background-color: transparent;
+  color: var(--primary-button-color);
+  border-radius: 10px;
+  border: solid 2px var(--primary-button-color);
+  padding: 10px 20px;
+  font-size: 15px;
+  margin-top: auto;
+  font-weight: 420;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+
+.blue_outline:hover {
+  background-color: var(--primary-button-color);
+  color: white;
+}
+
 .no-results {
   font-style: italic;
   color: var(--primary-text-color);
