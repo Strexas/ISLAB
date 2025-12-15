@@ -12,6 +12,7 @@ from models.Vehicle import Vehicle
 from models.RentPrice import RentPrice
 from models.ReviewCache import ReviewCache
 from form.VehicleForm import VehicleForm, RetireVehicleForm, ReviewCacheForm
+from subsystems.fleet_management.FleetController import FleetController
 
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
 
