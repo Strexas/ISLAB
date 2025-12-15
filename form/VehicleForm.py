@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField, TextAreaField, BooleanField,DecimalField,SubmitField    
-from wtforms.validators import DataRequired, Length, NumberRange
+from wtforms.validators import DataRequired, Length, NumberRange, InputRequired
 
 class VehicleForm(FlaskForm):
     license_plate = StringField("License Plate", validators=[DataRequired(), Length(max=20)])
@@ -28,8 +28,14 @@ class VehicleForm(FlaskForm):
     submit = SubmitField("Save")
 
 class RetireVehicleForm(FlaskForm):
-    reason = TextAreaField('Reason for Retirement', validators=[DataRequired(), Length(min=5, max=500)])
-    confirm = BooleanField('Confirm retirement', validators=[DataRequired()])
+    reason = TextAreaField(
+        'Reason for Retirement',
+        validators=[DataRequired(), Length(min=5, max=500)]
+    )
+    confirm = BooleanField(
+        'Confirm retirement',
+        validators=[InputRequired()]
+    )
 
 class ReviewCacheForm(FlaskForm):
     average_rating = DecimalField(
