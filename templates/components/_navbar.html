@@ -34,11 +34,11 @@
         <div class="navbar-actions">
 
             {% if not session.get('user_id') %}
-            <a href="/login" class="btn btn-primary">Login</a>
-            <a href="/register" class="btn btn-outline">Register</a>
+            <a href="/login" class="primary_button">Login</a>
+            <a href="/register" class="secondary_button blue_outline">Register</a>
             {% else %}
-            <a href="/profile" class="btn btn-outline">Profile</a>
-            <a href="/logout" class="btn btn-danger">Logout</a>
+            <a href="/profile" class="secondary_button blue_outline">Profile</a>
+            <a href="/logout" class="danger_button">Logout</a>
             {% endif %}
 
         </div>

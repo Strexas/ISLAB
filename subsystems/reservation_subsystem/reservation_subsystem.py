@@ -18,10 +18,10 @@ class ReservationSubsystem:
         pickup_date, return_date = self.parse_dates(pickup_date_s, return_date_s)
         
         #Check availability
-        if not self.is_car_available(vehicle.id, pickup_date, return_date):
+        if not self.is_car_available(vehicle.vehicle_id, pickup_date, return_date):
             raise ValueError("The selected vehicle is not available for the chosen dates.")
 
-        price_row = RentPrice.query.filter(RentPrice.vehicle_id == vehicle.id).first()
+        price_row = RentPrice.query.filter(RentPrice.vehicle_id == vehicle.vehicle_id).first()
         daily_rate = daily_rate = price_row.price if price_row else 0
 
         #Calculate total amount

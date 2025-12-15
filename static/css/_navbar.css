@@ -8,12 +8,12 @@
     background: #ffffff;
     z-index: 1000;
     border-bottom: 1px solid #e5e7eb;
-    font-family: "Segoe UI", Tahoma, sans-serif;
+    font-family: var(--text-font);
 }
 
 /* Space reserved for fixed navbar */
 .navbar-spacer {
-    height: 80px;
+    height: 74px;
 }
 
 /* ===== CONTAINER ===== */
@@ -75,45 +75,3 @@
     display: flex;
     gap: 10px;
 }
-
-/* ===== BUTTONS ===== */
-
-.btn {
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-/* Primary */
-.btn-primary {
-    background-color: #2563eb;
-    color: white;
-}
-
-    .btn-primary:hover {
-        background-color: #1e40af;
-    }
-
-/* Outline */
-.btn-outline {
-    border: 1px solid #2563eb;
-    color: #2563eb;
-}
-
-    .btn-outline:hover {
-        background-color: #2563eb;
-        color: white;
-    }
-
-/* Danger */
-.btn-danger {
-    background-color: #dc2626;
-    color: white;
-}
-
-    .btn-danger:hover {
-        background-color: #991b1b;
-    }
