@@ -141,7 +141,7 @@ def login():
 
         return redirect(
             url_for(
-                "user_management.list_users"
+                "user_management.admin_dashboard"
                 if user.role in ["accountant", "employee"]
                 else "user_management.profile"
             )

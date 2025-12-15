@@ -10,6 +10,7 @@ from models.User import User
 from subsystems.user_management.routes import user_management_bp
 from subsystems.reservation_subsystem.routes import reservation_blueprint
 from subsystems.user_management.dot_service import dot_bp
+from subsystems.fleet_management.routes import fleet_bp
 
 app = Flask(__name__)
 
