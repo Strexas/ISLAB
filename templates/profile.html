@@ -178,22 +178,23 @@
                 {% elif user.driver_license and user.license_photo_path %}
                 <span style="color:orange;">Pending approval</span>
                 {% if session.get("role") in ["employee", "accountant"]
-      and license_form is none
-      and not user.license_verified
-      and user.driver_license
-      and user.license_photo_path %}
+                and license_form is none
+                and not user.license_verified
+                and user.driver_license
+                and user.license_photo_path %}
 
-<div style="margin-top: 10px; display:flex; gap:10px;">
-    <form method="POST" action="{{ url_for('user_management.verify_license', user_id=user.id) }}">
-        <button type="submit" class="edit-btn" style="float:none;">Approve</button>
-    </form>
+                <div style="margin-top: 10px; display:flex; gap:10px;">
+                    <form method="POST" action="{{ url_for('user_management.verify_license', user_id=user.id) }}">
+                        <button type="submit" class="edit-btn" style="float:none;">Approve</button>
+                    </form>
 
-    <form method="POST" action="{{ url_for('user_management.reject_license', user_id=user.id) }}">
-        <button type="submit" class="delete-btn" style="margin-top:0;">Reject</button>
-    </form>
-</div>
+                    <form method="POST" action="{{ url_for('user_management.reject_license', user_id=user.id) }}">
+                        <button type="submit" class="delete-btn" style="margin-top:0;">Reject</button>
+                    </form>
+                </div>
 
-{% endif %}
+                {% endif %}
+
                 {% else %}
                 <span style="color:red;">Incomplete</span>
                 {% endif %}
