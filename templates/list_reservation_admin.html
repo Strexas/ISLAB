@@ -65,6 +65,8 @@
     {{ navbar() }}
 
     <div class="page_container">
+        <h1 style="color: white;">All reservations</h1>
+
       {% from "components/reservation_card.html" import reservation_card %}
       <!-- Show reservation list -->
       {% if reservations %}
