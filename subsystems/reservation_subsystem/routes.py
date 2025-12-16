@@ -1,5 +1,8 @@
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for, jsonify
 
+# EKLEME: Veritabanı işlemleri için gerekli
+from context import db
+
 from subsystems.reservation_subsystem.reservation_subsystem import ReservationSubsystem
 from models.Vehicle import Vehicle
 from models.User import User
@@ -38,14 +41,21 @@ def reserve(vehicle_id):
                 return_date_s=request.form.get("return_date")
             )
 
+            # --- EKLEME: VERİTABANINA ZORLA KAYIT (COMMIT) ---
+            # Payment sayfasına gitmeden önce ID'nin oluşması için kayıt şart.
+            db.session.add(reservation)
+            db.session.commit()
+            # -------------------------------------------------
 
-            # If user opted for insurance, add it to the reservation
-            wants_insurance = request.form.get("wants_insurance")
-            if wants_insurance:
-                return redirect(url_for("reservations.add_insurance", reservation=reservation))
+            
                 
-            return redirect(url_for("payment.payment_page", reservation=reservation))
+                
+            # Sigorta seçilmese bile akışın bozulmaması için insurance sayfasına (skip için) yönlendiriyoruz
+            # Veya direkt payment'a gidecekse bile ID'nin DB'de olduğundan artık eminiz.
+            return redirect(url_for("reservations.add_insurance", reservation=reservation))
+            
         except Exception as ex:
+            db.session.rollback() # Hata durumunda geri al
             flash(ex, "error")
             return render_template("car_reserve.html", logged_in=('user_id' in session), vehicle=vehicle, user=user)
 
@@ -130,4 +140,12 @@ def delete_reservation(reservation_id: int):
     
 @reservation_blueprint.route("/reservations/reserve/addinsurance", methods=["GET"])
 def add_insurance():
-    return render_template("insurance.html")
+    # --- EKLEME: URL'den gelen veriyi alıp template'e gönderiyoruz ---
+    reservation_data = request.args.get("reservation")
+    
+    # Veri gelmediyse güvenli şekilde ana sayfaya at
+    if not reservation_data:
+        flash("Reservation data missing.", "error")
+        return redirect(url_for("reservations.index"))
+
+    return render_template("insurance.html", reservation=reservation_data)

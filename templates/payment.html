@@ -1,239 +1,319 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Payment Portal | Bolt Drive</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    :root {
-      --primary: #0d6efd;
-      --bg: #f0f2f5;
-      --card-bg: #ffffff;
-      --text: #1f2933;
-      --border: #e1e4e8;
-      --danger: #dc3545;
-      --success: #198754;
-    }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .topbar {
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .brand { font-size: 1.25rem; font-weight: 800; color: #16396b; text-decoration: none; }
-    .nav-links a { margin-left: 20px; text-decoration: none; color: #16396b; font-weight: 500; }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Payment Portal | Bolt Drive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --primary: #0d6efd;
+        --bg: #f0f2f5;
+        --text: #1f2933;
+        --success: #198754;
+        --danger: #dc3545;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
 
-    .main-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 24px;
-      max-width: 1100px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-    .card-section {
-      background: var(--card-bg);
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      padding: 24px;
-      margin-bottom: 24px;
-      border: 1px solid var(--border);
-    }
-    h2 { margin-top: 0; font-size: 1.5rem; color: #16396b; }
-    h3 { margin-top: 0; font-size: 1.1rem; color: #323f4b; border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 15px;}
+      /* SUCCESS OVERLAY */
+      #successOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+      .success-box {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: popIn 0.4s ease;
+      }
+      @keyframes popIn {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .checkmark {
+        font-size: 60px;
+        color: var(--success);
+        display: block;
+        margin-bottom: 10px;
+      }
 
-    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; color: #4a5568; }
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #cbd5e0;
-      border-radius: 6px;
-      margin-bottom: 15px;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-    }
-    input:focus { border-color: var(--primary); outline: none; }
-
-    .btn {
-      padding: 10px 18px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: opacity 0.2s;
-    }
-    .btn-primary { background: var(--primary); color: white; width: 100%; }
-    .btn-danger { background: var(--danger); color: white; padding: 6px 12px; font-size: 0.8rem;}
-    .btn:hover { opacity: 0.9; }
-
-    .saved-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f8f9fa;
-      border: 1px solid var(--border);
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-    }
-    .card-info { font-family: monospace; font-size: 1.1rem; color: #333; }
-
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
-    }
-    .status-success { color: var(--success); font-weight: bold; }
-    .status-pending { color: #d69e2e; font-weight: bold; }
-
-    @media (max-width: 768px) {
-      .main-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="topbar">
-    <a href="/" class="brand">🚗 Bolt Drive</a>
-    <div class="nav-links">
-      <a href="/reservations">Reservations</a>
-      <a href="/login">Logout</a>
+      /* LAYOUT STYLES */
+      .topbar {
+        background: #fff;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #ddd;
+      }
+      .brand {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #16396b;
+        text-decoration: none;
+      }
+      .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        max-width: 1100px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+      .card-section {
+        background: white;
+        border-radius: 10px;
+        padding: 24px;
+        margin-bottom: 24px;
+        border: 1px solid #e1e4e8;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+      .btn {
+        padding: 10px;
+        width: 100%;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+      }
+      .btn-primary {
+        background: var(--primary);
+      }
+      .btn-danger {
+        background: var(--danger);
+        width: auto;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="successOverlay">
+      <div class="success-box">
+        <span class="checkmark">✔</span>
+        <h2>Payment Successful!</h2>
+        <p>Your reservation is confirmed.</p>
+        <p style="color: #777; font-size: 0.9rem">Redirecting to home...</p>
+      </div>
     </div>
-  </div>
 
-  <div class="main-grid">
+    <div class="topbar">
+      <a href="/" class="brand">🚗 Bolt Drive</a>
+      <a href="/" style="text-decoration: none; color: #16396b">Home</a>
+    </div>
 
-    <div class="column-left">
-
-      <!-- Add Card -->
-      <div class="card-section">
-        <h3>➕ Add New Bank Card</h3>
-        <form action="{{ url_for('payment.add_bank_card') }}" method="post">
-          <input type="hidden" name="user_id" value="1">
-
-          <label>Cardholder Name</label>
-          <input type="text" name="cardholder_name" placeholder="e.g. John Doe" required>
-
-          <label>Card Number</label>
-          <input type="text" name="card_number" placeholder="0000 0000 0000 0000" maxlength="19" required>
-
-          <div style="display: flex; gap: 15px;">
-            <div style="flex: 1;">
-              <label>Expiry Date</label>
-              <input type="text" name="expire_date" placeholder="YYYY-MM-DD" required>
+    <div class="main-grid">
+      <div class="column-left">
+        <div class="card-section">
+          <h3>➕ Add New Bank Card</h3>
+          <form action="{{ url_for('payment.add_bank_card') }}" method="post">
+            <input type="hidden" name="user_id" value="{{ user.id }}" />
+            <input
+              type="text"
+              name="cardholder_name"
+              placeholder="Name on Card"
+              required
+            />
+            <input
+              type="text"
+              name="card_number"
+              placeholder="Card Number"
+              required
+            />
+            <div style="display: flex; gap: 10px">
+              <input
+                type="text"
+                name="expire_date"
+                placeholder="YYYY-MM-DD"
+                required
+              />
+              <input type="text" name="cvv" placeholder="CVV" required />
             </div>
-            <div style="flex: 1;">
-              <label>CVV</label>
-              <input type="text" name="cvv" placeholder="123" maxlength="3" required>
-            </div>
+            <input
+              type="text"
+              name="billing_address"
+              placeholder="Billing Address"
+              required
+            />
+            <button class="btn btn-primary">Save Securely</button>
+          </form>
+        </div>
+
+        <div class="card-section">
+          <h3>💳 Saved Cards</h3>
+          {% if cards %} {% for card in cards %}
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background: #f9f9f9;
+              padding: 10px;
+              margin-bottom: 10px;
+              border-radius: 5px;
+            "
+          >
+            <span>**** **** **** {{ card.cardnumber[-4:] }}</span>
+            <form
+              action="{{ url_for('payment.delete_bank_card', card_id=card.cardid) }}"
+              method="post"
+              style="margin: 0"
+            >
+              <button class="btn btn-danger">Delete</button>
+            </form>
           </div>
-
-          <label>Billing Address</label>
-          <input type="text" name="billing_address" placeholder="Street, City, Zip" required>
-
-          <button type="submit" class="btn btn-primary">Save Securely</button>
-        </form>
-      </div>
-
-      <!-- Saved cards -->
-      <div class="card-section">
-        <h3>💳 Your Saved Cards</h3>
-
-        {% if cards %}
-          {% for card in cards %}
-            <div class="saved-card">
-              <div class="card-info">
-                **** **** **** {{ card.cardnumber[-4:] }}
-              </div>
-              <form action="{{ url_for('payment.delete_bank_card', card_id=card.cardid) }}" method="post" style="margin:0;">
-                <button type="submit" class="btn btn-danger">Delete</button>
-              </form>
-            </div>
-          {% endfor %}
-        {% else %}
-          <p style="font-size:0.9rem; color:#6b7280;">No saved cards yet.</p>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="column-right">
-
-      <!-- Wallet -->
-      <div class="card-section" style="background-color: #eef4ff; border-color: #dbeafe;">
-        <h3>💰 Wallet Balance</h3>
-        <h2 style="color:var(--primary); margin-bottom: 20px;">
-          € {{ (wallet_balance or 0) | round(2) }}
-        </h2>
-
-        <label>Add Money to Balance</label>
-        <form action="{{ url_for('payment.add_money') }}" method="post" style="display: flex; gap: 10px;">
-          <input type="hidden" name="user_id" value="1">
-          <input type="number" name="amount" placeholder="Amount €" min="5" step="0.01" required style="margin-bottom:0;">
-          <button type="submit" class="btn btn-primary" style="width: auto;">Top Up</button>
-        </form>
-      </div>
-
-      <!-- Pay reservation -->
-      <div class="card-section">
-        <h3>✅ Pay for Reservation</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
-          Paying for Reservation <strong>#RES-2025-001</strong>
-        </p>
-
-        <form action="{{ url_for('payment.pay_from_balance') }}" method="post">
-          <input type="hidden" name="user_id" value="1">
-
-          <label>Reservation ID</label>
-          <input type="text" name="reservation_id" value="RES-2025-001" readonly style="background-color:#eee;">
-
-          <label>Total Amount (€)</label>
-          <input type="number" name="amount" value="50.00" readonly style="background-color:#eee;">
-
-          <label>Description</label>
-          <input type="text" name="description" value="Payment for Insurance + Rental">
-
-          <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Pay from Balance</button>
-        </form>
-      </div>
-
-      <!-- History -->
-      <div class="card-section">
-        <h3>📜 History</h3>
-
-        {% if payments %}
-          {% for p in payments[:3] %}
-            <div class="history-item">
-              <span>{{ p.date.strftime("%Y-%m-%d") }} – {{ p.description or "Payment" }}</span>
-              <span class="{% if p.status.value == 'Success' %}status-success{% else %}status-pending{% endif %}">
-                €{{ p.amount }} {{ p.status.value }}
-              </span>
-            </div>
-          {% endfor %}
-        {% else %}
-          <p style="font-size:0.9rem; color:#6b7280;">No payments yet.</p>
-        {% endif %}
-
-        <div style="margin-top: 15px; text-align: center;">
-          <a href="{{ url_for('payment.payment_history', user_id=1) }}"
-             style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem;">
-            View All Transactions →
-          </a>
+          {% endfor %} {% else %}
+          <p style="color: #777">No cards saved.</p>
+          {% endif %}
         </div>
       </div>
 
-    </div>
-  </div>
+      <div class="column-right">
+        <div
+          class="card-section"
+          style="background: #eef4ff; border-color: #dbeafe"
+        >
+          <h3 style="margin-top: 0">💰 Wallet Balance</h3>
+          <h1 style="color: var(--primary)">
+            € {{ "%.2f"|format(wallet_balance) }}
+          </h1>
 
-</body>
+          <form
+            action="{{ url_for('payment.add_money') }}"
+            method="post"
+            style="display: flex; gap: 5px"
+          >
+            <input type="hidden" name="user_id" value="{{ user.id }}" />
+            <input
+              type="number"
+              name="amount"
+              placeholder="Amount €"
+              step="0.01"
+              required
+              style="margin-bottom: 0"
+            />
+            <button class="btn btn-primary" style="width: auto">Top Up</button>
+          </form>
+        </div>
+
+        <div class="card-section" style="border: 2px solid var(--primary)">
+          <h3 style="color: var(--primary)">✅ Pay for Reservation</h3>
+
+          {% if reservation %}
+          <p style="color: #666; font-size: 0.9rem">
+            Payment for <strong>{{ display_res_id }}</strong>
+          </p>
+
+          <form id="payForm">
+            <input type="hidden" name="user_id" value="{{ user.id }}" />
+
+            <label>Reservation ID</label>
+            <input
+              type="text"
+              name="reservation_id"
+              value="{{ display_res_id }}"
+              readonly
+              style="background: #eee; font-weight: bold"
+            />
+
+            <label>Total Amount (€)</label>
+            <input
+              type="text"
+              name="amount"
+              value="{{ '%.2f'|format(total_amount) }}"
+              readonly
+              style="
+                background: #eee;
+                font-weight: bold;
+                color: var(--primary);
+                font-size: 1.1rem;
+              "
+            />
+
+            <label>Description</label>
+            <input
+              type="text"
+              name="description"
+              value="Rental + {{ 'Insurance' if insurance_cost > 0 else 'No Insurance' }}"
+            />
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              style="margin-top: 10px"
+            >
+              Pay from Balance
+            </button>
+          </form>
+          {% else %}
+          <div style="color: red">
+            Error: No reservation loaded. Please go back to fleet page.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("payForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(this);
+          const jsonData = Object.fromEntries(formData.entries());
+
+          fetch("{{ url_for('payment.pay_from_balance') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(jsonData),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                // POPUP GÖSTER
+                document.getElementById("successOverlay").style.display =
+                  "flex";
+                // 2.5 sn Sonra Yönlendir
+                setTimeout(() => {
+                  window.location.href = "/";
+                }, 2500);
+              } else {
+                alert("Hata: " + data.message);
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+              alert("Sunucu hatası oluştu. Konsolu kontrol edin.");
+            });
+        });
+    </script>
+  </body>
 </html>
