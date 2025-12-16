@@ -14,6 +14,9 @@ class ReservationSubsystem:
 
     # ====================== CREATE RESERVATION ============================
     def create_reservation(self, user: User, vehicle: Vehicle, pickup_date_s: str, return_date_s: str) -> Reservation:
+        # if user.driver_license is None or user.driver_license == "":
+        #     raise Exception("No drivers licence attached to this profile")
+
         #Parse and validate dates
         pickup_date, return_date = self.parse_dates(pickup_date_s, return_date_s)
         
@@ -97,7 +100,6 @@ class ReservationSubsystem:
                 Reservation.return_date > pickup
             )
         )
-
 
         # Exclude the reservation we're editing
         if exclude_reservation_id is not None:

@@ -42,23 +42,25 @@ def reserve(vehicle_id):
             # If user opted for insurance, add it to the reservation
             wants_insurance = request.form.get("wants_insurance")
             if wants_insurance:
+                return redirect(url_for("reservations.add_insurance", reservation=reservation))
                 
-                reservation_subsystem.add_insurance_to_reservation(
-                    reservation=reservation,
-                    provider="Placeholder Provider",
-                    amount=29.99
-                )
-                
-            #Call Payment Subsystem to process payment here
-
-            #If payment successful, finalize reservation
-            reservation_subsystem.finalize_reservation(reservation)
-
-            # Show success page
-            return redirect(url_for("reservations.reservation_success", reservation_id=reservation.reservation_id))
+            return redirect(url_for("payment.payment_page", reservation=reservation))
         except Exception as ex:
             flash(ex, "error")
             return render_template("car_reserve.html", logged_in=('user_id' in session), vehicle=vehicle, user=user)
+
+
+
+    #Get dates from index search
+    pickup_date_str = request.args.get("pickup_date")
+    dropoff_date_str = request.args.get("dropoff_date")
+
+    try:
+        if pickup_date_str and pickup_date_str != "" and dropoff_date_str and dropoff_date_str != "":
+            pickup_date, dropoff_date = reservation_subsystem.parse_dates(pickup_date_str, dropoff_date_str)
+            return render_template("car_reserve.html", logged_in=('user_id' in session), vehicle=vehicle, user=user, pickup_date=pickup_date, dropoff_date=dropoff_date)
+    except Exception as e:
+        flash(e, "error")
 
     return render_template("car_reserve.html", logged_in=('user_id' in session), vehicle=vehicle, user=user)
 
@@ -125,3 +127,7 @@ def delete_reservation(reservation_id: int):
         return reservation_subsystem.deletereservation(user_id, reservation_id=reservation_id)
     except Exception as ex:
         return jsonify({"ok": False, "error": ex.__str__()}), 500
+    
+@reservation_blueprint.route("/reservations/reserve/addinsurance", methods=["GET"])
+def add_insurance():
+    return render_template("insurance.html")

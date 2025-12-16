@@ -329,37 +329,27 @@ def edit_license():
     user = UserManagementController.get_current()
     form = EditLicenseForm()
 
-    # 1️⃣ Validación WTForms
     if not form.validate_on_submit():
         flash("Invalid form input.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    # 2️⃣ Leer datos
     license_number = form.driver_license.data.strip()
     expiration_date = form.license_expiration.data
 
-    # 3️⃣ VALIDACIÓN DE FORMATO (AQUÍ VA EL REGEX)
     if not re.match(r'^[A-Z0-9-]{4,50}$', license_number):
-        user.license_verified = False
-        db.session.commit()
         flash("Invalid driver license format.", "danger")
         return redirect(url_for('user_management.profile'))
 
-    # 4️⃣ VALIDACIÓN DE EXPIRACIÓN
-    if expiration_date and expiration_date < date.today():
-        user.license_verified = False
-        db.session.commit()
-        flash("Driver license is expired.", "danger")
-        return redirect(url_for('user_management.profile'))
-
-    # 5️⃣ GUARDAR
     user.driver_license = license_number
     user.license_expiration = expiration_date
-    user.license_verified = True
+
+    user.license_verified = False
 
     db.session.commit()
-    flash("Driver license updated successfully.", "success")
+
+    flash("License submitted. Pending verification by staff.", "info")
     return redirect(url_for('user_management.profile'))
+
 
 
 @user_management_bp.route('/upload_license_photo', methods=['POST'])
@@ -394,13 +384,35 @@ def upload_license_photo():
         file.save(upload_path)
 
         user.license_photo_path = f"/static/uploads/licenses/{unique_filename}"
+
+        user.license_verified = False
+
         db.session.commit()
 
-        flash("License photo uploaded successfully!", "success")
+        flash("License photo uploaded. Pending verification.", "info")
     else:
         flash("Invalid file type. Allowed: png, jpg, jpeg", "danger")
 
     return redirect(url_for('user_management.profile'))
+
+@user_management_bp.route('/reject_license/<int:user_id>', methods=['POST'])
+def reject_license(user_id):
+    if session.get('role') not in ['employee', 'accountant']:
+        flash("Access denied.", "danger")
+        return redirect(url_for('user_management.profile'))
+
+    user = UserManagementController.get_by_id(user_id)
+
+    # Limpieza total
+    user.driver_license = None
+    user.license_expiration = None
+    user.license_photo_path = None
+    user.license_verified = False
+
+    db.session.commit()
+
+    flash("Driver license rejected. User must resubmit.", "warning")
+    return redirect(url_for('user_management.view_user_profile', user_id=user.id))
 
 @user_management_bp.route("/profile/<int:user_id>")
 def view_user_profile(user_id):
@@ -427,3 +439,21 @@ def admin_dashboard():
         return redirect(url_for("user_management.profile"))
 
     return render_template("admin_dashboard.html")
+
+@user_management_bp.route('/verify_license/<int:user_id>', methods=['POST'])
+def verify_license(user_id):
+    if session.get('role') not in ['employee', 'accountant']:
+        flash("Access denied.", "danger")
+        return redirect(url_for('user_management.profile'))
+
+    user = UserManagementController.get_by_id(user_id)
+
+    if not user.driver_license or not user.license_photo_path:
+        flash("License data or photo missing.", "danger")
+        return redirect(url_for('user_management.view_user_profile', user_id=user.id))
+
+    user.license_verified = True
+    db.session.commit()
+
+    flash("Driver license verified successfully.", "success")
+    return redirect(url_for('user_management.view_user_profile', user_id=user.id))

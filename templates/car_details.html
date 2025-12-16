@@ -1,4 +1,4 @@
-{% from "components/navbar.html" import navbar %}
+{% from "components/_navbar.html" import navbar %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,11 +27,11 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-            .container img {
-                width: 100%;
-                border-radius: 10px;
-                margin-bottom: 15px;
-            }
+        .container img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 
@@ -56,16 +56,18 @@
 
         <div style="margin-top: 30px;">
             <h3>Customer Reviews</h3>
-
-            {% if reviews.reviews %}
-            {% for r in reviews.reviews %}
-            <p><strong>{{ r.reviewerName }}</strong>: {{ r.comment }}</p>
-            <p>Rating: {{ r.rating }}</p>
-            <hr>
-            {% endfor %}
-            {% else %}
-            <p>No reviews available.</p>
-            {% endif %}
+{% if reviews and reviews.reviews %}
+    {% for r in reviews.reviews %}
+        <div style="padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 10px;">
+            <p><strong>{{ r.reviewerName }}</strong></p>
+            <p>{{ r.comment }}</p>
+            <p>Rating: {{ r.rating }}/5</p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No reviews available.</p>
+{% endif %}
+           
 
             <div style="display: flex; flex-direction: row; gap: 5px;">
                 <a class="primary_button"
@@ -75,7 +77,7 @@
 
                 <!-- RESERVE -->
                 <a class="primary_button"
-                href="/reservations/reserve/{{ vehicle.vehicle_id }}">
+                href="{{ url_for('reservations.reserve', vehicle_id=vehicle.vehicle_id, pickup_date=pickup_date, dropoff_date=dropoff_date) }}">
                     Reserve Car
                 </a>
 
@@ -86,15 +88,13 @@
                         Edit
                     </a>
 
-                    {% if session.get("role") == "accountant" %}
-                        <form method="POST"
-                            action="{{ url_for('fleet.fleet_delete', vehicle_id=vehicle.vehicle_id) }}"
-                            style="display:inline;">
-                            <button class="danger_button"
-                                    onclick="return confirm('Delete this vehicle?');">
-                                Delete
-                            </button>
-                        </form>
+                {% if session.get("role") == "accountant" %}
+                    <a class="primary_button">
+                     href="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}"
+                     Retire Vehicle
+                    </a>
+ 
+
                     {% endif %}
                 {% endif %}
             </div>

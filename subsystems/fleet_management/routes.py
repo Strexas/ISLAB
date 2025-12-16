@@ -13,6 +13,7 @@ from models.RentPrice import RentPrice
 from models.ReviewCache import ReviewCache
 from form.VehicleForm import VehicleForm, RetireVehicleForm, ReviewCacheForm
 from subsystems.fleet_management.FleetController import FleetController
+from subsystems.reservation_subsystem.reservation_subsystem import ReservationSubsystem
 
 
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
@@ -31,8 +32,37 @@ def can_manage():
 
 @fleet_bp.route("/")
 def fleet_list():
+    rs = ReservationSubsystem()
+
+    #Get dates from index search
+    pickup_date_str = request.args.get("pickup_date")
+    dropoff_date_str = request.args.get("dropoff_date")
+    
     vehicles = FleetController.get_all_vehicles()
-    return render_template("fleetlist.html", vehicles=vehicles)
+
+    print(vehicles)
+
+    final = []
+    #Dates are requested
+    if pickup_date_str and pickup_date_str != "" and dropoff_date_str and dropoff_date_str != "":
+        print(pickup_date_str, dropoff_date_str)
+        try:
+            pickup_date, dropoff_date = rs.parse_dates(pickup_date_str, dropoff_date_str)
+
+            #Check all the vehicles in the requested dates if they are available
+            for vehicle in vehicles:
+                if rs.is_car_available(vehicle.vehicle_id, pickup_date, dropoff_date):
+                    final.append(vehicle)
+
+            return render_template("fleetlist.html", vehicles=final, pickup_date=pickup_date, dropoff_date=dropoff_date)
+        except Exception as e:
+            flash(f"Invalid dates requested {e}", "error")
+            final = vehicles    
+    
+    else:
+        final = vehicles
+        
+    return render_template("fleetlist.html", vehicles=final)
 
 # ----------------- VEHICLE DETAILS -----------------
 
@@ -43,12 +73,34 @@ def vehicle_details(vehicle_id):
     vehicle = FleetController.get_vehicle(vehicle_id)
     reviews = FleetController.get_reviews(vehicle_id)
 
+    try:
+        rs = ReservationSubsystem()
+
+        #Get dates from index search
+        pickup_date_str = request.args.get("pickup_date")
+        dropoff_date_str = request.args.get("dropoff_date")
+        
+        if pickup_date_str and pickup_date_str != "" and dropoff_date_str and dropoff_date_str != "":
+            pickup_date, dropoff_date = rs.parse_dates(pickup_date_str, dropoff_date_str)
+
+            return render_template(
+                "car_details.html",
+                vehicle=vehicle,
+                rent_price=vehicle.rent_price[-1] if vehicle.rent_price else None,
+                review_cache=vehicle.review_cache,
+                reviews=reviews,
+                pickup_date=pickup_date,
+                dropoff_date=dropoff_date
+            )
+    except Exception as e:
+        flash(f"invalid dates requested: {e}")
+
     return render_template(
         "car_details.html",
         vehicle=vehicle,
         rent_price=vehicle.rent_price[-1] if vehicle.rent_price else None,
         review_cache=vehicle.review_cache,
-        reviews=reviews
+        reviews=reviews,
     )
 
 # -------------------- ADD VEHICLE --------------------
@@ -166,75 +218,97 @@ def fleet_edit(vehicle_id):
         flash("Vehicle updated successfully.", "success")
         return redirect(url_for("fleet.vehicle_details", vehicle_id=vehicle.vehicle_id))
 
-    return render_template("vehicle_form.html", form=form, mode="edit", vehicle=vehicle)
+    return render_template("add_car.html", form=form, mode="edit", vehicle=vehicle)
 
 # -------------------- REVIEW CACHE --------------------
 
-def get_vehicle_reviews(vehicle_id):
+def get_reviews(vehicle_id):
     cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
+    now = datetime.utcnow()
 
-    if cache:
-        age = datetime.utcnow() - cache.fetched_at
-        if age < timedelta(hours=24):
-            return cache.data
+    # 24-hour cache
+    if cache and now - cache.fetched_at < timedelta(hours=24):
+        return cache.data
+
+    external_id = VEHICLE_REVIEW_MAP.get(vehicle_id, 1)
+    url = f"https://dummyjson.com/products/{external_id}/reviews"
 
     try:
-        response = requests.get(
-            f"https://dummyjson.com/products/{vehicle_id}/reviews",
-            timeout=5
-        )
-        response.raise_for_status()
+        response = requests.get(url, timeout=5)
         data = response.json()
 
         if cache:
             cache.data = data
-            cache.fetched_at = datetime.utcnow()
+            cache.fetched_at = now
         else:
             cache = ReviewCache(
                 vehicle_id=vehicle_id,
                 data=data,
-                fetched_at=datetime.utcnow()
+                fetched_at=now
             )
             db.session.add(cache)
 
         db.session.commit()
         return data
 
-    except Exception:
+    except:
         return {"reviews": []}
+def get_reviews(vehicle_id):
+    cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
+    now = datetime.utcnow()
+
+    # 24-hour cache
+    if cache and now - cache.fetched_at < timedelta(hours=24):
+        return cache.data
+
+    external_id = VEHICLE_REVIEW_MAP.get(vehicle_id, 1)
+    url = f"https://dummyjson.com/products/{external_id}/reviews"
+
+    try:
+        response = requests.get(url, timeout=5)
+        data = response.json()
+
+        if cache:
+            cache.data = data
+            cache.fetched_at = now
+        else:
+            cache = ReviewCache(
+                vehicle_id=vehicle_id,
+                data=data,
+                fetched_at=now
+            )
+            db.session.add(cache)
+
+        db.session.commit()
+        return data
+
+    except:
+        return {"reviews": []}
+
 
 # -------------------- RETIRE VEHICLE --------------------
 
-@fleet_bp.route("/<int:vehicle_id>/retire", methods=["GET", "POST"])
+@fleet_bp.route("/<string:vehicle_id>/retire", methods=["GET", "POST"])
 def retire_vehicle(vehicle_id):
     if not can_manage():
         flash("Access denied.", "danger")
         return redirect(url_for("fleet.fleet_list"))
-
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    vehicle = FleetController.get_vehicle(vehicle_id)
     form = RetireVehicleForm()
 
+    # Handle confirmation submit
     if form.validate_on_submit():
         if not form.confirm.data:
             flash("Please confirm retirement.", "warning")
-            return render_template(
-                "retire_vehicle.html",
-                form=form,
-                vehicle=vehicle
-            )
+            return render_template("retire_vehicle.html", form=form, vehicle=vehicle)
 
-        vehicle.status = "Inactive"
-        vehicle.updated_at = datetime.utcnow()
-        db.session.commit()
+        # Use controller method
+        FleetController.retire(vehicle)
 
         flash("Vehicle retired successfully.", "success")
         return redirect(url_for("fleet.fleet_list"))
 
-    return render_template(
-        "retire_vehicle.html",
-        form=form,
-        vehicle=vehicle
-    )
+    return render_template("retire_vehicle.html", form=form, vehicle=vehicle)
 
 @fleet_bp.route("/<int:vehicle_id>/delete", methods=["POST"])
 def fleet_delete(vehicle_id):

@@ -155,7 +155,7 @@
         </div>
         {% endif %}
 
-        <!--DRIVER LICENSE SECTION -->
+        <!-- DRIVER LICENSE SECTION -->
         <div class="section-title">Driver License</div>
         <div class="info-box">
 
@@ -171,12 +171,39 @@
 
             <div class="info-line">
                 <strong>Status:</strong>
+
                 {% if user.license_verified %}
                 <span style="color:green;">Verified</span>
+
+                {% elif user.driver_license and user.license_photo_path %}
+                <span style="color:orange;">Pending approval</span>
+                {% if session.get("role") in ["employee", "accountant"]
+      and license_form is none
+      and not user.license_verified
+      and user.driver_license
+      and user.license_photo_path %}
+
+<div style="margin-top: 10px; display:flex; gap:10px;">
+    <form method="POST" action="{{ url_for('user_management.verify_license', user_id=user.id) }}">
+        <button type="submit" class="edit-btn" style="float:none;">Approve</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('user_management.reject_license', user_id=user.id) }}">
+        <button type="submit" class="delete-btn" style="margin-top:0;">Reject</button>
+    </form>
+</div>
+
+{% endif %}
                 {% else %}
-                <span style="color:red;">Not verified</span>
+                <span style="color:red;">Incomplete</span>
                 {% endif %}
             </div>
+
+            {% if not user.license_verified and user.driver_license and user.license_photo_path %}
+            <p style="font-size: 0.9em; color: #555; margin-top: 5px;">
+                Your license is under review. An employee will verify it shortly.
+            </p>
+            {% endif %}
 
             {% if license_form %}
             <button class="edit-btn" onclick="enableLicenseEdit()">Edit License</button>
@@ -184,30 +211,33 @@
             <form id="license-form"
                   action="{{ url_for('user_management.edit_license') }}"
                   method="POST"
-                  style="display:none; margin-top:10px;">
+                  style="display:none; margin-top:10px; clear:both;">
 
                 {{ license_form.hidden_tag() }}
 
                 {{
-                license_form.driver_license(
-                    placeholder="License number",
-                    style="width:100%; padding:8px; margin-bottom:8px;"
-                   )
-                }}
-
-                {{
-                  license_form.license_expiration(
-            style="width:100%; padding:8px; margin-bottom:8px;"
+ license_form.driver_license(
+                placeholder="License number",
+                style="width:100%; padding:8px; margin-bottom:8px;"
             )
                 }}
 
-                <button type="submit" class="edit-btn" style="float:none; width:100%;">
+                {{
+ license_form.license_expiration(
+                style="width:100%; padding:8px; margin-bottom:8px;"
+            )
+                }}
+
+                <button type="submit"
+                        class="edit-btn"
+                        style="float:none; width:100%;">
                     Save License
                 </button>
             </form>
             {% endif %}
 
         </div>
+
 
 
         <!-- LICENSE PHOTO -->

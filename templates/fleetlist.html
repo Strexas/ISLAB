@@ -1,76 +1,87 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    
-    <title>Dolt Drive - Fleet</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  
+  <title>Dolt Drive - Fleet</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/carcard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/fleetlist.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/_navbar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/carcard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fleetlist.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='resources/site_logo.png') }}">
 
   </head>
   <body style="margin: 0px; background-color: #1454d4;">
 
-      <!-- Navbar -->
-      {% from "components/_navbar.html" import navbar %}
-      {{ navbar() }}
+    <!-- Navbar -->
+    {% from "components/_navbar.html" import navbar %}
+    {{ navbar() }}
 
 
-      <main>
-          <div class="controls" aria-label="Search and filters">
+    <main>
+      <!-- FLASH MESSAGES -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="error_messages_container" style="width: 100%; margin-bottom: 20px;">
+        {% for category, message in messages %}
+        <p class="error_message">{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
 
-              {% if session.get('role') in ['employee', 'accountant'] %}
-              <button class="primary_button" onclick="location.href='/fleet/add'">
-                  + Add Car
-              </button>
-              {% endif %}
+      <div class="controls" aria-label="Search and filters">
 
-              <input id="search" type="search" placeholder="Search by model, brand..." />
-              <select id="typeFilter">
-                  <option value="">All types</option>
-                  <option>Economy</option>
-                  <option>Sedan</option>
-                  <option>SUV</option>
-                  <option>Van</option>
-                  <option>Luxury</option>
-              </select>
-              <select id="seatsFilter">
-                  <option value="">Any seats</option>
-                  <option value="2">2+</option>
-                  <option value="4">4+</option>
-                  <option value="5">5+</option>
-                  <option value="7">7+</option>
-              </select>
-              <select id="sort">
-                  <option value="recommended">Recommended</option>
-                  <option value="price-asc">Price: low → high</option>
-                  <option value="price-desc">Price: high → low</option>
-              </select>
-              <button id="reset" class="secondary_button">Reset</button>
-          </div>
+        {% if session.get('role') in ['employee', 'accountant'] %}
+        <button class="primary_button" onclick="location.href='/fleet/add'">
+          + Add Car
+        </button>
+        {% endif %}
 
-          <!-- Display Vehicles -->
-          {% if vehicles %}
-          {% from "components/car_card.html" import car_card %}
-          <!-- Vehicles Grid -->
-          <div class="fleet_grid">
-              {% for vehicle in vehicles %}
-              {{ car_card(vehicle) }}
-              {% endfor %}
-          </div>
-          {% else %}
-          <!-- No Vehicles Found -->
-          <div class="no-results">
-              <p>No vehicles found matching your criteria.</p>
-          </div>
-          {% endif %}
+        <input id="search" type="search" placeholder="Search by model, brand..." />
+        <select id="typeFilter">
+          <option value="">All types</option>
+          <option>Economy</option>
+          <option>Sedan</option>
+          <option>SUV</option>
+          <option>Van</option>
+          <option>Luxury</option>
+        </select>
+        <select id="seatsFilter">
+          <option value="">Any seats</option>
+          <option value="2">2+</option>
+          <option value="4">4+</option>
+          <option value="5">5+</option>
+          <option value="7">7+</option>
+        </select>
+        <select id="sort">
+          <option value="recommended">Recommended</option>
+          <option value="price-asc">Price: low → high</option>
+          <option value="price-desc">Price: high → low</option>
+        </select>
+        <button id="reset" class="secondary_button">Reset</button>
+      </div>
 
-          <footer>Prices include standard insurance. Taxes and fees may apply.</footer>
-      </main>
+      <!-- Display Vehicles -->
+      {% if vehicles %}
+      {% from "components/car_card.html" import car_card %}
+      <!-- Vehicles Grid -->
+      <div class="fleet_grid">
+        {% for vehicle in vehicles %}
+        {{ car_card(vehicle, pickup_date, dropoff_date) }}
+        {% endfor %}
+      </div>
+      {% else %}
+      <!-- No Vehicles Found -->
+      <div class="no-results">
+        <p>No vehicles found matching your criteria.</p>
+      </div>
+      {% endif %}
+
+      <footer>Prices include standard insurance. Taxes and fees may apply.</footer>
+    </main>
   </body>
 </html>
