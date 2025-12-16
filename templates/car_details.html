@@ -84,15 +84,14 @@
       action="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}"
       style="display:inline;">
     <button type="submit"
-            class="primary_button"
-            onclick="return confirm('Are you sure you want to retire this vehicle?');">
-        Retire Vehicle
-    </button>
+        class="primary_button"
+        onclick="return confirm('Are you sure you want to retire this vehicle?');">
+    Retire Vehicle
+</button>
 </form>
   
             
                     {% endif %}
-                    
                      {% if session.get("role") in ["employee", "accountant"] %}
     <a class="primary_button"
        href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.vehicle_id) }}">
