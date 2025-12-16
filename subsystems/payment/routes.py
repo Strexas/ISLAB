@@ -1,5 +1,5 @@
+import re
 from datetime import datetime
-
 from flask import (
     Blueprint,
     render_template,
@@ -8,200 +8,218 @@ from flask import (
     url_for,
     flash,
     jsonify,
+    session
 )
 
 from context import db
 from models.Payment import Payment, PaymentStatus
 from models.CreditCard import CreditCard
 from models.User import User
+from models.Reservation import Reservation, ReservationStatus
+from models.InsurancePolicy import InsurancePolicy
 
 payment_bp = Blueprint("payment", __name__, url_prefix="/payment")
 
+# -----------------------------------------------------
+#  HELPER: ID EXTRACTION
+# -----------------------------------------------------
+def extract_id(raw_val):
+    """ 
+    Extracts only the numerical ID (e.g., 1) from a string 
+    like '<Reservation 1>' or 'RES-2025-001'.
+    """
+    if not raw_val: return None
+    if isinstance(raw_val, int): return raw_val
+    
+    s_val = str(raw_val)
+    match = re.search(r'(\d+)', s_val)
+    
+    if match:
+        return int(match.group(1))
+    return None
 
 # -----------------------------------------------------
-#  GET /payment  
+#  INTERMEDIATE ROUTE: Confirm Insurance
+# -----------------------------------------------------
+@payment_bp.route("/confirm_insurance", methods=["POST"])
+def confirm_insurance():
+    # 1. Get data from form
+    raw_res_input = request.form.get("reservation_input")
+    insurance_type = request.form.get("insurance_type")
+    
+    # 2. Clean ID
+    reservation_id = extract_id(raw_res_input)
+
+    if not reservation_id:
+        flash("Could not read reservation info. Please try again.", "danger")
+        return redirect("/")
+
+    # 3. Write to Session (to be used in payment page)
+    session['checkout_reservation_id'] = reservation_id
+    session['checkout_insurance_type'] = insurance_type
+
+    # 4. Redirect to Payment Page
+    return redirect(url_for('payment.payment_page', reservation_id=reservation_id))
+
+
+# -----------------------------------------------------
+#  GET /payment (PAYMENT PAGE)
+# -----------------------------------------------------
 @payment_bp.route("/", methods=["GET"])
 def payment_page():
-    # Demo için sabit kullanıcı
-    user_id = 1
+    # 1. Find ID (from URL or Session)
+    raw_res_id = request.args.get('reservation_id') or session.get('checkout_reservation_id')
+    reservation_id = extract_id(raw_res_id)
+    
+    if not reservation_id:
+        flash("Reservation for payment not found.", "warning")
+        return redirect("/")
 
+    # 2. Fetch from DB
+    reservation = Reservation.query.get(reservation_id)
+    if not reservation:
+        flash("Reservation not found in database.", "danger")
+        return redirect("/")
+
+    # 3. User and Cards (Demo: ID 1)
+    user_id = session.get('user_id', 1) 
     user = User.query.get(user_id)
-    wallet_balance = user.wallet_balance if user and user.wallet_balance is not None else 0.0
-
     cards = CreditCard.query.filter_by(userid=user_id).all()
 
-    payments = (
-        Payment.query
-        .filter_by(userid=user_id)
-        .order_by(Payment.date.desc(), Payment.paymentid.desc())
-        .all()
-    )
+    # 4. Calculate Price (Dynamic)
+    vehicle_cost = reservation.total_amount if reservation.total_amount else 0.0
+    insurance_cost = 0.0
+    insurance_type = session.get('checkout_insurance_type', 'none')
+    
+    if insurance_type == 'standard':
+        days = (reservation.return_date - reservation.pickup_date).days
+        if days < 1: days = 1
+        insurance_cost = days * 15.0
+
+    total_amount = vehicle_cost + insurance_cost
+    
+    payments = Payment.query.filter_by(userid=user_id).order_by(Payment.date.desc()).all()
 
     return render_template(
         "payment.html",
         user=user,
-        wallet_balance=wallet_balance,
+        wallet_balance=(user.wallet_balance or 0.0),
         cards=cards,
         payments=payments,
+        reservation=reservation,
+        total_amount=total_amount,
+        insurance_cost=insurance_cost,
+        display_res_id=f"RES-2025-{reservation.reservation_id:03d}"
     )
 
 
 # -----------------------------------------------------
-#  POST /payment/add_bank_card
+#  POST /payment/pay_from_balance (PAYMENT PROCESS)
 # -----------------------------------------------------
-@payment_bp.route("/add_bank_card", methods=["POST"])
-def add_bank_card():
-    user_id = request.form.get("user_id", type=int)
-    holder_name = request.form.get("cardholder_name")
-    card_number = request.form.get("card_number")
-    expire_date = request.form.get("expire_date")
-    billing_address = request.form.get("billing_address")
+@payment_bp.route("/pay_from_balance", methods=["POST"])
+def pay_from_balance():
+    data = request.get_json() if request.is_json else request.form
+    
+    user_id = data.get("user_id", type=int)
+    amount = data.get("amount", type=float)
+    raw_res_id = data.get("reservation_id")
+    description = data.get("description")
 
-    if not all([user_id, holder_name, card_number, expire_date, billing_address]):
-        flash("Missing fields for bank card.", "danger")
-        return redirect(url_for("payment.payment_page"))
+    # Clean ID
+    reservation_id = extract_id(raw_res_id)
 
-    card = CreditCard(
-        userid=user_id,
-        cardholdername=holder_name,
-        cardnumber=card_number,
-        expiredate=expire_date,       # string : DATE, PostgreSQL parse (YYYY-MM-DD)
-        billingaddress=billing_address,
-    )
+    if not user_id or amount is None:
+        return jsonify({"success": False, "message": "Missing data."}), 400
 
-    db.session.add(card)
-    db.session.commit()
+    user = User.query.get(user_id)
+    reservation = Reservation.query.get(reservation_id)
 
-    flash("Card added successfully.", "success")
-    return redirect(url_for("payment.payment_page"))
+    if not user or not reservation:
+        return jsonify({"success": False, "message": "User or Reservation not found."}), 404
 
+    if (user.wallet_balance or 0.0) < amount:
+        return jsonify({"success": False, "message": f"Insufficient Balance! (Required: €{amount})"}), 400
 
-# -----------------------------------------------------
-#  POST /payment/delete_bank_card/<id>
-# -----------------------------------------------------
-@payment_bp.route("/delete_bank_card/<int:card_id>", methods=["POST"])
-def delete_bank_card(card_id):
-    card = CreditCard.query.get(card_id)
-    if not card:
-        flash("Card not found.", "danger")
-        return redirect(url_for("payment.payment_page"))
+    try:
+        # 1. Deduct from balance
+        user.wallet_balance -= amount
 
-    db.session.delete(card)
-    db.session.commit()
+        # 2. Payment Record
+        payment = Payment(
+            userid=user_id,
+            reservationid=reservation_id,
+            amount=amount,
+            status=PaymentStatus.SUCCESS,
+            paymentmethod="Balance",
+            description=description,
+            date=datetime.utcnow()
+        )
+        db.session.add(payment)
 
-    flash("Card deleted.", "info")
-    return redirect(url_for("payment.payment_page"))
+        # 3. Confirm Reservation
+        reservation.status = ReservationStatus.ACTIVE
+        
+        # 4. Insurance Record (If exists)
+        if session.get('checkout_insurance_type') == 'standard':
+            days = (reservation.return_date - reservation.pickup_date).days
+            if days < 1: days = 1
+            ins_cost = days * 15.0
+            
+            policy = InsurancePolicy(
+                reservation_id=reservation_id,
+                provider="Bolt Standard",
+                payment_amount=ins_cost,
+                start_date=reservation.pickup_date,
+                end_date=reservation.return_date,
+                policy_number=f"POL-{reservation_id}-{int(datetime.utcnow().timestamp())}"
+            )
+            db.session.add(policy)
 
+        db.session.commit()
+        
+        # Cleanup
+        session.pop('checkout_reservation_id', None)
+        session.pop('checkout_insurance_type', None)
 
-# -----------------------------------------------------
-#  POST /payment/add_money                     
-# -----------------------------------------------------
+        return jsonify({"success": True, "message": "Payment Successful!"})
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"ERROR: {e}")
+        return jsonify({"success": False, "message": f"System error: {str(e)}"}), 500
+
+# --- Other Functions (Same as before) ---
 @payment_bp.route("/add_money", methods=["POST"])
 def add_money():
     user_id = request.form.get("user_id", type=int)
     amount = request.form.get("amount", type=float)
+    if user_id and amount > 0:
+        user = User.query.get(user_id)
+        user.wallet_balance = (user.wallet_balance or 0) + amount
+        p = Payment(userid=user_id, amount=amount, status=PaymentStatus.SUCCESS, paymentmethod="Top-up", description="Wallet Load", date=datetime.utcnow())
+        db.session.add(p)
+        db.session.commit()
+        flash("Balance topped up.", "success")
+    return redirect(request.referrer or url_for('payment.payment_page'))
 
-    if not user_id or amount is None:
-        flash("Missing data for top-up.", "danger")
-        return redirect(url_for("payment.payment_page"))
-
-    if amount <= 0:
-        flash("Amount must be positive.", "danger")
-        return redirect(url_for("payment.payment_page"))
-
-    user = User.query.get(user_id)
-    if not user:
-        flash("User not found.", "danger")
-        return redirect(url_for("payment.payment_page"))
-
-    
-    # Cüzdanı güncelle
-    current = user.wallet_balance or 0.0
-    user.wallet_balance = current + amount
-
-    # Payment kaydı
-    payment = Payment(
-        userid=user_id,
-        reservationid=None,
-        amount=amount,
-        status=PaymentStatus.SUCCESS,
-        paymentmethod="Top-up",
-        description="Wallet top-up",
-        date=datetime.utcnow(),
-    )
-
-    db.session.add(payment)
-    db.session.commit()
-
-    flash("Balance updated successfully.", "success")
-    return redirect(url_for("payment.payment_page"))
-
-
-# -----------------------------------------------------
-#  POST /payment/pay_from_balance                            
-# -----------------------------------------------------
-@payment_bp.route("/pay_from_balance", methods=["POST"])
-def pay_from_balance():
+@payment_bp.route("/add_bank_card", methods=["POST"])
+def add_bank_card():
     user_id = request.form.get("user_id", type=int)
-    amount = request.form.get("amount", type=float)
-    reservation_id = request.form.get("reservation_id")  # String (UUID tarzı)
-    description = request.form.get("description") or "Pay reservation from wallet"
-
-    if not user_id or amount is None:
-        flash("Missing data for payment.", "danger")
-        return redirect(url_for("payment.payment_page"))
-
-    user = User.query.get(user_id)
-    if not user:
-        flash("User not found.", "danger")
-        return redirect(url_for("payment.payment_page"))
-
-    if (user.wallet_balance or 0.0) < amount:
-        flash("Insufficient wallet balance.", "danger")
-        return redirect(url_for("payment.payment_page"))
-
-    # Bakiyeden düş
-    user.wallet_balance = (user.wallet_balance or 0.0) - amount
-
-    # Payment kaydı
-    payment = Payment(
+    card = CreditCard(
         userid=user_id,
-        reservationid=reservation_id,
-        amount=amount,
-        status=PaymentStatus.SUCCESS,
-        paymentmethod="Balance",
-        description=description,
-        date=datetime.utcnow(),
+        cardholdername=request.form.get("cardholder_name"),
+        cardnumber=request.form.get("card_number"),
+        expiredate=request.form.get("expire_date"),
+        billingaddress=request.form.get("billing_address")
     )
-
-    db.session.add(payment)
+    db.session.add(card)
     db.session.commit()
+    return redirect(request.referrer or url_for('payment.payment_page'))
 
-    flash("Payment completed from wallet.", "success")
-    return redirect(url_for("payment.payment_page"))
-
-
-# -----------------------------------------------------
-#  GET /payment/history/<user_id>                 
-# -----------------------------------------------------
-@payment_bp.route("/history/<int:user_id>", methods=["GET"])
-def payment_history(user_id):
-    history = (
-        Payment.query
-        .filter_by(userid=user_id)
-        .order_by(Payment.date.desc())
-        .all()
-    )
-
-    data = []
-    for p in history:
-        data.append({
-            "paymentid": p.paymentid,
-            "date": p.date.strftime("%Y-%m-%d %H:%M"),
-            "amount": p.amount,
-            "status": p.status.value if isinstance(p.status, PaymentStatus) else str(p.status),
-            "method": p.paymentmethod,
-            "description": p.description,
-        })
-
-    return jsonify(data)
+@payment_bp.route("/delete_bank_card/<int:card_id>", methods=["POST"])
+def delete_bank_card(card_id):
+    card = CreditCard.query.get(card_id)
+    if card:
+        db.session.delete(card)
+        db.session.commit()
+    return redirect(request.referrer or url_for('payment.payment_page'))
