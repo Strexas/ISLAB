@@ -1,4 +1,7 @@
 """ Maintenance Controller"""
+import datetime
+
+import requests
 
 # pylint: disable=import-error
 from context import db
@@ -192,3 +195,56 @@ class MaintenanceController:
                 if components[component_id][1]:
                     component.quantity = int(components[component_id][1])
                 db.session.commit()
+
+    @staticmethod
+    def place_order(maintenance_id):
+        order = MaintenanceController.get_awaiting_order(maintenance_id)
+        components = Component.query.filter_by(order_id=order.id).all()
+        if not components:
+            return
+        order.status = "pending"
+
+        new_order = Order()
+        new_order.maintenance_id = maintenance_id
+        new_order.status = "awaiting order"
+
+        db.session.add(new_order)
+        db.session.commit()
+
+    @staticmethod
+    def get_components(order_id):
+        components = Component.query.filter_by(order_id=order_id).all()
+        return components
+
+    @staticmethod
+    def get_pending_orders():
+        return Order.query.filter_by(status="pending").all()
+
+    @staticmethod
+    def ship_parts(json):
+        date = json["date"]
+
+        keys = list(json.keys())
+        keys.remove("date")
+        keys.remove("secret_key")
+        order_id = keys[0]
+
+        order = Order.query.filter_by(id=order_id).first()
+        order.status = "shipped"
+        order.date = date
+        db.session.commit()
+
+        for component_id in json[order_id]:
+            component = Component.query.filter_by(id=component_id).first()
+            component.name = json[order_id][component_id]["name"]
+            component.quantity = json[order_id][component_id]["quantity"]
+            component.price = json[order_id][component_id]["price"]
+            db.session.commit()
+
+
+    @staticmethod
+    def receive_order(order_id):
+        order = Order.query.filter_by(id=order_id).first()
+        order.status = "received"
+        order.date = str(datetime.datetime.today())
+        db.session.commit()
