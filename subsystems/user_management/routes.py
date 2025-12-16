@@ -472,6 +472,24 @@ def upload_license_photo():
 
     return redirect(url_for('user_management.profile'))
 
+@user_management_bp.route('/reject_license/<int:user_id>', methods=['POST'])
+def reject_license(user_id):
+    if session.get('role') not in ['employee', 'accountant']:
+        flash("Access denied.", "danger")
+        return redirect(url_for('user_management.profile'))
+
+    user = UserManagementController.get_by_id(user_id)
+
+    # Limpieza total
+    user.driver_license = None
+    user.license_expiration = None
+    user.license_photo_path = None
+    user.license_verified = False
+
+    db.session.commit()
+
+    flash("Driver license rejected. User must resubmit.", "warning")
+    return redirect(url_for('user_management.view_user_profile', user_id=user.id))
 
 @user_management_bp.route("/profile/<int:user_id>")
 def view_user_profile(user_id):

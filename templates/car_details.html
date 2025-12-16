@@ -1,4 +1,4 @@
-{% from "components/navbar.html" import navbar %}
+{% from "components/_navbar.html" import navbar %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -57,6 +57,13 @@
         <div style="margin-top: 30px;">
             <h3>Customer Reviews</h3>
 
+        {% if reviews.rating %}
+    <p><strong>Rating:</strong> {{ reviews.rating.rate }} / 5</p>
+    <p><strong>Number of reviews:</strong> {{ reviews.rating.count }}</p>
+{% else %}
+    <p>No reviews available.</p>
+{% endif %}
+            
            
 
             <div style="display: flex; flex-direction: row; gap: 5px;">
@@ -73,24 +80,32 @@
 
                 <!-- EMPLOYEE / ACCOUNTANT ACTIONS -->
                 {% if session.get("role") in ["employee", "accountant"] %}
-                    <a href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.vehicle_id) }}"
-                    class="primary_button">
-                        Edit
-                    </a>
+                   <form method="POST"
+      action="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}"
+      style="display:inline;">
+    <button type="submit"
+            class="primary_button"
+            onclick="return confirm('Are you sure you want to retire this vehicle?');">
+        Retire Vehicle
+    </button>
+</form>
 
-                {% if session.get("role") == "accountant" %}
-                    <a class="primary_button">
-                     href="{{ url_for('fleet.retire_vehicle', vehicle_id=vehicle.vehicle_id) }}"
-                     Retire Vehicle
-                    </a>
- 
-
+            
                     {% endif %}
-                {% endif %}
+              
             </div>
 
         </div>
     </div>
 
 </body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+            {% for category, msg in messages %}
+                <div class="flash {{ category }}">{{ msg }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
 </html>

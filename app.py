@@ -24,8 +24,8 @@ app.config['SECRET_KEY'] = SECRET_KEY
 # MAILTRAP SETTINGS
 app.config['MAIL_SERVER'] = "sandbox.smtp.mailtrap.io"
 app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = "3ff460c1082e82"
-app.config['MAIL_PASSWORD'] = "f6cd02818d6de8"
+app.config['MAIL_USERNAME'] = "06bd0b75a26d96"
+app.config['MAIL_PASSWORD'] = "b7cab03071658e"
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 

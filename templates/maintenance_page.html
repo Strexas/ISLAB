@@ -32,7 +32,7 @@
       font-size: 1.1em;
     }
 
-    .btn {
+    .btn, .delete-listener {
       background: rgba(255,255,255,0.2);
       border: none;
       border-radius: 8px;
@@ -44,7 +44,7 @@
     }
 
     .btn:hover { background: rgba(255,255,255,0.4); transform: translateY(-2px); }
-    .btn.delete { background: rgba(255,50,50,0.3); }
+    .btn.delete, .delete-listener { background: rgba(255,50,50,0.3); }
     .btn.delete:hover { background: rgba(255,50,50,0.6); }
     .btn.parts { background: rgba(34,197,94,0.3); }
     .btn.parts:hover { background: rgba(34,197,94,0.5); }
@@ -156,7 +156,7 @@
     {% from "components/_navbar.html" import navbar %}
     {{ navbar() }}
   <h1>🛠️ Maintenance Details</h1>
-  <div class="subtitle">{{ vehicle.model }} ({{ vehicle.license_plate }}) Maintenance</div>
+  <div class="subtitle">{{ vehicle.manufacturer }} {{ vehicle.model }} ({{ vehicle.license_plate }}) Maintenance</div>
     <div class="info-section">
       {% if message %}
       <p>{{ message }}</p>
@@ -215,35 +215,50 @@
     <div class="info-section">
       <h2>Parts Orders</h2>
 
+      {% for order in orders %}
       <table>
         <thead>
           <tr>
-            <th>Order ID</th><th>Component</th><th>Cost (€)</th>
+            <th>Order ID</th><th>Component</th><th>Quantity</th><th>Cost (€)</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>ORD-2025-045</td><td>Suspension Bushings Set</td><td>80.00</td></tr>
-          <tr><th colspan="2" style="text-align:right;">Order Total:</th><th>€80.00</th></tr>
+          {% for component in components[order.id] %}
+          <tr><td>{{ order.id }}</td><td>{{ component.name }}</td><td>{{ component.quantity }}</td><td>{{ component.price }}</td></tr>
+          {% endfor %}
+          <tr><th colspan="3" style="text-align:right;">Order Total:</th><th>€{{ total_orders[order.id] }}</th></tr>
         </tbody>
       </table>
-      <div class="order-status">📦 Order Status: <strong>Pending (Expected Delivery: 2025-10-18)</strong></div>
-      <div class="table-actions">
-        <button class="btn edit">Edit</button>
-      </div>
+      <form method="POST" action="/maintenance_page/{{ maintenance.id }}">
+        <div class="order-status">Order Status: <strong>{{ order.status }}. </strong>
+        ({% if order.status == "shipped" %}
+        Expected delivery date: {{ order.date }}
+        {% elif order.status == "received" %}
+        Completed on: {{ order.date }}
+        {% endif %})
+        </div>
+        <div class="table-actions">
+          {% if order.status == "shipped" %}
+          <input type="text" name="order_id" value="{{ order.id }}" hidden>
+          <button class="btn save" name="button" value="received_button">Received</button>
+          {% endif %}
+        </div>
+      </form>
+      {% endfor %}
 
-      <div class="total-summary">Total Cost for All Orders: €220.00</div>
+      <div class="total-summary">Total Cost for All Orders: €{{ total_cost }}</div>
     </div>
 
     <div class="info-section" id="scrollto">
       <form method="POST" action="/maintenance_page/{{ maintenance.id }}">
-        <h2>Components Needing Order</h2>
+        <h2>Components Awaiting Order</h2>
         <table>
           <thead>
           <tr><th>Component ID</th><th>Component Name</th><th>Quantity</th><th></th></tr>
           </thead>
           <tbody>
           {% for component in awaiting_order_details %}
-          <tr><td>{{ component.id }}</td><td><input class="info-value" name="{{ component.id }}" type="text" value="{{ component.name }}"></td><td><input class="info-value" name="{{ component.id }}" type="number" min="1" step="1" value="{{ component.quantity }}"></td><td><button class="btn edit" name="delete_component" value="{{ component.id }}">Remove</button></td></tr>
+          <tr><td>{{ component.id }}</td><td><input class="info-value" name="{{ component.id }}" type="text" value="{{ component.name }}"></td><td><input class="info-value" name="{{ component.id }}" type="number" min="1" step="1" value="{{ component.quantity }}"></td><td><button class="delete-listener" name="delete_component" value="{{ component.id }}" id="deleteBtn">Remove</button></td></tr>
           {% endfor %}
           </tbody>
         </table>
@@ -262,6 +277,15 @@ document.getElementById('deleteBtn').addEventListener('click', function (e) {
     e.preventDefault();
   }
 });
+
+var elements = document.getElementsByClassName('delete-listener');
+for (const element of elements) {
+  element.addEventListener('click', function (e) {
+  if (!confirm('You are about to delete this record. Are you sure?')) {
+    e.preventDefault();
+  }
+});
+}
 if ({{ scroll }})
 {
   var element_to_scroll_to = document.getElementById('scrollto');
