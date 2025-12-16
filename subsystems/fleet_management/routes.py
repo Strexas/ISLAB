@@ -195,14 +195,19 @@ def fleet_edit(vehicle_id):
         vehicle.status = form.status.data
 
         # ---------- PRICE CHANGE (FIXED) ----------
-        last_price = vehicle.rent_price[-1] if vehicle.rent_price else None
-        if not last_price or last_price.price != form.current_price.data:
-            new_price = RentPrice(
-                price=form.current_price.data,
-                date=date.today()
-            )
-            vehicle.rent_price.append(new_price)
-            db.session.add(new_price)
+        # Update current price instead of creating new row
+        if vehicle.rent_price:
+           vehicle.rent_price[0].price = form.current_price.data
+           vehicle.rent_price[0].date = date.today()
+        else:
+    # Vehicle has no rent_price yet → create one
+           new_price = RentPrice(
+           vehicle_id=vehicle.vehicle_id,
+           price=form.current_price.data,
+           date=date.today()
+        )
+           db.session.add(new_price)
+
 
         # ---------- IMAGE ----------
         file = request.files.get("image")
