@@ -109,7 +109,8 @@ def payment_page():
         reservation=reservation,
         total_amount=total_amount,
         insurance_cost=insurance_cost,
-        display_res_id=f"RES-2025-{reservation.reservation_id:03d}"
+        display_res_id=f"RES-2025-{reservation.reservation_id:03d}",
+        res_id=reservation_id
     )
 
 
@@ -120,13 +121,17 @@ def payment_page():
 def pay_from_balance():
     data = request.get_json() if request.is_json else request.form
     
-    user_id = data.get("user_id", type=int)
-    amount = data.get("amount", type=float)
-    raw_res_id = data.get("reservation_id")
+    if not session['user_id']:
+        return jsonify({"success": False, "message": "Unauthorized."}), 401
+
+    user_id = session['user_id']
+    amount_str = data.get("amount") or request.form.get("amount") or request.args.get("total_amount")
     description = data.get("description")
 
+    amount = float(amount_str)
+
     # Clean ID
-    reservation_id = extract_id(raw_res_id)
+    reservation_id = data.get("reservation_id")
 
     if not user_id or amount is None:
         return jsonify({"success": False, "message": "Missing data."}), 400

@@ -231,14 +231,18 @@
             Payment for <strong>{{ display_res_id }}</strong>
           </p>
 
-          <form id="payForm">
+          <form
+            id="payForm"
+            method="post"
+            action="{{ url_for('payment.pay_from_balance', total_amount=total_amount) }}"
+          >
             <input type="hidden" name="user_id" value="{{ user.id }}" />
 
             <label>Reservation ID</label>
             <input
               type="text"
               name="reservation_id"
-              value="{{ display_res_id }}"
+              value="{{ res_id }}"
               readonly
               style="background: #eee; font-weight: bold"
             />
