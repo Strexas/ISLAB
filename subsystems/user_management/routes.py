@@ -67,6 +67,10 @@ def register():
             role=selected_role
         )
 
+        if not user:
+            flash("Email already exists", "error")
+            return render_template('register.html', form=form)
+
         token_value = UserManagementController.generate_token(user.id, type="verify_email")
         verify_url = url_for(
             'user_management.verify_email',
@@ -88,22 +92,95 @@ def register():
     return render_template('register.html', form=form)
 
 
-# ---------- EMAIL VERIFICATION ----------
-
 @user_management_bp.route('/verify/<token>')
 def verify_email(token):
     t = Token.query.filter_by(token=token, type="verify_email").first()
 
     if not t or not t.is_valid():
-        flash("Invalid or expired verification link.", "danger")
-        return redirect(url_for('user_management.login'))
+        if not t:
+            flash("Invalid verification link.", "danger")
+            return redirect(url_for("user_management.login"))
+
+        user_id = t.user_id
+
+        db.session.delete(t)
+        db.session.commit()
+
+        new_token = UserManagementController.generate_token(
+            user_id,
+            type="verify_email",
+            hours_valid=1/6  
+        )
+
+        verify_url = url_for(
+            "user_management.verify_email",
+            token=new_token,
+            _external=True
+        )
+
+        user = UserManagementController.get_by_id(user_id)
+
+        msg = Message(
+            subject="Verify your Car Rental account",
+            sender="noreply@carrental.com",
+            recipients=[user.email],
+            body=f"Your verification link expired.\n\nNew link:\n{verify_url}"
+        )
+
+        mail.send(msg)
+
+        flash(
+            "Verification link expired. A new email has been sent.",
+            "warning"
+        )
+        return redirect(url_for("user_management.login"))
 
     user = UserManagementController.get_by_id(t.user_id)
     user.is_verified = True
+
+    db.session.delete(t)
     db.session.commit()
 
     flash("Your email has been verified.", "success")
-    return redirect(url_for('user_management.login'))
+    return redirect(url_for("user_management.login"))
+
+
+@user_management_bp.route("/resend-verification")
+def resend_verification():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        flash("Please log in to resend verification email.", "danger")
+        return redirect(url_for("user_management.login"))
+
+    user = UserManagementController.get_by_id(user_id)
+
+    if user.is_verified:
+        flash("Your account is already verified.", "info")
+        return redirect(url_for("user_management.login"))
+
+    token_value = UserManagementController.generate_token(
+        user.id,
+        type="verify_email"
+    )
+
+    verify_url = url_for(
+        "user_management.verify_email",
+        token=token_value,
+        _external=True
+    )
+
+    msg = Message(
+        subject="Verify your Car Rental account",
+        sender="noreply@carrental.com",
+        recipients=[user.email],
+        body=f"Verify your account:\n{verify_url}"
+    )
+
+    mail.send(msg)
+
+    flash("Verification email resent.", "success")
+    return redirect(url_for("user_management.login"))
 
 
 # ---------- LOGIN / LOGOUT ----------
@@ -438,4 +515,22 @@ def verify_license(user_id):
     db.session.commit()
 
     flash("Driver license verified successfully.", "success")
+    return redirect(url_for('user_management.view_user_profile', user_id=user.id))
+
+@user_management_bp.route('/reject_license/<int:user_id>', methods=['POST'])
+def reject_license(user_id):
+    if session.get('role') not in ['employee', 'accountant']:
+        flash("Access denied.", "danger")
+        return redirect(url_for('user_management.profile'))
+
+    user = UserManagementController.get_by_id(user_id)
+
+    user.driver_license = None
+    user.license_expiration = None
+    user.license_photo_path = None
+    user.license_verified = False
+
+    db.session.commit()
+
+    flash("Driver license rejected. User must resubmit.", "warning")
     return redirect(url_for('user_management.view_user_profile', user_id=user.id))

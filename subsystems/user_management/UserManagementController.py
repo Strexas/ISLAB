@@ -8,7 +8,7 @@ import secrets
 class UserManagementController:
     
     @staticmethod
-    def generate_token(user_id, type="verify_email", hours_valid=1):
+    def generate_token(user_id, type="verify_email", hours_valid=1/6):
         Token.query.filter_by(
             user_id=user_id,
             type=type
@@ -29,6 +29,10 @@ class UserManagementController:
 
     @staticmethod
     def create_user(email, password, name=None, surname=None, birthdate=None, role="customer"):
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return None
+
         user = User(
             email=email,
             name=name,
@@ -44,6 +48,7 @@ class UserManagementController:
         db.session.add(user)
         db.session.commit()
         return user
+
 
     @staticmethod
     def authenticate(email, password):

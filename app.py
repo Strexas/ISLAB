@@ -47,31 +47,5 @@ app.register_blueprint(maintenance_bp)
 
 app.template_folder = "templates"
 
-# def create_default_admin():
-#     admin_email = "admin@carrenting.com"
-#     admin_password = "admin123"
-
-#     existing = User.query.filter_by(email=admin_email).first()
-#     if existing:
-#         return
-
-#     admin = User(
-#         email=admin_email,
-#         name="system",
-#         surname="admin",
-#         role="accountant",
-#         account_status=True,
-#         is_verified=True,
-#         is_banned=False
-#     )
-#     admin.set_password(admin_password)
-
-#     db.session.add(admin)
-#     db.session.commit()
-#     print("default admin created")
-
-# with app.app_context():
-#     create_default_admin()
-
 if __name__ == '__main__':
     app.run(debug=True)
