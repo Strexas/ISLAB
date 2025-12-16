@@ -95,6 +95,25 @@ def list_reservations():
 
     return render_template("reservation_list.html", reservations=reservations); 
 
+# ===================== LIST ALL RESERVATIONS FOR ADMIN =====================
+@reservation_blueprint.route("/reservations/reservationadmin")
+def reservation_admin():
+    #Check if user is logged
+    if 'user_id' not in session:
+        flash("You must be logged to access my reservations.", "error")
+        return redirect(url_for("user_management.login"))
+    
+    # Fetch user details
+    user = User.query.get(session['user_id'])
+    #CHeck if the user is an admin 
+    if user.role == "customer":
+        flash("You must be admin to access this feture", "error")
+
+    #Get all reservations and render
+    reservations = Reservation.query.all()
+    return render_template("list_reservation_admin.html", reservations=reservations);
+    
+
 # ===================== EDIT A RESERVATION ============================
 @reservation_blueprint.route("/reservations/edit/<int:reservation_id>", methods=["PUT"])
 def edit_reservation(reservation_id: int):
