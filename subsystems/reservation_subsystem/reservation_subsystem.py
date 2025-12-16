@@ -113,8 +113,11 @@ class ReservationSubsystem:
         if not reservation:
             return jsonify({"ok": False, "error": "Reservation not found"}), 404
         
+        # Fetch user details
+        user = User.query.get(user_id)
+
         # Ownership check
-        if reservation.user_id != user_id:
+        if reservation.user_id != user_id and user.role == "customer":
             return jsonify({"ok": False, "error": "Forbidden"}), 403
         
         # Delete
@@ -129,8 +132,11 @@ class ReservationSubsystem:
         if not reservation:
             return jsonify({"ok": False, "error": "Reservation not found"}), 404
         
+        # Fetch user details
+        user = User.query.get(user_id)
+
         # Ownership check
-        if reservation.user_id != user_id:
+        if reservation.user_id != user_id and user.role == "customer":
             return jsonify({"ok": False, "error": "Forbidden"}), 403
         
         #Parse and validate dates
