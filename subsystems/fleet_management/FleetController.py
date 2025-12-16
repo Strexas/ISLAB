@@ -7,6 +7,14 @@ from flask import session
 from datetime import datetime, date, timedelta
 import requests, os
 
+FAKESTORE_MAP = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    # map your vehicle IDs to product IDs
+}
 class FleetController:
 
     @staticmethod
@@ -60,6 +68,13 @@ class FleetController:
 
         db.session.commit()
         return vehicle
+    
+    @staticmethod
+    def retire(vehicle):
+       vehicle.status = "Inactive"
+       db.session.commit()
+       return True
+    
 
     @staticmethod
     def update_vehicle(vehicle, data, image_file, upload_folder):
@@ -67,7 +82,7 @@ class FleetController:
         # Update fields
         for field in [
             "license_plate", "manufacturer", "model", "year",
-            "transmission", "seats", "fuel_type", "status"
+            "transmission", "seat", "fuel_type", "status"
         ]:
             setattr(vehicle, field if field != "seats" else "seat", data[field])
 
@@ -95,65 +110,57 @@ class FleetController:
         db.session.commit()
         return vehicle
 
-    @staticmethod
-    def retire(vehicle):
-        vehicle.status = "Inactive"
-        vehicle.updated_at = datetime.utcnow()
-        db.session.commit()
-        return True
-
+    
     @staticmethod
     def get_reviews(vehicle_id):
-
         cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
-        now = datetime.utcnow()
-
-        if cache and now - cache.fetched_at < timedelta(hours=24):
+        now = date.today()
+        
+        # 24h cache
+        if cache and now - cache.last_updated < timedelta(days=3):
             return cache.data
 
-        # Fetch external reviews
+        api_id = FAKESTORE_MAP.get(vehicle_id, 1)
+        url = f"https://fakestoreapi.com/products/{api_id}"
+
         try:
-            url = f"https://dummyjson.com/products/{vehicle_id}/reviews"
-            r = requests.get(url, timeout=5)
+            r = requests.get(url, timeout=10)
+            r.raise_for_status()     # ← IMPORTANT
             data = r.json()
+
+            rating = data.get("rating", {})
+            avg = rating.get("rate", 0)
+            count = rating.get("count", 0)
+
+
+        # Make sure rating exists
+            if "rating" not in data:
+                data["rating"] = {"rate": 0, "count": 0}
 
             if cache:
                 cache.data = data
-                cache.fetched_at = now
+                cache.last_updated = now
+                cache.average_rating = avg
+                cache.review_count = count
+                cache.source = "FakeStoreAPI"
             else:
                 cache = ReviewCache(
-                    vehicle_id=vehicle_id,
-                    data=data,
-                    fetched_at=now
+                 vehicle_id=vehicle_id,
+                 data=data,
+                 last_updated=now,
+                 average_rating = avg,
+                 review_count = count,
+                 source="FakeStoreAPI"
+                 
                 )
                 db.session.add(cache)
 
             db.session.commit()
             return data
 
-        except:
-            return {"reviews": []}
-
-    @staticmethod
-    def update_review_cache(vehicle_id, data):
-
-        cache = ReviewCache.query.filter_by(vehicle_id=vehicle_id).first()
-
-        if cache:
-            cache.average_rating = data["average_rating"]
-            cache.review_count = data["review_count"]
-            cache.last_updated = data["last_updated"]
-            cache.source = data["source"]
-        else:
-            cache = ReviewCache(
-                vehicle_id=vehicle_id,
-                average_rating=data["average_rating"],
-                review_count=data["review_count"],
-                last_updated=data["last_updated"],
-                source=data["source"]
-            )
-            db.session.add(cache)
-
-        db.session.commit()
-        return cache
+        except Exception as e:
+            print("API ERROR:", e)
+            db.session.rollback()
+            return {"rating": {"rate": 0, "count": 0}}
+        
 
