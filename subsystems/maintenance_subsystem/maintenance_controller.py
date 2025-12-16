@@ -203,6 +203,7 @@ class MaintenanceController:
         if not components:
             return
         order.status = "pending"
+        db.session.commit()
 
         new_order = Order()
         new_order.maintenance_id = maintenance_id
