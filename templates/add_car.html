@@ -120,7 +120,12 @@
                 <label>Price (€)</label>
                 {{ form.current_price(class="form-control") }}
             </div>
-
+            {% if mode == "edit" and vehicle.image_path %}
+    <div style="margin-bottom: 15px;">
+        <p><strong>Current Image:</strong></p>
+        <img src="{{ vehicle.image_path }}" style="width: 250px; border-radius: 8px;">
+    </div>
+{% endif %}
             <div class="form-group">
                 <label>Image</label>
                 <input type="file" name="image" class="image-input">
@@ -134,3 +139,12 @@
 
 </body>
 </html>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+            {% for category, msg in messages %}
+                <div class="flash {{ category }}">{{ msg }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
