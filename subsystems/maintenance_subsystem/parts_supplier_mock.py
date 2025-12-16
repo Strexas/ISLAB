@@ -17,7 +17,11 @@ def main():
     while True:
         order = requests.get('http://127.0.0.1:5000/maintenance/get_pending', json={"secret_key": secret_key})
         data = order.json()
+        if not list(data.keys()):
+            sleep(5)
+            continue
         order_id = list(data.keys())[0]
+
         for component_id in data[order_id].keys():
             data[order_id][component_id]["price"] = randint(1, 100)
             data[order_id][component_id]["name"] = data[order_id][component_id]["name"] + f" ({generate_string(8)})"

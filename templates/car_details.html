@@ -89,11 +89,19 @@
         Retire Vehicle
     </button>
 </form>
-
+  
             
                     {% endif %}
+                    
+                     {% if session.get("role") in ["employee", "accountant"] %}
+    <a class="primary_button"
+       href="{{ url_for('fleet.fleet_edit', vehicle_id=vehicle.vehicle_id) }}">
+        Edit Vehicle
+    </a>
+{% endif %}
               
             </div>
+           
 
         </div>
     </div>
